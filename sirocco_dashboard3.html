@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sirocco Energy — Command Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0b0d; --surface:#111318; --border:#1e2530;
+    --accent:#e8a020; --accent2:#f0c040;
+    --green:#2ecc71; --red:#e74c3c; --yellow:#f39c12; --blue:#3498db;
+    --text:#e8eaf0; --text2:#8892a4; --text3:#4a5568;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;}
+
+  /* MODAL */
+  #setup-modal{position:fixed;inset:0;background:rgba(0,0,0,0.96);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(8px);}
+  #setup-modal.hidden{display:none;}
+  .setup-box{background:var(--surface);border:1px solid var(--accent);padding:48px;max-width:480px;width:100%;}
+  .setup-box h2{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:var(--accent);margin-bottom:8px;}
+  .setup-box p{color:var(--text2);margin-bottom:32px;font-size:13px;}
+  .setup-box label{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;}
+  .setup-box input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:12px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;margin-bottom:20px;outline:none;transition:border-color .2s;}
+  .setup-box input:focus{border-color:var(--accent);}
+  .btn-primary{background:var(--accent);color:#000;border:none;padding:14px 32px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;cursor:pointer;width:100%;}
+  .btn-primary:hover{background:var(--accent2);}
+  .setup-note{font-size:11px;color:var(--text3);margin-top:16px;font-family:'IBM Plex Mono',monospace;}
+
+  /* HEADER */
+  header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;background:var(--bg);}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:var(--accent);}
+  .logo span{color:var(--text2);font-size:14px;letter-spacing:2px;margin-left:16px;font-family:'IBM Plex Mono',monospace;}
+  .header-right{display:flex;align-items:center;gap:24px;}
+  .last-updated{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);}
+  .refresh-btn{background:transparent;border:1px solid var(--border);color:var(--text2);padding:6px 16px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+  .refresh-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+  main{padding:32px 40px;max-width:1600px;margin:0 auto;}
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* STATS */
+  .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:48px;}
+  .stats-bar-item{background:var(--surface);padding:20px 24px;}
+  .stats-bar-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
+  .stats-bar-value{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;}
+  .stats-bar-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);margin-top:4px;}
+
+  /* GOALS */
+  .goals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px;}
+  .goal-card{background:var(--surface);border:1px solid var(--border);padding:24px;position:relative;overflow:hidden;}
+  .goal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .goal-card.on-track::before{background:var(--green);}
+  .goal-card.at-risk::before{background:var(--yellow);}
+  .goal-card.critical::before{background:var(--red);}
+  .goal-number{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text3);margin-bottom:8px;}
+  .goal-title{font-size:15px;font-weight:600;margin-bottom:16px;line-height:1.3;}
+  .progress-bar-bg{height:4px;background:var(--border);margin-bottom:6px;}
+  .progress-bar-fill{height:100%;transition:width 1s ease;}
+  .progress-pct{font-size:28px;font-family:'Bebas Neue',sans-serif;color:var(--text);}
+  .goal-deadline{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);margin-top:12px;}
+  .status-badge{display:inline-block;padding:2px 8px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;margin-top:8px;}
+  .on-track .status-badge{background:rgba(46,204,113,.1);color:var(--green);border:1px solid rgba(46,204,113,.3);}
+  .at-risk .status-badge{background:rgba(243,156,18,.1);color:var(--yellow);border:1px solid rgba(243,156,18,.3);}
+  .critical .status-badge{background:rgba(231,76,60,.1);color:var(--red);border:1px solid rgba(231,76,60,.3);}
+
+  /* ===== FESTIVE WINS ===== */
+  .wins-section{margin-bottom:48px;}
+
+  /* Confetti canvas behind wins */
+  #confetti-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+
+  .wins-hero{
+    position:relative;overflow:hidden;
+    background:linear-gradient(135deg,#110900 0%,#0a0600 40%,#0d0a00 70%,#150c00 100%);
+    border:1px solid rgba(232,160,32,0.35);
+    padding:40px 48px;margin-bottom:32px;
+  }
+  .wins-hero::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 85% 50%,rgba(232,160,32,0.08) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .wins-hero-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:32px;}
+  .wins-hero-left{}
+  .wins-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:rgba(232,160,32,0.6);text-transform:uppercase;margin-bottom:8px;}
+  .wins-hero-title{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:5px;line-height:1;background:linear-gradient(135deg,#f0c040,#e8a020,#c87010);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .wins-hero-sub{font-size:13px;color:var(--text2);margin-top:8px;}
+  .wins-hero-right{display:flex;gap:32px;flex-shrink:0;}
+  .wins-stat{text-align:center;}
+  .wins-stat-num{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1;color:var(--accent);}
+  .wins-stat-num.gc{background:linear-gradient(135deg,#f0c040,#e8a020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .wins-stat-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-top:2px;}
+  .wins-trophy-bg{position:absolute;right:180px;top:50%;transform:translateY(-50%);font-size:140px;opacity:0.04;pointer-events:none;z-index:0;line-height:1;}
+
+  /* Lane headers */
+  .win-lane{margin-bottom:32px;}
+  .win-lane-header{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+  .win-lane-badge{
+    font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;
+    padding:4px 14px;border-radius:2px;
+  }
+  .win-lane-badge.gc{background:linear-gradient(135deg,rgba(240,192,64,0.2),rgba(232,160,32,0.1));color:var(--accent);border:1px solid rgba(232,160,32,0.4);}
+  .win-lane-badge.imp{background:rgba(52,152,219,0.1);color:var(--blue);border:1px solid rgba(52,152,219,0.3);}
+  .win-lane-badge.reg{background:rgba(46,204,113,0.08);color:var(--green);border:1px solid rgba(46,204,113,0.2);}
+  .win-lane-line{flex:1;height:1px;}
+  .win-lane-line.gc{background:linear-gradient(90deg,rgba(232,160,32,0.5),rgba(232,160,32,0.05));}
+  .win-lane-line.imp{background:linear-gradient(90deg,rgba(52,152,219,0.4),transparent);}
+  .win-lane-line.reg{background:linear-gradient(90deg,rgba(46,204,113,0.3),transparent);}
+  .win-lane-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);}
+
+  /* Win cards */
+  .wins-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+
+  .win-card{
+    position:relative;overflow:hidden;padding:20px;
+    border:1px solid var(--border);background:var(--surface);
+    animation:fadeInUp .35s ease both;transition:transform .2s,box-shadow .2s;
+    cursor:default;
+  }
+  .win-card:hover{transform:translateY(-3px);}
+
+  /* GAME CHANGER card — special treatment */
+  .win-card.game-changer{
+    background:linear-gradient(135deg,#1c1100 0%,#120c00 50%,#1a1000 100%);
+    border:1px solid rgba(240,192,64,0.45);
+    box-shadow:0 4px 24px rgba(232,160,32,0.1),inset 0 1px 0 rgba(240,192,64,0.2);
+  }
+  .win-card.game-changer:hover{
+    box-shadow:0 8px 32px rgba(232,160,32,0.18),inset 0 1px 0 rgba(240,192,64,0.3);
+  }
+  .win-card.game-changer::before{
+    content:'';position:absolute;top:-40px;right:-40px;
+    width:120px;height:120px;border-radius:50%;
+    background:radial-gradient(circle,rgba(240,192,64,0.12),transparent 70%);
+    pointer-events:none;
+  }
+  .gc-crown{
+    position:absolute;top:0;right:0;
+    background:linear-gradient(135deg,#f0c040,#c87010);
+    color:#000;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:1.5px;
+    padding:3px 12px;
+    clip-path:polygon(0 0,100% 0,100% 100%,8px 100%);
+  }
+
+  .win-icon{font-size:20px;margin-bottom:8px;display:block;}
+  .win-title{font-size:13px;font-weight:500;line-height:1.35;margin-bottom:12px;padding-right:4px;}
+  .win-card.game-changer .win-title{color:#fff;font-weight:600;font-size:14px;}
+  .win-footer{display:flex;align-items:center;justify-content:space-between;}
+  .win-assignee{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);}
+  .win-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);}
+  .win-glow{
+    position:absolute;bottom:0;left:0;right:0;height:2px;
+  }
+  .win-card.game-changer .win-glow{background:linear-gradient(90deg,transparent,rgba(240,192,64,0.6),transparent);}
+  .win-card.important .win-glow{background:linear-gradient(90deg,transparent,rgba(52,152,219,0.4),transparent);}
+  .win-card.regular .win-glow{background:linear-gradient(90deg,transparent,rgba(46,204,113,0.3),transparent);}
+
+  /* TEAM */
+  .team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px;}
+  .team-card{background:var(--surface);border:1px solid var(--border);padding:24px;}
+  .team-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+  .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;flex-shrink:0;}
+  .team-name{font-weight:600;font-size:14px;}
+  .team-role{font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .health-dot{width:8px;height:8px;border-radius:50%;margin-left:auto;flex-shrink:0;}
+  .health-green{background:var(--green);box-shadow:0 0 8px var(--green);}
+  .health-yellow{background:var(--yellow);box-shadow:0 0 8px var(--yellow);}
+  .health-red{background:var(--red);box-shadow:0 0 8px var(--red);}
+  .team-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+  .stat-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;}
+  .stat-value{font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1;}
+  .stat-value.good{color:var(--green);}.stat-value.warn{color:var(--yellow);}.stat-value.bad{color:var(--red);}.stat-value.neutral{color:var(--text);}
+  .mini-bar{height:2px;background:var(--border);margin-top:3px;}
+  .mini-bar-fill{height:100%;}
+  .okr-list{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
+  .okr-item{margin-bottom:8px;}
+  .okr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+  .okr-label{font-size:11px;color:var(--text2);line-height:1.2;flex:1;padding-right:8px;}
+  .okr-pct{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;}
+  .okr-bar{height:2px;background:var(--border);}
+  .okr-bar-fill{height:100%;transition:width .8s ease;}
+  .team-tasks{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
+  .team-tasks-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
+  .mini-task{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid rgba(30,37,48,0.6);}
+  .mini-task:last-child{border-bottom:none;}
+  .mini-task-dot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+  .mini-task-name{font-size:11px;color:var(--text2);line-height:1.3;flex:1;}
+  .mini-task-days{font-family:'IBM Plex Mono',monospace;font-size:10px;flex-shrink:0;margin-left:4px;}
+  .overdue-color{color:var(--red);}
+  .active-color{color:var(--blue);}
+  .soon-color{color:var(--yellow);}
+  .no-tasks{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);padding:6px 0;}
+
+  /* ATTENTION */
+  .attention-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:48px;}
+  .attention-list{background:var(--surface);border:1px solid var(--border);padding:24px;}
+  .attention-list h3{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;}
+  .attention-list.overdue h3{color:var(--red);}
+  .attention-list.in-progress h3{color:var(--blue);}
+  .task-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .task-row:last-child{border-bottom:none;}
+  .task-indicator{width:3px;min-height:40px;flex-shrink:0;margin-top:2px;}
+  .task-indicator.overdue{background:var(--red);}
+  .task-indicator.active{background:var(--blue);}
+  .task-info{flex:1;}
+  .task-name{font-size:13px;font-weight:500;margin-bottom:4px;line-height:1.3;}
+  .task-meta{display:flex;gap:12px;}
+  .task-assignee{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);}
+  .task-days{font-family:'IBM Plex Mono',monospace;font-size:10px;}
+  .task-days.overdue{color:var(--red);}
+  .task-days.due-soon{color:var(--yellow);}
+  .task-days.ok{color:var(--text3);}
+
+  .loading-overlay{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--text3);font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:2px;}
+  .pulse{animation:pulse 1.5s ease-in-out infinite;}
+  .empty-state{color:var(--text3);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:20px 0;text-align:center;}
+  @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes shimmer{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}
+
+  @media(max-width:1200px){.goals-grid,.team-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:768px){main{padding:20px}header{padding:0 20px}.goals-grid,.team-grid,.attention-grid,.stats-bar{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="setup-modal">
+  <div class="setup-box">
+    <h2>SIROCCO</h2>
+    <p>Введи Asana Personal Access Token. Зберігається тільки в пам'яті браузера.</p>
+    <label>Personal Access Token</label>
+    <input type="password" id="token-input" placeholder="2/1234567890:abcdef..."/>
+    <label>Project GID</label>
+    <input type="text" id="gid-input" value="1214134790038822"/>
+    <button class="btn-primary" onclick="initDashboard()">ПІДКЛЮЧИТИ →</button>
+    <p class="setup-note">⚠ Токен не передається нікуди — прямі запити до api.asana.com</p>
+  </div>
+</div>
+
+<header>
+  <div class="logo">SIROCCO <span>COMMAND</span></div>
+  <div class="header-right">
+    <span class="last-updated" id="last-updated">—</span>
+    <button class="refresh-btn" onclick="loadAllData()">↻ ОНОВИТИ</button>
+  </div>
+</header>
+
+<main>
+  <div class="stats-bar">
+    <div class="stats-bar-item"><div class="stats-bar-label">Відкритих задач</div><div class="stats-bar-value" id="stat-open">—</div><div class="stats-bar-sub">активно зараз</div></div>
+    <div class="stats-bar-item"><div class="stats-bar-label">Закрито цього місяця</div><div class="stats-bar-value" id="stat-closed" style="color:var(--green)">—</div><div class="stats-bar-sub">перемог</div></div>
+    <div class="stats-bar-item"><div class="stats-bar-label">Протермінованих</div><div class="stats-bar-value" id="stat-overdue" style="color:var(--red)">—</div><div class="stats-bar-sub">потребують уваги</div></div>
+    <div class="stats-bar-item"><div class="stats-bar-label">До пілоту</div><div class="stats-bar-value" id="stat-days" style="color:var(--accent)">—</div><div class="stats-bar-sub">днів до 31 серпня</div></div>
+  </div>
+
+  <div class="section-label">🎯 Стратегічні цілі</div>
+  <div class="goals-grid">
+    <div class="goal-card at-risk">
+      <div class="goal-number">O1 · ПІЛОТ</div>
+      <div class="goal-title">Турбіна 30 кВт встановлена і генерує дані</div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:35%;background:var(--yellow)"></div></div>
+      <div class="progress-pct">35%</div>
+      <div class="goal-deadline">🗓 31 серпня 2026</div>
+      <div class="status-badge">⚠ Під загрозою</div>
+    </div>
+    <div class="goal-card critical">
+      <div class="goal-number">O2 · ФІНАНСИ</div>
+      <div class="goal-title">Закрити gap $130K через bridge-інвесторів</div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:20%;background:var(--red)"></div></div>
+      <div class="progress-pct">20%</div>
+      <div class="goal-deadline">🗓 31 травня 2026</div>
+      <div class="status-badge">🔴 Критично</div>
+    </div>
+    <div class="goal-card on-track">
+      <div class="goal-number">O3 · МОНОПРОДУКТ</div>
+      <div class="goal-title">Затверджена специфікація монопродукту</div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:60%;background:var(--green)"></div></div>
+      <div class="progress-pct">60%</div>
+      <div class="goal-deadline">🗓 30 липня 2026</div>
+      <div class="status-badge">На треку</div>
+    </div>
+  </div>
+
+  <div class="section-label">🏆 Зона перемог</div>
+  <div class="wins-section">
+    <div class="wins-hero">
+      <div class="wins-trophy-bg">🏆</div>
+      <div class="wins-hero-inner">
+        <div class="wins-hero-left">
+          <div class="wins-eyebrow">Sirocco Energy · Останні 30 днів</div>
+          <div class="wins-hero-title">ЗОНА ПЕРЕМОГ</div>
+          <div class="wins-hero-sub">Кожне закрите завдання наближає до пілоту</div>
+        </div>
+        <div class="wins-hero-right">
+          <div class="wins-stat">
+            <div class="wins-stat-num gc" id="wins-gc">—</div>
+            <div class="wins-stat-label">🚀 Game<br>Changers</div>
+          </div>
+          <div class="wins-stat">
+            <div class="wins-stat-num" style="color:var(--blue)" id="wins-imp">—</div>
+            <div class="wins-stat-label">⭐ Важливих<br>перемог</div>
+          </div>
+          <div class="wins-stat">
+            <div class="wins-stat-num" style="color:var(--green)" id="wins-reg">—</div>
+            <div class="wins-stat-label">✅ Прогрес<br>задач</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="wins-content"><div class="loading-overlay"><span class="pulse">ЗАВАНТАЖЕННЯ ПЕРЕМОГ...</span></div></div>
+  </div>
+
+  <div class="section-label">👥 Команда</div>
+  <div class="team-grid" id="team-grid">
+    <div class="loading-overlay" style="grid-column:1/-1"><span class="pulse">ЗАВАНТАЖЕННЯ...</span></div>
+  </div>
+
+  <div class="section-label">🔴 Зона уваги</div>
+  <div class="attention-grid">
+    <div class="attention-list overdue">
+      <h3>Протерміновані задачі</h3>
+      <div id="overdue-list"><div class="loading-overlay"><span class="pulse">...</span></div></div>
+    </div>
+    <div class="attention-list in-progress">
+      <h3>В роботі — найближчі дедлайни</h3>
+      <div id="inprogress-list"><div class="loading-overlay"><span class="pulse">...</span></div></div>
+    </div>
+  </div>
+</main>
+
+<script>
+let TOKEN='', PROJECT_GID='1214134790038822', allTasks=[];
+
+const OKR_DATA={
+  'Taras Vodyanyy':{displayName:'Тарас Водяний',role:'CEO',color:'#e8a020',initials:'ТВ',krs:[
+    {label:'Локацію підтверджено до 30.04',conf:0,obj:'O1'},
+    {label:'Bridge $130K закрито до 31.05',conf:0,obj:'O2'},
+    {label:'Турбіна встановлена до 31.08',conf:0,obj:'O1'},
+    {label:'Рішення по монопродукту до 30.07',conf:0,obj:'O3'},
+  ]},
+  'Nazariy Mirchuk':{displayName:'Назарій Мірчук',role:'CGO',color:'#3498db',initials:'НМ',krs:[
+    {label:'Всі компоненти для пілоту до 30.04',conf:0,obj:'O1'},
+    {label:'2+ інвест. контакти з Берклі',conf:0,obj:'O2'},
+    {label:'20 агрокомпаній у shortlist до 30.06',conf:0,obj:'O3'},
+  ]},
+  'Alina Bocharova':{displayName:'Аліна Бочарова',role:'CMO',color:'#9b59b6',initials:'АБ',krs:[
+    {label:'Монопродукт маркет фіт до 01.07',conf:80,obj:'O3'},
+    {label:'Запуск на Hightlender до 10.05',conf:100,obj:'O2'},
+    {label:'Маркетинг нового раунду до 1.09',conf:75,obj:'O2'},
+    {label:'Комунікація по пілоту до 01.07',conf:100,obj:'O1'},
+  ]},
+  'Anna Aliieva':{displayName:'Аня Алієва',role:'Fundraising / Finance',color:'#e74c3c',initials:'АА',krs:[
+    {label:'ГУ EUR 500k підписана до 26.06',conf:15,obj:'O2'},
+    {label:'Pipeline грантів оновлено до 30.04',conf:90,obj:'O2'},
+    {label:'Асистент найнятий до 31.05',conf:100,obj:'O2'},
+    {label:'Перший майлстоун P2R до 30.07',conf:0,obj:'O2'},
+  ]},
+  'Liudmyla Sokolovska':{displayName:'Людмила Соколовська',role:'CLO',color:'#1abc9c',initials:'ЛС',krs:[
+    {label:'NDA з виробниками до 30.05',conf:75,obj:'O1'},
+    {label:'Convertible Note темплейт до 30.04',conf:100,obj:'O2'},
+    {label:'Договір локації пілоту до 15.05',conf:65,obj:'O1'},
+    {label:'Правовий аналіз 250 кВт до 30.06',conf:0,obj:'O3'},
+  ]},
+  'Liudmyla Motsak':{displayName:'Людмила Моцак',role:'Head of Analytics',color:'#f39c12',initials:'ЛМ',krs:[
+    {label:'Підрядник по лопатях до 30.04',conf:90,obj:'O1'},
+    {label:'Підрядник по кресленнях до 30.04',conf:90,obj:'O1'},
+    {label:'Підрядник по металу до 30.04',conf:85,obj:'O1'},
+    {label:'3 ангельських інвестори до 29.05',conf:80,obj:'O2'},
+  ]}
+};
+
+async function asanaFetch(url){
+  const r=await fetch(`https://app.asana.com/api/1.0${url}`,{headers:{'Authorization':`Bearer ${TOKEN}`,'Accept':'application/json'}});
+  if(!r.ok)throw new Error(`Asana ${r.status}`);
+  return r.json();
+}
+
+async function loadAllData(){
+  document.getElementById('last-updated').textContent='Оновлення...';
+  try{
+    const d=await asanaFetch(`/tasks?project=${PROJECT_GID}&opt_fields=name,completed,completed_at,due_on,assignee.name,custom_fields&limit=100`);
+    allTasks=d.data||[];
+    let cur=d.next_page?.offset;
+    while(cur){const m=await asanaFetch(`/tasks?project=${PROJECT_GID}&opt_fields=name,completed,completed_at,due_on,assignee.name,custom_fields&limit=100&offset=${cur}`);allTasks=allTasks.concat(m.data||[]);cur=m.next_page?.offset;}
+    renderStats();renderWins();renderTeam();renderAttention();
+    document.getElementById('last-updated').textContent=`Оновлено: ${new Date().toLocaleTimeString('uk-UA')}`;
+  }catch(e){document.getElementById('last-updated').textContent=`Помилка: ${e.message}`;}
+}
+
+// Priority field: High=Game Changer, Medium=Important, Low=Regular
+function getImpact(task){
+  const cf=(task.custom_fields||[]).find(f=>f.name==='Priority'||f.name==='Impact'||f.name==='Вага');
+  if(!cf)return'regular';
+  const v=(cf.display_value||cf.enum_value?.name||'').toLowerCase();
+  if(v==='high'||v.includes('game')||v.includes('changer'))return'game-changer';
+  if(v==='medium'||v.includes('import')||v.includes('важлив'))return'important';
+  return'regular';
+}
+
+function isThisMonth(d){if(!d)return false;const dt=new Date(d),n=new Date();return dt.getMonth()===n.getMonth()&&dt.getFullYear()===n.getFullYear();}
+function daysOverdue(d){return d?Math.floor((new Date()-new Date(d))/86400000):0;}
+
+function renderStats(){
+  const n=new Date();
+  document.getElementById('stat-open').textContent=allTasks.filter(t=>!t.completed).length;
+  document.getElementById('stat-closed').textContent=allTasks.filter(t=>t.completed&&isThisMonth(t.completed_at)).length;
+  document.getElementById('stat-overdue').textContent=allTasks.filter(t=>!t.completed&&t.due_on&&new Date(t.due_on)<n).length;
+  document.getElementById('stat-days').textContent=Math.ceil((new Date('2026-08-31')-n)/86400000);
+}
+
+function renderWins(){
+  const cutoff=new Date(Date.now()-30*86400000);
+  const wins=allTasks.filter(t=>t.completed&&t.completed_at&&new Date(t.completed_at)>=cutoff);
+  const gc=wins.filter(t=>getImpact(t)==='game-changer');
+  const imp=wins.filter(t=>getImpact(t)==='important');
+  const reg=wins.filter(t=>getImpact(t)==='regular');
+  document.getElementById('wins-gc').textContent=gc.length;
+  document.getElementById('wins-imp').textContent=imp.length;
+  document.getElementById('wins-reg').textContent=reg.length;
+
+  function cards(list,cls,icon){
+    if(!list.length)return`<div class="empty-state">Немає у цій категорії — позначай задачі як ${cls==='game-changer'?'High':cls==='important'?'Medium':'Low'} Priority в Asana</div>`;
+    return`<div class="wins-grid">${list.map((t,i)=>{
+      const dt=t.completed_at?new Date(t.completed_at).toLocaleDateString('uk-UA',{day:'2-digit',month:'2-digit'}):'';
+      const isGC=cls==='game-changer';
+      return`<div class="win-card ${cls}" style="animation-delay:${i*.04}s">
+        ${isGC?`<div class="gc-crown">🚀 GAME CHANGER</div>`:''}
+        <span class="win-icon">${icon}</span>
+        <div class="win-title">${t.name}</div>
+        <div class="win-footer">
+          <span class="win-assignee">👤 ${t.assignee?.name||'—'}</span>
+          <span class="win-date">${dt}</span>
+        </div>
+        <div class="win-glow"></div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  let html='';
+  if(gc.length)html+=`<div class="win-lane">
+    <div class="win-lane-header">
+      <div class="win-lane-badge gc">🚀 GAME CHANGERS · HIGH PRIORITY</div>
+      <div class="win-lane-line gc"></div>
+      <span class="win-lane-count">${gc.length} перемог</span>
+    </div>${cards(gc,'game-changer','🏆')}</div>`;
+  if(imp.length)html+=`<div class="win-lane">
+    <div class="win-lane-header">
+      <div class="win-lane-badge imp">⭐ ВАЖЛИВІ ПЕРЕМОГИ · MEDIUM PRIORITY</div>
+      <div class="win-lane-line imp"></div>
+      <span class="win-lane-count">${imp.length} перемог</span>
+    </div>${cards(imp,'important','⭐')}</div>`;
+  if(reg.length)html+=`<div class="win-lane">
+    <div class="win-lane-header">
+      <div class="win-lane-badge reg">✅ ПРОГРЕС · LOW PRIORITY</div>
+      <div class="win-lane-line reg"></div>
+      <span class="win-lane-count">${reg.length} задач</span>
+    </div>${cards(reg,'regular','✨')}</div>`;
+  if(!wins.length)html='<div class="empty-state">Немає закритих задач за останні 30 днів</div>';
+  else if(!html)html=`<div class="empty-state">Є ${wins.length} закритих задач — але Priority не виставлено. Виставляй High/Medium/Low в Asana для розподілу по категоріях.</div>`;
+
+  document.getElementById('wins-content').innerHTML=html;
+}
+
+function renderTeam(){
+  const now=new Date();
+  const by={};
+  allTasks.forEach(t=>{const n=t.assignee?.name;if(!n)return;if(!by[n])by[n]=[];by[n].push(t);});
+
+  document.getElementById('team-grid').innerHTML=Object.entries(OKR_DATA).map(([key,data])=>{
+    const tasks=by[key]||[];
+    const total=tasks.length;
+    const done=tasks.filter(t=>t.completed).length;
+    const active=tasks.filter(t=>!t.completed);
+    const ovd=active.filter(t=>t.due_on&&new Date(t.due_on)<now).sort((a,b)=>new Date(a.due_on)-new Date(b.due_on));
+    const inprog=active.filter(t=>!t.due_on||new Date(t.due_on)>=now).sort((a,b)=>{if(!a.due_on&&!b.due_on)return 0;if(!a.due_on)return 1;if(!b.due_on)return -1;return new Date(a.due_on)-new Date(b.due_on);});
+    const compP=total>0?Math.round(done/total*100):0;
+    const inP=total>0?Math.round(active.length/total*100):0;
+    const ovdP=total>0?Math.round(ovd.length/total*100):0;
+    let h=ovd.length>2||ovdP>30?'health-red':ovd.length>0||compP<30?'health-yellow':'health-green';
+
+    const okrH=data.krs.slice(0,3).map(kr=>{
+      const p=kr.conf,c=p>=70?'var(--green)':p>=40?'var(--yellow)':'var(--red)';
+      return`<div class="okr-item"><div class="okr-row"><div class="okr-label">${kr.obj} · ${kr.label.length>45?kr.label.substring(0,44)+'…':kr.label}</div><div class="okr-pct">${p}%</div></div><div class="okr-bar"><div class="okr-bar-fill" style="width:${p}%;background:${c}"></div></div></div>`;
+    }).join('');
+
+    const ovdH=ovd.length===0?'<div class="no-tasks">✅ Немає протермінованих</div>':
+      ovd.slice(0,3).map(t=>`<div class="mini-task"><div class="mini-task-dot" style="background:var(--red)"></div><div class="mini-task-name">${t.name.length>50?t.name.substring(0,49)+'…':t.name}</div><div class="mini-task-days overdue-color">+${daysOverdue(t.due_on)}д</div></div>`).join('')+(ovd.length>3?`<div class="no-tasks">+${ovd.length-3} ще</div>`:'');
+
+    const inpH=inprog.length===0?'<div class="no-tasks">Немає активних</div>':
+      inprog.slice(0,4).map(t=>{const dl=t.due_on?Math.ceil((new Date(t.due_on)-now)/86400000):null;let cls='active-color',txt=t.due_on?`за ${dl}д`:'∞';if(dl!==null&&dl<=3){cls='soon-color';txt=`⚠ ${dl}д`;}return`<div class="mini-task"><div class="mini-task-dot" style="background:var(--blue)"></div><div class="mini-task-name">${t.name.length>50?t.name.substring(0,49)+'…':t.name}</div><div class="mini-task-days ${cls}">${txt}</div></div>`;}).join('')+(inprog.length>4?`<div class="no-tasks">+${inprog.length-4} ще</div>`:'');
+
+    return`<div class="team-card">
+      <div class="team-header">
+        <div class="avatar" style="background:${data.color}22;color:${data.color}">${data.initials}</div>
+        <div><div class="team-name">${data.displayName}</div><div class="team-role">${data.role}</div></div>
+        <div class="health-dot ${h}"></div>
+      </div>
+      <div class="team-stats">
+        <div><div class="stat-label">Всього</div><div class="stat-value neutral">${total}</div></div>
+        <div><div class="stat-label">Закрито</div><div class="stat-value ${compP>=50?'good':compP>=30?'warn':'bad'}">${compP}%</div><div class="mini-bar"><div class="mini-bar-fill" style="width:${compP}%;background:var(--green)"></div></div></div>
+        <div><div class="stat-label">В роботі</div><div class="stat-value neutral">${inP}%</div><div class="mini-bar"><div class="mini-bar-fill" style="width:${inP}%;background:var(--blue)"></div></div></div>
+        <div><div class="stat-label">Протерм.</div><div class="stat-value ${ovd.length===0?'good':ovd.length<3?'warn':'bad'}">${ovdP}%</div><div class="mini-bar"><div class="mini-bar-fill" style="width:${ovdP}%;background:var(--red)"></div></div></div>
+      </div>
+      <div class="okr-list">${okrH}</div>
+      <div class="team-tasks">
+        <div class="team-tasks-label">🔴 Протерміновані</div>${ovdH}
+        <div class="team-tasks-label" style="margin-top:10px">🔵 В роботі</div>${inpH}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAttention(){
+  const now=new Date();
+  const ovd=allTasks.filter(t=>!t.completed&&t.due_on&&new Date(t.due_on)<now).sort((a,b)=>new Date(a.due_on)-new Date(b.due_on));
+  const act=allTasks.filter(t=>!t.completed&&(!t.due_on||new Date(t.due_on)>=now)).sort((a,b)=>{if(!a.due_on&&!b.due_on)return 0;if(!a.due_on)return 1;if(!b.due_on)return -1;return new Date(a.due_on)-new Date(b.due_on);}).slice(0,15);
+
+  document.getElementById('overdue-list').innerHTML=ovd.length===0?'<div class="empty-state">✅ Немає протермінованих</div>':
+    ovd.map(t=>`<div class="task-row"><div class="task-indicator overdue"></div><div class="task-info"><div class="task-name">${t.name}</div><div class="task-meta"><span class="task-assignee">${t.assignee?.name||'Без виконавця'}</span><span class="task-days overdue">+${daysOverdue(t.due_on)}д</span></div></div></div>`).join('');
+
+  document.getElementById('inprogress-list').innerHTML=act.length===0?'<div class="empty-state">Немає активних задач</div>':
+    act.map(t=>{const dl=t.due_on?Math.ceil((new Date(t.due_on)-now)/86400000):null;const cls=dl!==null&&dl<=3?'due-soon':'ok';const txt=dl!==null?(dl<=3?`⚠ ${dl}д`:`за ${dl}д`):'без дедлайну';return`<div class="task-row"><div class="task-indicator active"></div><div class="task-info"><div class="task-name">${t.name}</div><div class="task-meta"><span class="task-assignee">${t.assignee?.name||'Без виконавця'}</span><span class="task-days ${cls}">${txt}</span></div></div></div>`;}).join('');
+}
+
+function initDashboard(){
+  TOKEN=document.getElementById('token-input').value.trim();
+  PROJECT_GID=document.getElementById('gid-input').value.trim();
+  if(!TOKEN){alert('Введи токен');return;}
+  document.getElementById('setup-modal').classList.add('hidden');
+  loadAllData();
+}
+setInterval(()=>{if(TOKEN)loadAllData();},5*60*1000);
+</script>
+</body>
+</html>
