@@ -535,14 +535,21 @@ function runAI(){
   var wkAgo=new Date(Date.now()-7*86400000);
   var inact=Object.keys(OKR).filter(function(k){var ts=tasks.filter(function(t){return t.assignee&&t.assignee.name===k;});return ts.length>0&&!ts.some(function(t){return t.completed&&t.completed_at&&new Date(t.completed_at)>wkAgo;});}).map(function(k){return OKR[k].n;}).join(', ');
   var tsum=tasks.slice(0,80).map(function(t){return(t.completed?'OK':'--')+' ['+(t.assignee&&t.assignee.name?t.assignee.name:'?')+'] '+t.name+(t.due_on?' dd:'+t.due_on:'');}).join('\n');
-  var prompt='Ти AI-аналітик Sirocco Energy (deep tech, 6 людей, турбіна 30кВт).\n\nТАЙМЛАЙН ПІЛОТУ:\n'+TIMELINE+'\n\nЗАДАЧІ В ASANA:\n'+tsum+'\n\nПРОТЕРМ: '+ovdL+'\nБЕЗ ДЕДЛАЙНУ: '+ndlL+'\n0 АКТИВНОСТІ ЗА ТИЖДЕНЬ: '+inact+'\nДНІВ ДО ПІЛОТУ: '+Math.ceil((new Date('2026-08-31')-n)/86400000)+'\nСЬОГОДНІ: '+n.toLocaleDateString('uk-UA')+'\n\nВідповідь ТІЛЬКИ JSON (без markdown, без пояснень):\n{"summary":"2 речення стан","blind_spots":["до 4 пунктів таймлайну без задач"],"risks":["до 3 критичних ризиків"],"attention":["до 3 пунктів де потрібна увага CEO"],"asymmetric":["до 2 дій з найбільшим ефектом"],"inactive":["до 2 осіб без активності і що зробити"]}';
-  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTK,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})})
+  var prompt='You are analyzing Sirocco Energy pilot project. Output ONLY a JSON object, nothing else.\nTIMELINE:'+TIMELINE+'\nTASKS:'+tsum+'\nOVERDUE:'+ovdL+'\nNO_DEADLINE:'+ndlL+'\nINACTIVE:'+inact+'\nDAYS_LEFT:'+Math.ceil((new Date(\'2026-08-31\')-n)/86400000)+'\nReturn JSON: {"summary":"стан проекту 2 речення","blind_spots":["пункти таймлайну без задач"],"risks":["ризики"],"attention":["увага CEO"],"asymmetric":["асиметричні дії"],"inactive":["неактивні"]}';
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTK,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:1000,messages:[{role:'user',content:prompt}]})})
   .then(function(r){if(!r.ok)throw new Error('Anthropic '+r.status);return r.json();})
   .then(function(data){
-    var raw=data.content[0].text.replace(/```json|```/g,'').trim();
-    // Find JSON object boundaries
-    var start=raw.indexOf('{'), end=raw.lastIndexOf('}');
-    if(start===-1||end===-1)throw new Error('No JSON found');
+    var raw=data.content[0].text;
+    // Clean markdown if any
+    raw=raw.replace(/```json/g,'').replace(/```/g,'').trim();
+    // Find JSON boundaries
+    var start=raw.indexOf('{');
+    var end=raw.lastIndexOf('}');
+    if(start===-1||end===-1){
+      // Try to build a fallback response
+      document.getElementById('aic').innerHTML='<div class="ai-item risk" style="margin:0">AI відповів не в JSON форматі. Натисни "Оновити аналіз" ще раз.</div>';
+      return;
+    }
     raw=raw.substring(start,end+1);
     var j=JSON.parse(raw);
     var secs=[
