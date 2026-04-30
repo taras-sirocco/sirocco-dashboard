@@ -516,7 +516,7 @@ function openModal(type){
     var dotC=isOvd?'var(--red)':t.completed?'var(--green)':'var(--blue)';
     var dText=t.due_on?(t.completed?'Закрито '+new Date(t.completed_at).toLocaleDateString('uk-UA',{day:'2-digit',month:'2-digit'}):(isOvd?'+'+ovdDays(t.due_on)+'д прострочено':'за '+dl+'д')):'без дедлайну';
     var dColor=isOvd?'color:var(--red)':t.completed?'color:var(--green)':'';
-    h+='<div class="modal-item" onclick="window.open('https://app.asana.com/0/'+GID+'/'+(t.gid||'')+'','_blank')"><div class="mi-dot" style="background:'+dotC+'"></div><div class="mi-info"><div class="mi-name">'+(isGC(t)?t.name.replace(/^GC\s+/i,'&#128640; '):t.name)+'</div><div class="mi-meta"><span>'+(t.assignee&&t.assignee.name?t.assignee.name:'Без виконавця')+'</span><span style="'+dColor+'">'+dText+'</span></div></div><div class="mi-arrow">&#8594;</div></div>';
+    h+='<div class="modal-item" onclick="window.open(&quot;https://app.asana.com/0/&quot;+GID+&quot;/&quot;+(t.gid||&quot;&quot;),&quot;_blank&quot;)"><div class="mi-dot" style="background:'+dotC+'"></div><div class="mi-info"><div class="mi-name">'+(isGC(t)?t.name.replace(/^GC\s+/i,'&#128640; '):t.name)+'</div><div class="mi-meta"><span>'+(t.assignee&&t.assignee.name?t.assignee.name:'Без виконавця')+'</span><span style="'+dColor+'">'+dText+'</span></div></div><div class="mi-arrow">&#8594;</div></div>';
   });
   if(!list.length)h='<div class="en" style="padding:32px">Немає задач у цій категорії</div>';
   document.getElementById('modal-list').innerHTML=h;
