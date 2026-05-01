@@ -610,11 +610,14 @@ function rTeam(){
     html+='</div>';
   });
   document.getElementById('tg').innerHTML=html;
-  // Auto-run AI for all team members
+  // Auto-run AI sequentially with delay to avoid rate limits
   if(ANTK){
-    Object.keys(OKR).forEach(function(k){
-      var safeKey=OKR[k].photo.replace(/'/g,'');
-      runPersonAI(k,safeKey);
+    var keys=Object.keys(OKR);
+    keys.forEach(function(k,idx){
+      setTimeout(function(){
+        var safeKey=OKR[k].photo.replace(/'/g,'');
+        runPersonAI(k,safeKey);
+      }, idx * 3000); // 3 sec between each person
     });
   }
 }
