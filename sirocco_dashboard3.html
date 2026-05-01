@@ -118,10 +118,12 @@ body{background:var(--bg);color:var(--t1);font-family:'Manrope',sans-serif;font-
 .gdl{font-size:11px;color:var(--t3);font-weight:300;}
 
 /* TEAM GRID */
-.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
-.tc{background:linear-gradient(145deg,var(--card),var(--card2));border:1px solid var(--border);border-radius:var(--r);padding:20px;transition:all .25s;position:relative;overflow:hidden;}
-.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent);}
+.team-grid{display:flex;flex-direction:column;gap:16px;margin-bottom:18px;}
+.tc{display:grid;grid-template-columns:380px 1fr;gap:0;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);transition:all .25s;}
 .tc:hover{border-color:var(--border2);box-shadow:0 8px 32px rgba(0,0,0,0.25);}
+.tc-left{background:linear-gradient(145deg,var(--card),var(--card2));padding:20px;position:relative;overflow:hidden;}
+.tc-left::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent);}
+.tc-right{background:rgba(255,255,255,0.02);border-left:1px solid var(--border);padding:20px;display:flex;flex-direction:column;}
 .tc-h{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
 .tc-photo{width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--border2);}
 .tc-n{font-size:13px;font-weight:600;line-height:1.2;}
@@ -375,9 +377,9 @@ body{background:var(--bg);color:var(--t1);font-family:'Manrope',sans-serif;font-
         </div>
         <div class="panel">
           <div class="panel-t">&#127919; Стратегічні цілі</div>
-          <div class="goal at-risk"><div class="gh"><span class="gobj">O1 &middot; Пілот</span><span class="gbadge at-risk">Під загрозою</span></div><div class="gtitle">Турбіна 30 кВт встановлена і генерує дані</div><div class="gdl">&#128197; 31 серпня 2026</div></div>
-          <div class="goal critical"><div class="gh"><span class="gobj">O2 &middot; Фінанси</span><span class="gbadge critical">Критично</span></div><div class="gtitle">Закрити gap $130K через bridge-інвесторів</div><div class="gdl">&#128197; 31 травня 2026</div></div>
-          <div class="goal on-track"><div class="gh"><span class="gobj">O3 &middot; Монопродукт</span><span class="gbadge on-track">На треку</span></div><div class="gtitle">Затверджена специфікація монопродукту</div><div class="gdl">&#128197; 30 липня 2026</div></div>
+          <div class="goal"><div class="gobj" style="margin-bottom:6px">O1 &middot; Пілот</div><div class="gtitle">Турбіна 30 кВт встановлена і генерує дані</div><div class="gdl">&#128197; 31 серпня 2026</div></div>
+          <div class="goal"><div class="gobj" style="margin-bottom:6px">O2 &middot; Фінанси</div><div class="gtitle">Закрити gap $130K через bridge-інвесторів</div><div class="gdl">&#128197; 31 травня 2026</div></div>
+          <div class="goal"><div class="gobj" style="margin-bottom:6px">O3 &middot; Монопродукт</div><div class="gtitle">Затверджена специфікація монопродукту</div><div class="gdl">&#128197; 30 липня 2026</div></div>
         </div>
       </div>
 
@@ -386,16 +388,7 @@ body{background:var(--bg);color:var(--t1);font-family:'Manrope',sans-serif;font-
         <div class="team-grid" id="tg"><div class="lov" style="grid-column:1/-1"><span class="pulse">Завантаження...</span></div></div>
       </div>
 
-      <div class="ai-wrap" id="ai-sec">
-        <div class="slbl">&#10022; AI Аналітика &mdash; звірка з таймлайном пілоту</div>
-        <div class="ai-panel">
-          <div id="aic"><div class="ai-loading"><div class="ai-spin"></div>Очікування даних...</div></div>
-          <div class="ai-chat">
-            <input type="text" id="ai-input" placeholder="Додай контекст або уточнення для AI..."/>
-            <button onclick="runAI()">&#10022; Аналіз</button>
-          </div>
-        </div>
-      </div>
+      <div id="ai-sec"></div>
 
       <div class="progress-section">
         <div class="slbl">&#9632; Прогрес пілоту — від 1 квітня до 31 серпня 2026</div>
@@ -476,7 +469,7 @@ function loadOKR(){
 
 function isMonth(d){if(!d)return false;var dt=new Date(d),n=new Date();return dt.getMonth()===n.getMonth()&&dt.getFullYear()===n.getFullYear();}
 function ovdDays(d){return d?Math.floor((new Date()-new Date(d))/86400000):0;}
-function isGC(t){return t.name.trim().toUpperCase().indexOf('GC ')===0;}
+function isGC(t){return /^GC[\s\-:]/i.test(t.name.trim());}
 
 function loadAll(){
   document.getElementById('upd').textContent='Оновлення...';
@@ -570,11 +563,10 @@ function rTeam(){
       h5html='<div class="h5-row">';
       h5.top5.slice(0,3).forEach(function(s){
         var type=STR_TYPES[s]||'thinking';
-        h5html+='<span class="h5-pill h5-'+type+'" onclick="openH5('+JSON.stringify(photoKey)+')" title="Клікни для повного профілю HIGH5">'+s+'</span>';
+        h5html+='<span class="h5-pill h5-'+type+'" onclick="openH5('+JSON.stringify(photoKey)+')" title="Клікни для профілю HIGH5">'+s+'</span>';
       });
-      h5html+='<span class="h5-pill" style="background:rgba(255,255,255,0.04);color:var(--t3);border:1px solid var(--border);cursor:pointer" onclick="openH5('+JSON.stringify(photoKey)+')" title="Клікни для повного профілю">+' +(h5.top5.length-3)+'</span>';
+      h5html+='<span class="h5-pill" style="background:rgba(255,255,255,0.04);color:var(--t3);border:1px solid var(--border);cursor:pointer" onclick="openH5('+JSON.stringify(photoKey)+')">+' +(h5.top5.length-3)+'</span>';
       h5html+='</div>';
-      // Domain mini bars
       h5html+='<div class="dom-bars">';
       Object.keys(h5.domains).forEach(function(dom){
         var pct=h5.domains[dom],c=DOMAIN_COLORS[dom]||'#fff';
@@ -584,23 +576,47 @@ function rTeam(){
     }
 
     var ovdH=ovd.length===0?'<div class="nt">&#9989; Чисто</div>':'';
-    ovd.slice(0,3).forEach(function(t){ovdH+='<div class="mt"><div class="mt-dot" style="background:var(--red)"></div><div class="mt-n">'+(t.name.length>40?t.name.substring(0,39)+'…':t.name)+'</div><div class="mt-d oc">+'+ovdDays(t.due_on)+'д</div></div>';});
+    ovd.slice(0,3).forEach(function(t){ovdH+='<div class="mt"><div class="mt-dot" style="background:var(--red)"></div><div class="mt-n">'+(t.name.length>40?t.name.substring(0,39)+'...':t.name)+'</div><div class="mt-d oc">+'+ovdDays(t.due_on)+'д</div></div>';});
     if(ovd.length>3)ovdH+='<div class="nt">+'+(ovd.length-3)+' ще</div>';
     var inpH=inp.length===0?'<div class="nt">—</div>':'';
-    inp.slice(0,4).forEach(function(t){var dl=t.due_on?Math.ceil((new Date(t.due_on)-n)/86400000):null;var cl='ac',tx=t.due_on?'за '+dl+'д':'∞';if(dl!==null&&dl<=3){cl='sc2';tx='⚠ '+dl+'д';}inpH+='<div class="mt"><div class="mt-dot" style="background:var(--blue)"></div><div class="mt-n">'+(t.name.length>40?t.name.substring(0,39)+'…':t.name)+'</div><div class="mt-d '+cl+'">'+tx+'</div></div>';});
+    inp.slice(0,4).forEach(function(t){var dl=t.due_on?Math.ceil((new Date(t.due_on)-n)/86400000):null;var cl='ac',tx=t.due_on?'за '+dl+'д':'∞';if(dl!==null&&dl<=3){cl='sc2';tx='⚠ '+dl+'д';}inpH+='<div class="mt"><div class="mt-dot" style="background:var(--blue)"></div><div class="mt-n">'+(t.name.length>40?t.name.substring(0,39)+'...':t.name)+'</div><div class="mt-d '+cl+'">'+tx+'</div></div>';});
     if(inp.length>4)inpH+='<div class="nt">+'+(inp.length-4)+' ще</div>';
     var ndlH=ndl.length>0?'<div class="tc-sublbl" style="color:var(--yellow)">&#9888; Без дедлайну ('+ndl.length+')</div><div class="nt" style="color:var(--yellow)">Невидимий ризик</div>':'';
 
+    var safeKey=photoKey.replace(/'/g,'');
     html+='<div class="tc">';
+    // LEFT: person card
+    html+='<div class="tc-left">';
     html+='<div class="tc-h">';
     if(photoSrc)html+='<img class="tc-photo" src="'+photoSrc+'" alt="'+d.n+'"/>';
     html+='<div><div class="tc-n">'+d.n+'</div><div class="tc-r">'+d.r+'</div></div>';
     html+='<div class="hdot '+hc+'"></div></div>';
     html+=h5html;
     html+='<div class="tc-stats"><div><div class="tsl">Всього</div><div class="tsv n">'+tot+'</div></div><div><div class="tsl">Закрито</div><div class="tsv '+(cP>=50?'g':cP>=30?'w':'b')+'">'+cP+'%</div><div class="tsbar"><div class="tsbf" style="width:'+cP+'%;background:var(--green)"></div></div></div><div><div class="tsl">В роботі</div><div class="tsv n">'+iP+'%</div><div class="tsbar"><div class="tsbf" style="width:'+iP+'%;background:var(--blue)"></div></div></div><div><div class="tsl">Протерм.</div><div class="tsv '+(ovd.length===0?'g':ovd.length<3?'w':'b')+'">'+oP+'%</div><div class="tsbar"><div class="tsbf" style="width:'+oP+'%;background:var(--red)"></div></div></div></div>';
-    html+='<div class="tc-sep"><div class="tc-sublbl">Протерміновані</div>'+ovdH+'<div class="tc-sublbl">В роботі</div>'+inpH+ndlH+'</div></div>';
+    html+='<div class="tc-sep"><div class="tc-sublbl">Протерміновані</div>'+ovdH+'<div class="tc-sublbl">В роботі</div>'+inpH+ndlH+'</div>';
+    html+='</div>';
+    // RIGHT: AI analysis for this person
+    html+='<div class="tc-right">';
+    html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">';
+    html+='<div style="width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--violet));display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">&#10022;</div>';
+    html+='<div style="font-size:12px;font-weight:500;color:var(--t2)">AI аналітика &mdash; '+d.n+'</div>';
+    html+='</div>';
+    html+='<div id="ai-person-'+safeKey+'" style="flex:1;min-height:80px"><div class="ai-loading"><div class="ai-spin"></div>Завантаження...</div></div>';
+    html+='<div style="display:flex;gap:7px;margin-top:12px">';
+    html+='<input type="text" id="ai-chat-'+safeKey+'" placeholder="Додай контекст або уточнення..." style="flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:100px;color:var(--t1);padding:8px 14px;font-family:Manrope,sans-serif;font-size:11px;outline:none"/>';
+    html+='<button onclick="runPersonAI('+JSON.stringify(k)+','+JSON.stringify(safeKey)+')" style="background:rgba(76,125,255,0.12);border:1px solid rgba(76,125,255,0.25);color:var(--blue);padding:8px 14px;border-radius:100px;font-size:11px;cursor:pointer;font-family:Manrope,sans-serif;white-space:nowrap;transition:all .2s">&#10022; Аналіз</button>';
+    html+='</div>';
+    html+='</div>';
+    html+='</div>';
   });
   document.getElementById('tg').innerHTML=html;
+  // Auto-run AI for all team members
+  if(ANTK){
+    Object.keys(OKR).forEach(function(k){
+      var safeKey=OKR[k].photo.replace(/'/g,'');
+      runPersonAI(k,safeKey);
+    });
+  }
 }
 
 function rProgress(){
@@ -621,6 +637,74 @@ function rProgress(){
   document.getElementById('prog-past').textContent=pastDays+' днів пройдено';
   document.getElementById('prog-today').textContent='Сьогодні — '+today.toLocaleDateString('uk-UA',{day:'2-digit',month:'long'});
   document.getElementById('prog-left').textContent=leftDays+' днів залишилось';
+}
+
+
+function runPersonAI(asanaKey, safeKey){
+  if(!ANTK){
+    var el=document.getElementById('ai-person-'+safeKey);
+    if(el)el.innerHTML='<div class="ai-loading" style="font-size:11px">Введи Anthropic API ключ</div>';
+    return;
+  }
+  var el=document.getElementById('ai-person-'+safeKey);
+  if(!el)return;
+  el.innerHTML='<div class="ai-loading"><div class="ai-spin"></div>Аналізую...</div>';
+  var n=new Date();
+  var d=OKR[asanaKey];
+  var personTasks=tasks.filter(function(t){return t.assignee&&t.assignee.name===asanaKey;});
+  var chatInput=document.getElementById('ai-chat-'+safeKey);
+  var extra=chatInput?chatInput.value.trim():'';
+  var doneTasks=personTasks.filter(function(t){return t.completed;});
+  var ovdTasks=personTasks.filter(function(t){return!t.completed&&t.due_on&&new Date(t.due_on)<n;});
+  var activeTasks=personTasks.filter(function(t){return!t.completed;});
+  var wkAgo=new Date(Date.now()-7*86400000);
+  var recentDone=doneTasks.filter(function(t){return t.completed_at&&new Date(t.completed_at)>wkAgo;});
+  var taskList=personTasks.slice(0,40).map(function(t){return(t.completed?'OK':'--')+' '+t.name+(t.due_on?' dd:'+t.due_on:'');}).join('\n');
+  var promptParts=[
+    'Analyze team member for Sirocco Energy startup. Be encouraging about wins first, then flag risks.',
+    'PERSON: '+d.n+' ('+d.r+')',
+    'TOTAL_TASKS:'+personTasks.length+' DONE:'+doneTasks.length+' ACTIVE:'+activeTasks.length+' OVERDUE:'+ovdTasks.length,
+    'RECENT_WINS_7D:'+recentDone.map(function(t){return t.name;}).join('; '),
+    'OVERDUE:'+ovdTasks.map(function(t){return t.name+' +'+Math.floor((n-new Date(t.due_on))/86400000)+'d';}).join('; '),
+    'ALL_TASKS:\n'+taskList,
+    extra?'CEO_NOTE:'+extra:'',
+    'Return ONLY JSON with Ukrainian values: {"wins":["recent wins to celebrate, max 3"],"risks":["risks or blockers, max 2"],"blind_spots":["missing tasks for their role, max 2"],"tip":"one actionable tip for this person today"}'
+  ];
+  var prompt=promptParts.filter(Boolean).join('\n');
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':ANTK,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:600,messages:[{role:'user',content:prompt}]})
+  }).then(function(r){if(!r.ok)throw new Error('Anthropic '+r.status);return r.json();})
+  .then(function(data){
+    var raw=data.content[0].text;
+    var s=raw.indexOf('{'),e=raw.lastIndexOf('}');
+    if(s===-1||e===-1){el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:8px">Натисни Аналіз ще раз</div>';return;}
+    var j=JSON.parse(raw.substring(s,e+1));
+    var h='';
+    if(j.wins&&j.wins.length){
+      h+='<div style="margin-bottom:10px"><div style="font-size:9px;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-bottom:6px;font-weight:500">&#127942; Перемоги</div>';
+      j.wins.forEach(function(w){h+='<div class="ai-item win" style="font-size:11px;margin-bottom:4px">'+w+'</div>';});
+      h+='</div>';
+    }
+    if(j.risks&&j.risks.length){
+      h+='<div style="margin-bottom:10px"><div style="font-size:9px;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:6px;font-weight:500">&#9888; Ризики</div>';
+      j.risks.forEach(function(r){h+='<div class="ai-item risk" style="font-size:11px;margin-bottom:4px">'+r+'</div>';});
+      h+='</div>';
+    }
+    if(j.blind_spots&&j.blind_spots.length){
+      h+='<div style="margin-bottom:10px"><div style="font-size:9px;letter-spacing:2px;color:var(--yellow);text-transform:uppercase;margin-bottom:6px;font-weight:500">&#128371; Сліпі зони</div>';
+      j.blind_spots.forEach(function(b){h+='<div class="ai-item blind" style="font-size:11px;margin-bottom:4px">'+b+'</div>';});
+      h+='</div>';
+    }
+    if(j.tip){
+      h+='<div><div style="font-size:9px;letter-spacing:2px;color:var(--blue);text-transform:uppercase;margin-bottom:6px;font-weight:500">&#9889; Рекомендація</div>';
+      h+='<div class="ai-item attn" style="font-size:11px">'+j.tip+'</div></div>';
+    }
+    el.innerHTML=h||'<div style="font-size:11px;color:var(--t3)">Немає даних для аналізу</div>';
+  }).catch(function(e){
+    el.innerHTML='<div style="font-size:11px;color:var(--red);padding:8px">Помилка: '+e.message+'</div>';
+  });
 }
 
 function openH5(key){
