@@ -664,14 +664,35 @@ function openModal(type){
     var dText=t.due_on?(t.completed?'Закрито '+new Date(t.completed_at).toLocaleDateString('uk-UA',{day:'2-digit',month:'2-digit'}):(isOvd?'+'+ovdDays(t.due_on)+'д прострочено':'за '+dl+'д')):'без дедлайну';
     var dColor=isOvd?'color:var(--red)':t.completed?'color:var(--green)':'';
     var taskGid=t.gid||'';
-    h+='<div class="modal-item" onclick="window.open('https://app.asana.com/0/'+GID+'/'+taskGid+'','_blank')"><div class="mi-dot" style="background:'+dotC+'"></div><div class="mi-info"><div class="mi-n">'+(isGC(t)?t.name.replace(/^GC\s+/i,'&#128640; '):t.name)+'</div><div class="mi-m"><span>'+(t.assignee&&t.assignee.name?t.assignee.name:'Без виконавця')+'</span><span style="'+dColor+'">'+dText+'</span></div></div><div class="mi-arr">&#8594;</div></div>';
+    var asanaUrl='https://app.asana.com/0/'+GID+'/'+taskGid;
+    var gcName=isGC(t)?t.name.replace(/^GC\s+/i,'&#128640; '):t.name;
+    var assigneeName=t.assignee&&t.assignee.name?t.assignee.name:'Без виконавця';
+    h+='<div class="modal-item">';
+    h+='<div class="mi-dot" style="background:'+dotC+'"></div>';
+    h+='<div class="mi-info">';
+    h+='<div class="mi-n">'+gcName+'</div>';
+    h+='<div class="mi-m"><span>'+assigneeName+'</span><span style="'+dColor+'">'+dText+'</span></div>';
+    h+='</div>';
+    h+='<div class="mi-arr">&#8594;</div>';
+    h+='</div>';
+    // Store URL for click handler
+    if(!window._modalUrls)window._modalUrls={};
+    window._modalUrls[taskGid]=asanaUrl;
   });
   if(!list.length)h='<div class="en" style="padding:28px">Немає задач</div>';
   document.getElementById('modal-list').innerHTML=h;
   document.getElementById('modal').classList.remove('h');
 }
 function closeModal(){document.getElementById('modal').classList.add('h');}
-document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('modal').addEventListener('click',function(e){
+  if(e.target===this){closeModal();return;}
+  var item=e.target.closest('.modal-item');
+  if(item){
+    var idx=Array.from(item.parentNode.children).indexOf(item);
+    var keys=Object.keys(window._modalUrls||{});
+    if(keys[idx])window.open(window._modalUrls[keys[idx]],'_blank');
+  }
+});
 document.getElementById('h5modal').addEventListener('click',function(e){if(e.target===this)closeH5();});
 
 function runAI(){
