@@ -706,7 +706,18 @@ function runAI(){
   var inact=Object.keys(OKR).filter(function(k){var ts=tasks.filter(function(t){return t.assignee&&t.assignee.name===k;});return ts.length>0&&!ts.some(function(t){return t.completed&&t.completed_at&&new Date(t.completed_at)>wkAgo;});}).map(function(k){return OKR[k].n;}).join(', ');
   var tsum=tasks.slice(0,80).map(function(t){return(t.completed?'OK':'--')+' ['+(t.assignee&&t.assignee.name?t.assignee.name:'?')+'] '+t.name+(t.due_on?' dd:'+t.due_on:'');}).join('\n');
   var extraCtx=extra?'\nADDITIONAL CONTEXT FROM CEO: '+extra:'';
-  var prompt='Analyze Sirocco Energy pilot project. Respond ONLY with valid JSON object.\nTIMELINE:'+TIMELINE+'\nTASKS:'+tsum+'\nOVERDUE:'+ovdL+'\nNO_DEADLINE:'+ndlL+'\nINACTIVE_WEEK:'+inact+'\nDAYS_LEFT:'+Math.ceil((new Date(\'2026-08-31\')-n)/86400000)+extraCtx+'\nReturn JSON with Ukrainian text: {"summary":"2 sentence project state","blind_spots":["timeline items missing from Asana tasks, max 4"],"risks":["critical risks, max 3"],"attention":["CEO attention needed, max 3"],"asymmetric":["highest impact actions, max 2"],"inactive":["inactive people and what to do, max 2"]}';
+  var promptParts=[
+    'Analyze Sirocco Energy pilot project. Respond ONLY with valid JSON object.',
+    'TIMELINE:'+TIMELINE,
+    'TASKS:'+tsum,
+    'OVERDUE:'+ovdL,
+    'NO_DEADLINE:'+ndlL,
+    'INACTIVE_WEEK:'+inact,
+    'DAYS_LEFT:'+Math.ceil((new Date('2026-08-31')-n)/86400000),
+    extraCtx,
+    'Return JSON with Ukrainian text values: {"summary":"2 sentences","blind_spots":["max 4 items"],"risks":["max 3"],"attention":["max 3"],"asymmetric":["max 2"],"inactive":["max 2"]}'
+  ];
+  var prompt=promptParts.join('\n');
   fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTK,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:1200,messages:[{role:'user',content:prompt}]})})
   .then(function(r){if(!r.ok)throw new Error('Anthropic '+r.status);return r.json();})
   .then(function(data){
