@@ -518,7 +518,7 @@ function rTeam(){
       h5.top5.forEach(function(s){
         var type=STR_TYPES[s]||'thinking';
         var cls={thinking:'h5-t',doing:'h5-d',feeling:'h5-f',motivating:'h5-m'}[type]||'h5-t';
-        h5h+='<span class="h5-pill '+cls+'" onclick="openH5(''+sk+'')">'+s+'</span>';
+        h5h+='<span class="h5-pill '+cls+'" onclick="openH5(\''+sk+'\')">'+s+'</span>';
       });
       h5h+='</div>';
       h5h+='<div class="dom-bars">';
@@ -543,9 +543,9 @@ function rTeam(){
     html+='<div><div class="tc-n">'+d.n+'</div><div class="tc-r">'+d.r+'</div></div><div class="hdot '+hc+'"></div></div>';
     html+=h5h;
     html+='<div class="tc-tabs">';
-    html+='<div class="tc-tab active" id="tab-'+sk+'-week" onclick="switchTab(''+k+'',''+sk+'','week')">Тиждень</div>';
-    html+='<div class="tc-tab" id="tab-'+sk+'-month" onclick="switchTab(''+k+'',''+sk+'','month')">Місяць</div>';
-    html+='<div class="tc-tab" id="tab-'+sk+'-all" onclick="switchTab(''+k+'',''+sk+'','all')">Весь час</div>';
+    html+='<div class="tc-tab active" id="tab-'+sk+'-week" onclick="switchTab(\''+k+'\',\''+sk+'\',\'week\')">Тиждень</div>';
+    html+='<div class="tc-tab" id="tab-'+sk+'-month" onclick="switchTab(\''+k+'\',\''+sk+'\',\'month\')">Місяць</div>';
+    html+='<div class="tc-tab" id="tab-'+sk+'-all" onclick="switchTab(\''+k+'\',\''+sk+'\',\'all\')">Весь час</div>';
     html+='</div>';
     html+='<div class="tc-stats" id="stats-'+sk+'"></div>';
     html+='<div class="tc-sep"><div class="tc-sublbl">Протерміновані</div>'+ovdH+'<div class="tc-sublbl">В роботі</div>'+inpH+ndlH+'</div>';
