@@ -1,0 +1,216 @@
+.prog {
+  padding: 10px 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.pcount {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ptrack {
+  flex: 1;
+  height: 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+.pfill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent-lo), var(--accent-hi));
+  box-shadow: 0 0 16px rgba(127, 119, 221, 0.7);
+  transition: width 0.3s;
+}
+
+.main {
+  flex: 1 1 auto;
+  padding: 22px 20px 116px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.step {
+  display: none;
+}
+.step.on {
+  display: block;
+}
+.eyebrow {
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.h1 {
+  font-size: clamp(28px, 5.4vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.14;
+}
+.sub {
+  font-size: clamp(15px, 2.6vw, 18px);
+  color: var(--text-secondary);
+  margin-top: 10px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.qplain {
+  font-size: clamp(30px, 6vw, 46px);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  margin-bottom: 34px;
+  max-width: 14ch;
+}
+.qcard {
+  padding: 30px 26px;
+  margin-top: 22px;
+}
+.qtext {
+  font-size: clamp(24px, 4.6vw, 34px);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.acts {
+  display: flex;
+  gap: 14px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+.big {
+  flex: 1 1 220px;
+  padding: 24px;
+  border-radius: var(--r);
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+  transition: transform 0.08s;
+}
+.big:active {
+  transform: scale(0.985);
+}
+.primary {
+  background: linear-gradient(150deg, var(--accent-hi), var(--accent-lo));
+  color: #fff;
+  box-shadow:
+    0 16px 40px rgba(127, 119, 221, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+/* .glass.primary (не .primary::after) — специфічність не залежить від
+   порядку завантаження CSS-модулів відносно глобального .glass::after. */
+.glass.primary::after {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1));
+}
+.primary:disabled {
+  opacity: 0.35;
+  box-shadow: none;
+  cursor: default;
+}
+.warn {
+  color: var(--danger-text);
+}
+.glass.warn::after {
+  background: linear-gradient(140deg, rgba(255, 154, 154, 0.6), rgba(255, 154, 154, 0.08));
+}
+
+.rec {
+  margin-top: 20px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+  text-align: center;
+}
+.micbtn {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, var(--accent-hi), var(--accent-lo));
+  box-shadow:
+    0 16px 44px rgba(127, 119, 221, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.micbtn.on {
+  background: linear-gradient(150deg, #ff8f8f, var(--danger));
+  box-shadow:
+    0 0 0 12px rgba(226, 86, 79, 0.18),
+    0 16px 44px rgba(226, 86, 79, 0.5);
+  animation: pulse 1.4s infinite;
+}
+@keyframes pulse {
+  50% {
+    box-shadow:
+      0 0 0 22px rgba(226, 86, 79, 0.06),
+      0 16px 44px rgba(226, 86, 79, 0.5);
+  }
+}
+.rechint {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.rectime {
+  font-size: 26px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.textarea {
+  width: 100%;
+  min-height: 120px;
+  border-radius: 16px;
+  padding: 18px;
+  resize: none;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font: 500 17px/1.5 var(--font-manrope), sans-serif;
+  -webkit-text-fill-color: #fff;
+}
+.textarea::placeholder {
+  color: rgba(184, 178, 240, 0.6);
+}
+.textarea:focus {
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 2px;
+}
+
+.done {
+  text-align: center;
+  padding: 52px 26px;
+}
+.doneIni {
+  width: 88px;
+  height: 88px;
+  font-size: 31px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+@media (max-width: 560px) {
+  .qcard {
+    padding: 24px 20px;
+  }
+  .big {
+    flex: 1 1 100%;
+    padding: 22px;
+  }
+  .main {
+    padding-bottom: 110px;
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep *)",
+      "Bash(egrep *)",
+      "Bash(fgrep *)",
+      "Bash(rg *)",
+      "Bash(curl *)",
+      "Bash(psql -U \"$(whoami)\" -d sirocco -c \"SELECT *)",
+      "Bash(psql -U \"$(whoami)\" -d sirocco -c \"\\dt*)",
+      "Bash(psql -U \"$(whoami)\" -d sirocco -c \"\\d *)",
+      "Bash(psql -U \"$(whoami)\" -d postgres -c \"SELECT *)",
+      "Bash(psql -U \"$(whoami)\" -d postgres -c \"\\l*)"
+    ]
+  }
+}

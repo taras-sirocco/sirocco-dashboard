@@ -58,6 +58,7 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
       'У прототипі текст згадує кнопку «Не можу», хоча сама кнопка підписана «Ні» — залишено дослівно, варто звірити з Тарасом перед показом працівникам.',
   },
   { key: 'opening.start_button', value: 'Почати' },
+  { key: 'opening.progress_template', value: '{n} з {total}', note: 'Лічильник над смугою прогресу чек-листа відкриття.' },
   { key: 'opening.yes', value: 'Так' },
   { key: 'opening.no', value: 'Ні' },
   { key: 'opening.problem_eyebrow', value: 'Проблема' },

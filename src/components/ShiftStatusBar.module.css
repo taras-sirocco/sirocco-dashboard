@@ -1,0 +1,10 @@
+.bar {
+  padding: 8px 20px 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.bar b {
+  color: #fff;
+  font-weight: 700;
+}

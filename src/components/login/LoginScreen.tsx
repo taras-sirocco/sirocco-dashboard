@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
 import type { LoginWorker } from '@/lib/workers'
@@ -30,6 +31,7 @@ type LoginScreenProps = {
 }
 
 export function LoginScreen({ workers, strings }: LoginScreenProps) {
+  const router = useRouter()
   const tt = (key: string, vars?: Record<string, string>) => t(strings, key, vars)
 
   const [step, setStep] = useState<Step>('people')
@@ -99,6 +101,13 @@ export function LoginScreen({ workers, strings }: LoginScreenProps) {
       setSubmitting(false)
     }
   }
+
+  // "Відкриваємо зміну…" — багатокрапка означає перехід далі сам собою.
+  useEffect(() => {
+    if (step !== 'done') return
+    const timer = setTimeout(() => router.push('/opening'), 900)
+    return () => clearTimeout(timer)
+  }, [step, router])
 
   return (
     <main className={styles.main}>

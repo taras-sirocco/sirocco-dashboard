@@ -90,7 +90,19 @@ export const ChecklistTemplates: CollectionConfig = {
           return data
         }
         if (operation === 'update' && originalDoc) {
-          const itemsChanged = JSON.stringify(originalDoc.items ?? []) !== JSON.stringify(data.items ?? [])
+          // Порівнюємо тільки контент (key/text/requiresPhoto) — Payload сам
+          // додає службовий `id` кожному рядку масиву, і без цього стриппінгу
+          // версія зростала б на кожен save, навіть якщо текст пунктів той самий.
+          const stripIds = (items: unknown) =>
+            (Array.isArray(items) ? items : []).map((item) => {
+              if (item && typeof item === 'object' && 'id' in item) {
+                const { id: _id, ...rest } = item as Record<string, unknown>
+                return rest
+              }
+              return item
+            })
+          const itemsChanged =
+            JSON.stringify(stripIds(originalDoc.items)) !== JSON.stringify(stripIds(data.items))
           if (itemsChanged) {
             data.version = (originalDoc.version ?? 1) + 1
           }

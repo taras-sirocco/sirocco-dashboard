@@ -175,7 +175,9 @@
     0 14px 36px rgba(127, 119, 221, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
-.keyGo::after {
+/* .glass.keyGo (не .keyGo::after саме по собі) — щоб специфічність точно
+   перебила .glass::after незалежно від порядку завантаження CSS-модулів. */
+.glass.keyGo::after {
   background: linear-gradient(140deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1));
 }
 
