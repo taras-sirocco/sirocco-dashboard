@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sirocco — що завадило</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-page:#0b1020;--accent:#7f77dd;--accent-lo:#544bc0;--accent-hi:#a49cf6;
+  --text-primary:#fff;--text-secondary:#b8b2f0;--danger-text:#ff9a9a;--danger:#e2564f;
+  --ok:#5dcaa5;--warn:#ffcf5d;--r:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button{-webkit-appearance:none;appearance:none;font:inherit;color:inherit;
+  -webkit-text-fill-color:currentColor;background:none;border:none;cursor:pointer;text-align:left}
+textarea{-webkit-appearance:none;appearance:none;font:inherit}
+html{height:100%}
+body{min-height:100%;background:var(--bg-page);color:var(--text-primary);
+  font-family:"Manrope",system-ui,-apple-system,sans-serif;
+  display:flex;flex-direction:column;user-select:none;position:relative;overflow-x:hidden;isolation:isolate}
+
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(70px)}
+.b1{width:60vmax;height:60vmax;left:-20vmax;top:-24vmax;background:radial-gradient(circle,rgba(120,86,255,.66),rgba(120,86,255,0) 66%)}
+.b2{width:52vmax;height:52vmax;right:-18vmax;top:8vmax;background:radial-gradient(circle,rgba(40,110,255,.5),rgba(40,110,255,0) 68%)}
+.b3{width:40vmax;height:40vmax;left:14vmax;bottom:-20vmax;background:radial-gradient(circle,rgba(255,180,70,.26),rgba(255,180,70,0) 70%)}
+
+.glass{position:relative;border-radius:var(--r);
+  background:linear-gradient(140deg,rgba(255,255,255,.20),rgba(255,255,255,.05) 42%,rgba(255,255,255,.10));
+  backdrop-filter:blur(26px) saturate(170%);-webkit-backdrop-filter:blur(26px) saturate(170%);
+  box-shadow:0 22px 60px rgba(0,0,0,.42);overflow:hidden}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(140deg,rgba(255,255,255,.7),rgba(255,255,255,.06) 46%,rgba(255,255,255,.3));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none}
+.z{position:relative;z-index:1}
+
+.bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px 6px}
+.logo{display:flex;align-items:center;gap:10px;height:38px;padding:0 14px;
+  border:1px dashed rgba(255,255,255,.35);border-radius:10px;color:var(--text-secondary);
+  font-size:13px;letter-spacing:.20em;font-weight:700}
+.meta{display:flex;align-items:center;gap:14px}
+.when{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.clock{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.date{font-size:13px;color:var(--text-secondary);font-weight:500}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+.shiftbar{padding:8px 20px 12px;font-size:14px;color:var(--text-secondary);font-weight:500;
+  border-bottom:1px solid rgba(255,255,255,.08)}
+.shiftbar b{color:#fff;font-weight:700}
+
+/* прогрес по недобитих задачах */
+.dots{display:flex;gap:8px;padding:14px 20px 0}
+.pd{flex:1;height:6px;border-radius:4px;background:rgba(255,255,255,.14)}
+.pd.done{background:linear-gradient(90deg,var(--accent-lo),var(--accent-hi))}
+.pd.cur{background:rgba(255,255,255,.45)}
+
+main{flex:1 1 auto;padding:20px 20px 40px}
+
+.eyebrow{font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--warn);font-weight:800;margin-bottom:12px}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.03em;line-height:1.12;margin-bottom:20px}
+
+/* картка недобору */
+.gap{padding:22px 24px;margin-bottom:24px}
+.gap .tn{font-size:17px;font-weight:700;margin-bottom:14px}
+.gap .nums{display:flex;align-items:baseline;gap:14px}
+.gap .big{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.gap .of{font-size:18px;color:var(--text-secondary);font-weight:700}
+.gap .miss{margin-left:auto;font-size:15px;font-weight:800;color:var(--warn);
+  background:rgba(255,207,93,.15);padding:8px 14px;border-radius:10px}
+.gap .track{height:10px;border-radius:6px;background:rgba(0,0,0,.3);margin-top:16px;overflow:hidden;display:flex}
+.gap .fill{height:100%;background:linear-gradient(90deg,var(--accent-lo),var(--accent-hi))}
+
+/* запис */
+.rec{padding:26px;display:flex;flex-direction:column;gap:16px;align-items:center}
+.mic{width:104px;height:104px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));
+  box-shadow:0 16px 44px rgba(127,119,221,.55),inset 0 1px 0 rgba(255,255,255,.4)}
+.mic.on{background:linear-gradient(150deg,#ff8f8f,var(--danger));
+  box-shadow:0 0 0 12px rgba(226,86,79,.16),0 16px 44px rgba(226,86,79,.5);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 22px rgba(226,86,79,.05),0 16px 44px rgba(226,86,79,.5)}}
+.mic svg{position:relative;z-index:1}
+.rectime{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;display:none}
+.rechint{font-size:16px;color:var(--text-secondary);font-weight:500;text-align:center}
+textarea{width:100%;min-height:110px;border-radius:16px;padding:18px;resize:none;
+  background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);color:#fff;
+  font:500 17px/1.5 "Manrope",sans-serif;-webkit-text-fill-color:#fff}
+textarea::placeholder{color:rgba(184,178,240,.6)}
+textarea:focus{outline:2px solid var(--accent-hi);outline-offset:2px}
+
+.carry{display:flex;align-items:center;gap:12px;margin:22px 0 10px;font-size:15px;
+  color:var(--text-secondary);font-weight:500;line-height:1.4}
+.carry .ic{flex:0 0 auto;width:36px;height:36px;border-radius:10px;background:rgba(127,119,221,.2);
+  display:flex;align-items:center;justify-content:center;color:var(--accent-hi);font-size:18px}
+.carry b{color:#fff;font-weight:700}
+
+.cta{width:100%;padding:24px;border-radius:var(--r);text-align:center;font-size:19px;font-weight:800;
+  transition:transform .08s;position:relative;overflow:hidden;margin-top:8px;
+  background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));color:#fff;
+  box-shadow:0 16px 40px rgba(127,119,221,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.cta:active{transform:scale(.99)}
+.cta::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(140deg,rgba(255,255,255,.55),rgba(255,255,255,.08));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="blobs" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+
+<header class="bar">
+  <div class="logo"><span>SIROCCO</span></div>
+  <div class="meta">
+    <span class="when"><span class="clock" id="clock">--:--</span><span class="date" id="today">—</span></span>
+    <span class="dot"></span>
+  </div>
+</header>
+<div class="shiftbar">Зміна відкрита · Відповідальний — <b>Ігор Савчук</b></div>
+
+<div class="dots" id="dots"></div>
+
+<main>
+  <div class="eyebrow" id="pos">Недобір 1 з 2</div>
+  <h1>Що завадило?</h1>
+
+  <div class="glass gap">
+    <div class="z">
+      <div class="tn" id="tname">—</div>
+      <div class="nums">
+        <span class="big" id="done">0</span>
+        <span class="of">з <span id="target">0</span></span>
+        <span class="miss" id="miss">−0</span>
+      </div>
+      <div class="track"><span class="fill" id="fill" style="width:0"></span></div>
+    </div>
+  </div>
+
+  <div class="glass rec">
+    <div class="z" style="display:flex;flex-direction:column;gap:16px;align-items:center;width:100%">
+      <button class="mic" id="mic" aria-label="Записати голосом">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+          <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/>
+        </svg>
+      </button>
+      <div class="rectime" id="rectime">0:00</div>
+      <div class="rechint" id="rechint">Скажи своїми словами. Це не про провину — ми шукаємо, що в системі полагодити</div>
+      <textarea id="txt" placeholder="або напиши коротко"></textarea>
+    </div>
+  </div>
+
+  <div class="carry">
+    <span class="ic">↻</span>
+    <span>Залишок <b id="carryn">0 шт</b> перенесеться на завтра автоматично</span>
+  </div>
+
+  <button class="cta" id="send"><span class="z">Відправити і далі</span></button>
+</main>
+
+<script>
+// недобиті задачі зі зміни (done < target)
+const gaps=[
+  {title:"Кріплення фланця", target:20, done:14},
+  {title:"Установка датчика вібрації", target:20, done:0}
+];
+
+const $=id=>document.getElementById(id);
+let i=0;
+
+function renderDots(){
+  $("dots").innerHTML=gaps.map((_,k)=>{
+    const cls=k<i?"done":(k===i?"cur":"");
+    return `<span class="pd ${cls}"></span>`;
+  }).join("");
+}
+
+function render(){
+  const g=gaps[i];
+  renderDots();
+  $("pos").textContent="Недобір "+(i+1)+" з "+gaps.length;
+  $("tname").textContent=g.title;
+  $("done").textContent=g.done;
+  $("target").textContent=g.target;
+  $("miss").textContent="−"+(g.target-g.done);
+  $("fill").style.width=(g.done/g.target*100)+"%";
+  $("carryn").textContent=(g.target-g.done)+" шт";
+  $("txt").value=""; stop();
+}
+
+$("send").onclick=()=>{
+  // тут: зберегти причину + голос, відправити Тарасу й бригадиру, перенести залишок
+  if(i<gaps.length-1){ i++; render(); window.scrollTo(0,0); }
+  else { alert("Причини відправлено. Залишки перенесено на завтра.\nДалі — закриття зміни."); }
+};
+
+/* запис */
+let rec=null,t0=0,timer=null;
+$("mic").onclick=async()=>{
+  if(rec&&rec.state==="recording"){stop();return}
+  try{
+    const st=await navigator.mediaDevices.getUserMedia({audio:true});
+    rec=new MediaRecorder(st); rec.start(); t0=Date.now();
+    $("mic").classList.add("on"); $("rectime").style.display="block";
+    $("rechint").textContent="Записую. Натисни ще раз, щоб зупинити";
+    timer=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);
+      $("rectime").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0")},300);
+  }catch(e){ $("rechint").textContent="Мікрофон недоступний — напиши текстом"; }
+};
+function stop(){
+  if(rec&&rec.state==="recording"){rec.stop();rec.stream.getTracks().forEach(t=>t.stop())}
+  clearInterval(timer); $("mic").classList.remove("on");
+  $("rectime").style.display="none";
+  $("rechint").textContent="Скажи своїми словами. Це не про провину — ми шукаємо, що в системі полагодити";
+}
+
+render();
+
+function tick(){
+  const d=new Date();
+  $("clock").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  const dw=["неділя","понеділок","вівторок","середа","четвер","п'ятниця","субота"];
+  const mo=["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+  $("today").textContent=dw[d.getDay()]+", "+d.getDate()+" "+mo[d.getMonth()];
+}
+tick(); setInterval(tick,10000);
+</script>
+</body>
+</html>

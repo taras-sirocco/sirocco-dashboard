@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sirocco — зміна</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-page:#0b1020;--accent:#7f77dd;--accent-lo:#544bc0;--accent-hi:#a49cf6;
+  --text-primary:#fff;--text-secondary:#b8b2f0;--danger-text:#ff9a9a;--danger:#e2564f;
+  --ok:#5dcaa5;--warn:#ffcf5d;--r:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button{-webkit-appearance:none;appearance:none;font:inherit;color:inherit;
+  -webkit-text-fill-color:currentColor;background:none;border:none;cursor:pointer;text-align:left}
+textarea{-webkit-appearance:none;appearance:none;font:inherit}
+html{height:100%}
+body{min-height:100%;background:var(--bg-page);color:var(--text-primary);
+  font-family:"Manrope",system-ui,-apple-system,sans-serif;
+  display:flex;flex-direction:column;user-select:none;position:relative;overflow-x:hidden;isolation:isolate}
+
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(70px)}
+.b1{width:60vmax;height:60vmax;left:-20vmax;top:-24vmax;background:radial-gradient(circle,rgba(120,86,255,.7),rgba(120,86,255,0) 66%)}
+.b2{width:52vmax;height:52vmax;right:-18vmax;top:8vmax;background:radial-gradient(circle,rgba(40,110,255,.55),rgba(40,110,255,0) 68%)}
+.b3{width:40vmax;height:40vmax;left:18vmax;bottom:-20vmax;background:radial-gradient(circle,rgba(0,220,190,.22),rgba(0,220,190,0) 70%)}
+
+.glass{position:relative;border-radius:var(--r);
+  background:linear-gradient(140deg,rgba(255,255,255,.20),rgba(255,255,255,.05) 42%,rgba(255,255,255,.10));
+  backdrop-filter:blur(26px) saturate(170%);-webkit-backdrop-filter:blur(26px) saturate(170%);
+  box-shadow:0 22px 60px rgba(0,0,0,.42);overflow:hidden}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(140deg,rgba(255,255,255,.7),rgba(255,255,255,.06) 46%,rgba(255,255,255,.3));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none}
+.z{position:relative;z-index:1}
+
+.bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px 6px}
+.logo{display:flex;align-items:center;gap:10px;height:38px;padding:0 14px;
+  border:1px dashed rgba(255,255,255,.35);border-radius:10px;color:var(--text-secondary);
+  font-size:13px;letter-spacing:.20em;font-weight:700}
+.meta{display:flex;align-items:center;gap:14px}
+.when{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.clock{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.date{font-size:13px;color:var(--text-secondary);font-weight:500}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+.shiftbar{padding:8px 20px 12px;font-size:14px;color:var(--text-secondary);font-weight:500;
+  border-bottom:1px solid rgba(255,255,255,.08)}
+.shiftbar b{color:#fff;font-weight:700}
+
+main{flex:1 1 auto;padding:24px 20px 40px}
+.view{display:none}.view.on{display:block}
+.eyebrow{font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-secondary);font-weight:800;margin-bottom:10px}
+h1{font-size:clamp(28px,5.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.14;margin-bottom:8px}
+.sub{font-size:16px;color:var(--text-secondary);font-weight:500;line-height:1.45;margin-bottom:22px}
+.back{display:inline-flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:16px;font-weight:600;margin-bottom:18px}
+
+/* --- ХАБ --- */
+.hero{padding:26px;margin-bottom:16px}
+.hero .lab{font-size:14px;color:var(--text-secondary);font-weight:600;margin-bottom:6px}
+.hero .cur{font-size:clamp(24px,5vw,32px);font-weight:800;letter-spacing:-.02em;margin-bottom:18px}
+.hero .prog{display:flex;gap:8px;margin-bottom:14px}
+.hero .seg{flex:1;height:8px;border-radius:5px;background:rgba(255,255,255,.14)}
+.hero .seg.done{background:linear-gradient(90deg,var(--accent-lo),var(--accent-hi));box-shadow:0 0 12px rgba(127,119,221,.6)}
+.hero .seg.cur{background:rgba(255,255,255,.45)}
+.hero .meta2{font-size:14px;color:var(--text-secondary);font-weight:600}
+
+.cta{width:100%;padding:24px;border-radius:var(--r);text-align:center;font-size:20px;font-weight:800;
+  transition:transform .08s;position:relative;overflow:hidden;margin-bottom:12px;
+  background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));color:#fff;
+  box-shadow:0 16px 40px rgba(127,119,221,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.cta:active{transform:scale(.99)}
+.cta::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(140deg,rgba(255,255,255,.55),rgba(255,255,255,.08));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.tile{padding:20px;min-height:104px;display:flex;flex-direction:column;justify-content:space-between;
+  transition:transform .08s}
+.tile:active{transform:scale(.98)}
+.tile .ic{font-size:24px}
+.tile .t{font-size:16px;font-weight:700;line-height:1.25}
+.tile.wide{grid-column:1/-1;min-height:0;flex-direction:row;align-items:center;gap:14px}
+.tile .badge{margin-left:auto;background:var(--accent);color:#1a1740;font-size:13px;font-weight:800;
+  width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.tile.crit .t{color:var(--danger-text)}
+
+/* --- ЩО ЗМІНИЛИ --- */
+.chg{padding:20px 22px;margin-bottom:12px}
+.chg .d{font-size:13px;color:var(--text-secondary);font-weight:700;margin-bottom:8px}
+.chg .said{font-size:15px;color:var(--text-secondary);font-weight:500;line-height:1.4;margin-bottom:10px;
+  padding-left:14px;border-left:2px solid rgba(255,255,255,.2)}
+.chg .did{font-size:17px;font-weight:600;line-height:1.45;display:flex;gap:10px}
+.chg .did .m{flex:0 0 auto;color:var(--ok)}
+
+/* --- ЗАПИС --- */
+.rec{padding:26px;display:flex;flex-direction:column;gap:16px;align-items:center;margin-bottom:12px}
+.mic{width:104px;height:104px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));
+  box-shadow:0 16px 44px rgba(127,119,221,.55),inset 0 1px 0 rgba(255,255,255,.4)}
+.mic.crit{background:linear-gradient(150deg,#ff8f8f,var(--danger));box-shadow:0 16px 44px rgba(226,86,79,.5),inset 0 1px 0 rgba(255,255,255,.3)}
+.mic.on{animation:pulse 1.4s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 20px rgba(127,119,221,.06),0 16px 44px rgba(127,119,221,.5)}}
+.mic svg{position:relative;z-index:1}
+.rectime{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;display:none}
+.rechint{font-size:16px;color:var(--text-secondary);font-weight:500;text-align:center}
+textarea{width:100%;min-height:110px;border-radius:16px;padding:18px;resize:none;
+  background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);color:#fff;
+  font:500 17px/1.5 "Manrope",sans-serif;-webkit-text-fill-color:#fff}
+textarea::placeholder{color:rgba(184,178,240,.6)}
+.mediabtn{width:100%;padding:16px;border-radius:14px;text-align:center;font-size:15px;font-weight:700;margin-bottom:12px}
+
+/* --- МОДАЛКА --- */
+.overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:24px;
+  background:rgba(8,10,20,.72);backdrop-filter:blur(4px)}
+.overlay.on{display:flex}
+.modal{width:100%;max-width:520px;border-radius:24px;padding:32px 28px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.modal.message{background:#e8e9f0;color:#1a1740}
+.modal.task{background:#f5cf5a;color:#3a2e05}
+.modal .kind{font-size:14px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;margin-bottom:14px;opacity:.7}
+.modal .from{font-size:14px;font-weight:700;margin-bottom:16px;opacity:.75}
+.modal .mbody{font-size:22px;font-weight:700;line-height:1.35;margin-bottom:8px}
+.modal .mextra{font-size:16px;font-weight:500;line-height:1.45;margin-bottom:24px;opacity:.85}
+.modal .ack{width:100%;padding:22px;border-radius:16px;text-align:center;font-size:19px;font-weight:800}
+.modal.message .ack{background:#1a1740;color:#fff}
+.modal.task .ack{background:#3a2e05;color:#f5cf5a}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="blobs" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+
+<header class="bar">
+  <div class="logo"><span>SIROCCO</span></div>
+  <div class="meta">
+    <span class="when"><span class="clock" id="clock">--:--</span><span class="date" id="today">—</span></span>
+    <span class="dot"></span>
+  </div>
+</header>
+<div class="shiftbar">Зміна відкрита · Відповідальний — <b>Ігор Савчук</b></div>
+
+<main>
+
+  <!-- 4.1 ХАБ -->
+  <section class="view on" id="hub">
+    <div class="eyebrow">Головна зміни</div>
+    <h1>Сьогодні</h1>
+    <p class="sub">Три задачі на день. Дві ще в роботі.</p>
+
+    <div class="glass hero">
+      <div class="z">
+        <div class="lab">Поточна задача</div>
+        <div class="cur">Кріплення фланця · 14 з 20</div>
+        <div class="prog">
+          <span class="seg done"></span><span class="seg cur"></span><span class="seg"></span>
+        </div>
+        <div class="meta2">Задача 2 з 3 · залишилось 6</div>
+      </div>
+    </div>
+
+    <button class="cta" id="toTask"><span class="z">Продовжити роботу</span></button>
+
+    <div class="tiles">
+      <button class="glass tile" id="tNote"><span class="ic">📝</span><span class="t">Додати нотатку до процесу</span></button>
+      <button class="glass tile crit" id="tCrit"><span class="ic" style="filter:grayscale(0)">⚠️</span><span class="t">Повідомити про критичну проблему</span></button>
+      <button class="glass tile wide" id="tChanges"><span class="ic">✨</span><span class="t">Що змінили за вашими сигналами</span><span class="badge">2</span></button>
+      <button class="glass tile wide" id="tClose"><span class="ic">🌙</span><span class="t">Закрити зміну</span></button>
+    </div>
+
+    <div style="margin-top:18px;display:flex;gap:10px">
+      <button class="glass mediabtn" id="demoMsg" style="flex:1;margin:0"><span class="z">▷ демо: повідомлення</span></button>
+      <button class="glass mediabtn" id="demoTask" style="flex:1;margin:0"><span class="z">▷ демо: нова задача</span></button>
+    </div>
+  </section>
+
+  <!-- 4.9 ЩО ЗМІНИЛИ -->
+  <section class="view" id="changes">
+    <button class="back" id="chBack">‹ Назад</button>
+    <div class="eyebrow" style="color:var(--ok)">Ваш голос працює</div>
+    <h1>Що змінили за вашими сигналами</h1>
+    <p class="sub">Кожне, що ви сказали, ми розбираємо. Ось що вже зробили.</p>
+    <div id="chList"></div>
+  </section>
+
+  <!-- НОТАТКА / ПРОБЛЕМА -->
+  <section class="view" id="note">
+    <button class="back" id="nBack">‹ Назад</button>
+    <div class="eyebrow" id="nEyebrow">Нотатка до процесу</div>
+    <h1 id="nTitle">Що хочеш сказати?</h1>
+    <p class="sub" id="nSub">Скажи голосом або напиши. Це потрапить у звіт дня.</p>
+
+    <div class="glass rec">
+      <div class="z" style="display:flex;flex-direction:column;gap:16px;align-items:center;width:100%">
+        <button class="mic" id="mic" aria-label="Записати"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+          <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button>
+        <div class="rectime" id="rectime">0:00</div>
+        <div class="rechint" id="rechint">Натисни і скажи</div>
+        <textarea id="txt" placeholder="або напиши коротко"></textarea>
+      </div>
+    </div>
+    <button class="glass mediabtn" id="attach"><span class="z">📷 Додати фото або відео</span></button>
+    <button class="cta" id="nSend"><span class="z">Відправити</span></button>
+    <input type="file" id="cam" accept="image/*,video/*" capture="environment" style="display:none">
+  </section>
+
+</main>
+
+<!-- МОДАЛКА -->
+<div class="overlay" id="overlay">
+  <div class="modal message" id="modal">
+    <div class="kind" id="mKind">Повідомлення</div>
+    <div class="from" id="mFrom">Тарас Водяний · CEO · щойно</div>
+    <div class="mbody" id="mBody">—</div>
+    <div class="mextra" id="mExtra"></div>
+    <button class="ack" id="mAck"><span>Прочитано</span></button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const go=v=>{document.querySelectorAll(".view").forEach(x=>x.classList.toggle("on",x.id===v));window.scrollTo(0,0);};
+
+/* навігація хабу */
+$("toTask").onclick =()=>alert("→ екран задач (03-task)");
+$("tClose").onclick =()=>alert("→ аркуш дня і закриття (05-close). Якщо є недобір — спершу «Що завадило» (06-blocker)");
+$("tChanges").onclick=()=>go("changes");
+$("chBack").onclick  =()=>go("hub");
+$("tNote").onclick   =()=>openNote("note");
+$("tCrit").onclick   =()=>openNote("crit");
+$("nBack").onclick   =()=>{stop();go("hub")};
+
+/* що змінили */
+const changes=[
+  {d:"9 вересня", said:"«Клей застигає швидше, ніж 8 хвилин»", did:"Перефасували клей на менші порції, оновили інструкцію: тепер 5 хвилин"},
+  {d:"8 вересня", said:"«Бракує розетки, тягнемо подовжувач через прохід»", did:"Поставили другу розетку над столом, подовжувач прибрали"}
+];
+$("chList").innerHTML=changes.map(c=>`
+  <div class="glass chg"><div class="z">
+    <div class="d">${c.d}</div>
+    <div class="said">${c.said}</div>
+    <div class="did"><span class="m">✓</span><span>${c.did}</span></div>
+  </div></div>`).join("");
+
+/* нотатка / проблема */
+function openNote(kind){
+  const crit = kind==="crit";
+  $("nEyebrow").textContent = crit?"Критична проблема":"Нотатка до процесу";
+  $("nEyebrow").style.color = crit?"var(--danger-text)":"var(--text-secondary)";
+  $("nTitle").textContent   = crit?"Що сталося?":"Що хочеш сказати?";
+  $("nSub").textContent     = crit
+    ? "Це піде терміновим сигналом Тарасу й бригадиру одразу."
+    : "Скажи голосом або напиши. Це потрапить у звіт дня.";
+  $("mic").classList.toggle("crit",crit);
+  $("nSend").querySelector("span").textContent = crit?"Відправити терміново":"Відправити";
+  $("txt").value=""; stop(); go("note");
+}
+$("nSend").onclick=()=>{stop();alert("Відправлено. Запис із контекстом (задача, час, хто) пішов у звіт / сигнал.");go("hub");};
+$("attach").onclick=()=>$("cam").click();
+$("cam").onchange=e=>{ if(e.target.files[0]) $("attach").querySelector("span").textContent="📷 Медіа додано"; };
+
+/* запис */
+let rec=null,t0=0,timer=null;
+$("mic").onclick=async()=>{
+  if(rec&&rec.state==="recording"){stop();return}
+  try{
+    const st=await navigator.mediaDevices.getUserMedia({audio:true});
+    rec=new MediaRecorder(st); rec.start(); t0=Date.now();
+    $("mic").classList.add("on"); $("rectime").style.display="block";
+    $("rechint").textContent="Записую. Натисни ще раз, щоб зупинити";
+    timer=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);
+      $("rectime").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0")},300);
+  }catch(e){ $("rechint").textContent="Мікрофон недоступний — напиши текстом"; }
+};
+function stop(){
+  if(rec&&rec.state==="recording"){rec.stop();rec.stream.getTracks().forEach(t=>t.stop())}
+  clearInterval(timer); $("mic").classList.remove("on");
+  $("rectime").style.display="none"; $("rechint").textContent="Натисни і скажи";
+}
+
+/* --- 4.11 модалки --- */
+function showModal(kind){
+  const m=$("modal"), ov=$("overlay");
+  if(kind==="task"){
+    m.className="modal task";
+    $("mKind").textContent="Нова задача на сьогодні";
+    $("mFrom").textContent="Ігор Савчук · бригадир · щойно";
+    $("mBody").textContent="Додати перевірку моменту затягу на всіх готових фланцях";
+    $("mExtra").textContent="Ціль: 14 шт. Перед закриттям зміни.";
+    $("mAck").querySelector("span").textContent="Прийнято";
+  } else {
+    m.className="modal message";
+    $("mKind").textContent="Повідомлення";
+    $("mFrom").textContent="Тарас Водяний · CEO · щойно";
+    $("mBody").textContent="Хлопці, завтра о 9:00 приїде фотограф — приберіть трохи ретельніше на закритті.";
+    $("mExtra").textContent="";
+    $("mAck").querySelector("span").textContent="Прочитано";
+  }
+  ov.classList.add("on");
+}
+$("mAck").onclick=()=>$("overlay").classList.remove("on"); // єдиний вихід — тільки ця кнопка
+$("demoMsg").onclick=()=>showModal("message");
+$("demoTask").onclick=()=>showModal("task");
+
+function tick(){
+  const d=new Date();
+  $("clock").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  const dw=["неділя","понеділок","вівторок","середа","четвер","п'ятниця","субота"];
+  const mo=["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+  $("today").textContent=dw[d.getDay()]+", "+d.getDate()+" "+mo[d.getMonth()];
+}
+tick(); setInterval(tick,10000);
+</script>
+</body>
+</html>

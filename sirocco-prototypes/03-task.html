@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sirocco — задачі зміни</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-page:#0b1020;--accent:#7f77dd;--accent-lo:#544bc0;--accent-hi:#a49cf6;
+  --text-primary:#fff;--text-secondary:#b8b2f0;--danger-text:#ff9a9a;--danger:#e2564f;
+  --ok:#5dcaa5;--r:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button{-webkit-appearance:none;appearance:none;font:inherit;color:inherit;
+  -webkit-text-fill-color:currentColor;background:none;border:none;cursor:pointer;text-align:left}
+html{height:100%}
+body{min-height:100%;background:var(--bg-page);color:var(--text-primary);
+  font-family:"Manrope",system-ui,-apple-system,sans-serif;
+  display:flex;flex-direction:column;user-select:none;position:relative;overflow-x:hidden;isolation:isolate}
+
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(70px)}
+.b1{width:60vmax;height:60vmax;left:-20vmax;top:-24vmax;background:radial-gradient(circle,rgba(120,86,255,.75),rgba(120,86,255,0) 66%)}
+.b2{width:52vmax;height:52vmax;right:-18vmax;top:8vmax;background:radial-gradient(circle,rgba(40,110,255,.62),rgba(40,110,255,0) 68%)}
+.b3{width:40vmax;height:40vmax;left:18vmax;bottom:-20vmax;background:radial-gradient(circle,rgba(255,110,70,.36),rgba(255,110,70,0) 70%)}
+.b4{width:34vmax;height:34vmax;right:6vmax;bottom:-14vmax;background:radial-gradient(circle,rgba(0,220,190,.28),rgba(0,220,190,0) 70%)}
+
+.glass{position:relative;border-radius:var(--r);
+  background:linear-gradient(140deg,rgba(255,255,255,.20),rgba(255,255,255,.05) 42%,rgba(255,255,255,.10));
+  backdrop-filter:blur(26px) saturate(170%);-webkit-backdrop-filter:blur(26px) saturate(170%);
+  box-shadow:0 22px 60px rgba(0,0,0,.42);overflow:hidden}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(140deg,rgba(255,255,255,.75),rgba(255,255,255,.06) 46%,rgba(255,255,255,.34));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none}
+.glass::before{content:"";position:absolute;left:-30%;top:-70%;width:90%;height:150%;
+  background:linear-gradient(135deg,rgba(255,255,255,.30),rgba(255,255,255,0) 62%);transform:rotate(18deg);pointer-events:none}
+.z{position:relative;z-index:1}
+
+.bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px 6px}
+.logo{display:flex;align-items:center;gap:10px;height:38px;padding:0 14px;
+  border:1px dashed rgba(255,255,255,.35);border-radius:10px;color:var(--text-secondary);
+  font-size:13px;letter-spacing:.20em;font-weight:700}
+.meta{display:flex;align-items:center;gap:14px}
+.when{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.clock{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.date{font-size:13px;color:var(--text-secondary);font-weight:500;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+.shiftbar{padding:8px 20px 12px;font-size:14px;color:var(--text-secondary);font-weight:500;
+  border-bottom:1px solid rgba(255,255,255,.08)}
+.shiftbar b{color:#fff;font-weight:700}
+
+main{flex:1 1 auto;padding:26px 20px 116px;display:flex;flex-direction:column}
+.step{display:none}.step.on{display:block}
+
+/* прогрес по задачах зміни */
+.queue{display:flex;gap:8px;margin-bottom:26px}
+.qseg{flex:1;height:6px;border-radius:4px;background:rgba(255,255,255,.14)}
+.qseg.done{background:linear-gradient(90deg,var(--accent-lo),var(--accent-hi));box-shadow:0 0 14px rgba(127,119,221,.6)}
+.qseg.cur{background:rgba(255,255,255,.4)}
+
+.pos{font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-secondary);font-weight:700;margin-bottom:12px}
+.tname{font-size:clamp(30px,6vw,46px);font-weight:800;letter-spacing:-.03em;line-height:1.14;margin-bottom:26px}
+
+/* лічильник */
+.counter{padding:28px 26px;margin-bottom:16px}
+.crow{display:flex;align-items:baseline;justify-content:space-between}
+.clabel{font-size:16px;color:var(--text-secondary);font-weight:600}
+.cval{font-size:52px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.cval small{font-size:26px;color:var(--text-secondary);font-weight:700}
+.ctrack{height:12px;border-radius:8px;background:rgba(0,0,0,.3);margin-top:18px;overflow:hidden}
+.cfill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent-lo),var(--accent-hi));
+  box-shadow:0 0 18px rgba(127,119,221,.7);transition:width .35s}
+
+/* степер */
+.stepper{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.sbtn{flex:0 0 auto;width:88px;height:88px;border-radius:22px;font-size:44px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;transition:transform .08s}
+.sbtn:active{transform:scale(.93)}
+.sbtn span{position:relative;z-index:1;line-height:1}
+.sbtn[disabled]{opacity:.3;cursor:default}
+.snum{flex:1;text-align:center;font-size:60px;font-weight:800;font-variant-numeric:tabular-nums}
+
+.instr{width:100%;padding:22px;border-radius:var(--r);text-align:center;font-size:19px;font-weight:700;
+  margin-bottom:12px;color:var(--text-primary)}
+.big{width:100%;padding:24px;border-radius:var(--r);text-align:center;font-size:20px;font-weight:800;transition:transform .08s}
+.big:active{transform:scale(.99)}
+.primary{background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));color:#fff;
+  box-shadow:0 16px 40px rgba(127,119,221,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.primary::after{background:linear-gradient(140deg,rgba(255,255,255,.6),rgba(255,255,255,.1))}
+.primary[disabled]{opacity:.4;box-shadow:none;cursor:default}
+
+/* фінал зміни */
+.done{text-align:center;padding:48px 24px}
+.done .big-ini{width:88px;height:88px;font-size:34px;margin:0 auto 24px;border-radius:50%;
+  background:linear-gradient(150deg,var(--ok),#3fa882);display:flex;align-items:center;justify-content:center;font-weight:800}
+.done h1{font-size:clamp(28px,5.5vw,40px);font-weight:800;letter-spacing:-.025em}
+.done p{color:var(--text-secondary);margin-top:10px;font-size:17px;font-weight:500}
+
+/* нижні кнопки — постійні на екрані задач */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;gap:12px;padding:14px 20px 18px;
+  background:linear-gradient(to top,rgba(11,16,32,.96),rgba(11,16,32,0))}
+.dockbtn{flex:1;padding:18px;border-radius:16px;text-align:center;font-size:16px;font-weight:700;line-height:1.25}
+.dockbtn.stop{color:var(--danger-text)}
+.dockbtn.stop::after{background:linear-gradient(140deg,rgba(255,154,154,.6),rgba(255,154,154,.08))}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:560px){
+  .cval{font-size:44px}.snum{font-size:48px}.sbtn{width:76px;height:76px;font-size:38px}
+}
+</style>
+</head>
+<body>
+
+<div class="blobs" aria-hidden="true">
+  <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="blob b4"></span>
+</div>
+
+<header class="bar">
+  <div class="logo"><span>SIROCCO</span></div>
+  <div class="meta">
+    <span class="when"><span class="clock" id="clock">--:--</span><span class="date" id="today">—</span></span>
+    <span class="dot"></span>
+  </div>
+</header>
+<div class="shiftbar">Зміна відкрита · Відповідальний — <b>Ігор Савчук</b></div>
+
+<main>
+
+  <!-- задача -->
+  <section class="step on" id="task">
+    <div class="queue" id="queue"></div>
+    <div class="pos" id="pos">Задача 1 з 3</div>
+    <div class="tname" id="tname">—</div>
+
+    <div class="glass counter">
+      <div class="z">
+        <div class="crow">
+          <span class="clabel">Зроблено сьогодні</span>
+          <span class="cval"><span id="cdone">0</span> <small>з <span id="ctarget">0</span></small></span>
+        </div>
+        <div class="ctrack"><span class="cfill" id="cfill" style="width:0"></span></div>
+      </div>
+    </div>
+
+    <button class="glass instr" id="instr"><span class="z">Інструкція по кроках</span></button>
+
+    <button class="glass big primary" id="ready"><span class="z">Готово</span></button>
+  </section>
+
+  <!-- ввід кількості -->
+  <section class="step" id="qty">
+    <div class="pos">Скільки зробили щойно?</div>
+    <div class="tname" id="qtyname" style="font-size:clamp(24px,4.6vw,32px);margin-bottom:20px">—</div>
+
+    <div class="stepper">
+      <button class="glass sbtn" id="minus"><span>−</span></button>
+      <div class="snum" id="snum">1</div>
+      <button class="glass sbtn" id="plus"><span>+</span></button>
+    </div>
+
+    <button class="glass big primary" id="confirm"><span class="z">Підтвердити</span></button>
+    <button class="glass instr" id="qtyback" style="margin-top:12px"><span class="z">Назад</span></button>
+  </section>
+
+  <!-- зміну завершено -->
+  <section class="step" id="allDone">
+    <div class="done">
+      <div class="big-ini">✓</div>
+      <h1>Усі задачі на сьогодні зроблено</h1>
+      <p>Час переходити до аркуша дня і закриття зміни</p>
+    </div>
+    <button class="glass big primary" id="toClose"><span class="z">До аркуша дня</span></button>
+  </section>
+
+</main>
+
+<div class="dock" id="dock">
+  <button class="glass dockbtn" id="note"><span class="z">Додати нотатку до процесу</span></button>
+  <button class="glass dockbtn stop" id="crit"><span class="z">Повідомити про критичну проблему</span></button>
+</div>
+
+<script>
+// демо-дані. У проді — з Payload, у порядку `order`
+const tasks=[
+  {title:"Збірка лопаті, етап 1", target:20, done:6},
+  {title:"Кріплення фланця", target:20, done:0},
+  {title:"Установка датчика вібрації", target:20, done:0}
+];
+
+const $=id=>document.getElementById(id);
+const go=s=>{
+  document.querySelectorAll(".step").forEach(x=>x.classList.toggle("on",x.id===s));
+  $("dock").style.display = (s==="task"||s==="qty") ? "flex" : "none";
+  window.scrollTo(0,0);
+};
+
+let cur=0, entry=1;
+
+function renderQueue(){
+  $("queue").innerHTML=tasks.map((t,i)=>{
+    const cls = t.done>=t.target ? "done" : (i===cur ? "cur" : "");
+    return `<span class="qseg ${cls}"></span>`;
+  }).join("");
+}
+
+function renderTask(){
+  const t=tasks[cur];
+  renderQueue();
+  $("pos").textContent="Задача "+(cur+1)+" з "+tasks.length;
+  $("tname").textContent=t.title;
+  $("cdone").textContent=t.done;
+  $("ctarget").textContent=t.target;
+  $("cfill").style.width=Math.min(100,t.done/t.target*100)+"%";
+  $("ready").querySelector("span").textContent = t.done>0 ? "Готово, записати кількість" : "Готово";
+}
+
+$("ready").onclick=()=>{
+  const t=tasks[cur];
+  entry=1;
+  $("qtyname").textContent=t.title;
+  $("snum").textContent=entry;
+  $("minus").disabled=true;
+  go("qty");
+};
+
+$("plus").onclick=()=>{ entry++; $("snum").textContent=entry; $("minus").disabled=false; };
+$("minus").onclick=()=>{ if(entry>1){entry--; $("snum").textContent=entry; $("minus").disabled=entry<=1;} };
+$("qtyback").onclick=()=>go("task");
+
+$("confirm").onclick=()=>{
+  const t=tasks[cur];
+  t.done=Math.min(t.target,t.done+entry);
+  // якщо ціль досягнута — наступна незавершена задача
+  if(t.done>=t.target){
+    const nextIdx=tasks.findIndex((x,i)=>i>cur && x.done<x.target);
+    const anyLeft=tasks.findIndex(x=>x.done<x.target);
+    if(nextIdx!==-1){ cur=nextIdx; renderTask(); go("task"); }
+    else if(anyLeft!==-1){ cur=anyLeft; renderTask(); go("task"); }
+    else { go("allDone"); }
+  } else {
+    renderTask(); go("task");
+  }
+};
+
+$("instr").onclick=()=>alert("Далі — екран інструкції по кроках (4.5)");
+$("note").onclick=()=>alert("Запис нотатки: голос або текст");
+$("crit").onclick=()=>alert("Термінове повідомлення про критичну проблему — Тарасу й бригадиру");
+$("toClose").onclick=()=>alert("Далі — аркуш дня і закриття зміни (4.7–4.8)");
+
+renderTask();
+
+function tick(){
+  const d=new Date();
+  $("clock").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  const dw=["неділя","понеділок","вівторок","середа","четвер","п'ятниця","субота"];
+  const mo=["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+  $("today").textContent=dw[d.getDay()]+", "+d.getDate()+" "+mo[d.getMonth()];
+}
+tick(); setInterval(tick,10000);
+</script>
+</body>
+</html>

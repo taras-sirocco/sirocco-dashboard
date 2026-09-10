@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sirocco — відкриття зміни</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-page:#0b1020;--accent:#7f77dd;--accent-lo:#544bc0;--accent-hi:#a49cf6;
+  --text-primary:#fff;--text-secondary:#b8b2f0;--danger-text:#ff9a9a;--danger:#e2564f;
+  --ok:#5dcaa5;--r:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button{-webkit-appearance:none;appearance:none;font:inherit;color:inherit;
+  -webkit-text-fill-color:currentColor;background:none;border:none;cursor:pointer;text-align:left}
+html{height:100%}
+body{min-height:100%;background:var(--bg-page);color:var(--text-primary);
+  font-family:"Manrope",system-ui,-apple-system,sans-serif;
+  display:flex;flex-direction:column;user-select:none;position:relative;overflow-x:hidden;isolation:isolate}
+
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(70px)}
+.b1{width:60vmax;height:60vmax;left:-20vmax;top:-24vmax;background:radial-gradient(circle,rgba(120,86,255,.75),rgba(120,86,255,0) 66%)}
+.b2{width:52vmax;height:52vmax;right:-18vmax;top:8vmax;background:radial-gradient(circle,rgba(40,110,255,.62),rgba(40,110,255,0) 68%)}
+.b3{width:40vmax;height:40vmax;left:18vmax;bottom:-20vmax;background:radial-gradient(circle,rgba(255,110,70,.36),rgba(255,110,70,0) 70%)}
+.b4{width:34vmax;height:34vmax;right:6vmax;bottom:-14vmax;background:radial-gradient(circle,rgba(0,220,190,.28),rgba(0,220,190,0) 70%)}
+
+.glass{position:relative;border-radius:var(--r);
+  background:linear-gradient(140deg,rgba(255,255,255,.20),rgba(255,255,255,.05) 42%,rgba(255,255,255,.10));
+  backdrop-filter:blur(26px) saturate(170%);-webkit-backdrop-filter:blur(26px) saturate(170%);
+  box-shadow:0 22px 60px rgba(0,0,0,.42);overflow:hidden}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(140deg,rgba(255,255,255,.75),rgba(255,255,255,.06) 46%,rgba(255,255,255,.34));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none}
+.glass::before{content:"";position:absolute;left:-30%;top:-70%;width:90%;height:150%;
+  background:linear-gradient(135deg,rgba(255,255,255,.30),rgba(255,255,255,0) 62%);transform:rotate(18deg);pointer-events:none}
+.z{position:relative;z-index:1}
+
+/* шапка */
+.bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px 6px}
+.logo{display:flex;align-items:center;gap:10px;height:38px;padding:0 14px;
+  border:1px dashed rgba(255,255,255,.35);border-radius:10px;color:var(--text-secondary);
+  font-size:13px;letter-spacing:.20em;font-weight:700}
+.logo img{height:24px;display:none}
+.logo.has{border:0;padding:0}.logo.has img{display:block}.logo.has .ph{display:none}
+.meta{display:flex;align-items:center;gap:14px}
+.when{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.clock{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.date{font-size:13px;color:var(--text-secondary);font-weight:500;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+.dot.off{background:var(--danger-text);box-shadow:0 0 12px var(--danger-text)}
+.shiftbar{padding:8px 20px 12px;font-size:14px;color:var(--text-secondary);font-weight:500}
+.shiftbar b{color:#fff;font-weight:700}
+
+/* прогрес */
+.prog{padding:10px 20px 0;display:flex;align-items:center;gap:14px}
+.pcount{font-size:14px;color:var(--text-secondary);font-weight:600;white-space:nowrap}
+.ptrack{flex:1;height:6px;border-radius:4px;background:rgba(255,255,255,.14);overflow:hidden}
+.pfill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent-lo),var(--accent-hi));
+  box-shadow:0 0 16px rgba(127,119,221,.7);transition:width .3s}
+
+main{flex:1 1 auto;padding:22px 20px 116px;display:flex;flex-direction:column;justify-content:center}
+.step{display:none}.step.on{display:block}
+.eyebrow{font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-secondary);font-weight:700;margin-bottom:14px}
+h1{font-size:clamp(28px,5.4vw,42px);font-weight:800;letter-spacing:-.025em;line-height:1.14}
+.sub{font-size:clamp(15px,2.6vw,18px);color:var(--text-secondary);margin-top:10px;font-weight:500;line-height:1.45}
+
+/* картка питання */
+.qplain{font-size:clamp(30px,6vw,46px);font-weight:800;line-height:1.2;letter-spacing:-.03em;
+  margin-bottom:34px;max-width:14ch}
+.qcard{padding:30px 26px;margin-top:22px}
+.qtext{font-size:clamp(24px,4.6vw,34px);font-weight:700;line-height:1.25;letter-spacing:-.02em}
+
+
+.acts{display:flex;gap:14px;margin-top:22px;flex-wrap:wrap}
+.big{flex:1 1 220px;padding:24px;border-radius:var(--r);text-align:center;font-size:20px;font-weight:800;
+  transition:transform .08s}
+.big:active{transform:scale(.985)}
+.primary{background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));color:#fff;
+  box-shadow:0 16px 40px rgba(127,119,221,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.primary::after{background:linear-gradient(140deg,rgba(255,255,255,.6),rgba(255,255,255,.1))}
+.primary[disabled]{opacity:.35;box-shadow:none;cursor:default}
+.warn{color:var(--danger-text)}
+.warn::after{background:linear-gradient(140deg,rgba(255,154,154,.6),rgba(255,154,154,.08))}
+
+/* проблема */
+.rec{margin-top:20px;padding:26px;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center}
+.micbtn{width:110px;height:110px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));
+  box-shadow:0 16px 44px rgba(127,119,221,.55),inset 0 1px 0 rgba(255,255,255,.4)}
+.micbtn.on{background:linear-gradient(150deg,#ff8f8f,var(--danger));
+  box-shadow:0 0 0 12px rgba(226,86,79,.18),0 16px 44px rgba(226,86,79,.5);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 22px rgba(226,86,79,.06),0 16px 44px rgba(226,86,79,.5)}}
+.micbtn svg{position:relative;z-index:1}
+.rechint{font-size:16px;color:var(--text-secondary);font-weight:500}
+.rectime{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+textarea{width:100%;min-height:120px;border-radius:16px;padding:18px;resize:none;
+  background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);color:#fff;
+  font:500 17px/1.5 "Manrope",sans-serif;-webkit-text-fill-color:#fff}
+textarea::placeholder{color:rgba(184,178,240,.6)}
+textarea:focus{outline:2px solid var(--accent-hi);outline-offset:2px}
+
+/* підсумок */
+.list{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:14px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:16px;font-weight:600}
+.tick{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:rgba(93,202,165,.2);color:var(--ok);font-size:14px;font-weight:800}
+.tick.bad{background:rgba(226,86,79,.22);color:var(--danger-text)}
+
+/* повідомлення дня */
+.msg{padding:26px;margin-top:20px}
+.msgfrom{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.msgfrom .av{width:44px;height:44px;border-radius:50%;background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.msgfrom b{font-size:16px;font-weight:700}
+.msgfrom span{display:block;font-size:13px;color:var(--text-secondary);font-weight:500}
+.msgtext{font-size:18px;line-height:1.5;font-weight:500}
+.chg{margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.16)}
+.chg h3{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-secondary);font-weight:700;margin-bottom:12px}
+.chgrow{display:flex;gap:12px;font-size:16px;line-height:1.45;margin-bottom:10px;font-weight:500}
+.chgrow em{font-style:normal;color:var(--text-secondary);flex:0 0 auto}
+
+/* нижні постійні кнопки */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;gap:12px;padding:14px 20px 18px;
+  background:linear-gradient(to top,rgba(11,16,32,.96),rgba(11,16,32,0))}
+.dockbtn{flex:1;padding:18px;border-radius:16px;text-align:center;font-size:17px;font-weight:700}
+.dockbtn.stop{color:var(--danger-text)}
+.dockbtn.stop::after{background:linear-gradient(140deg,rgba(255,154,154,.6),rgba(255,154,154,.08))}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:560px){
+  .qcard{padding:24px 20px}
+  .big{flex:1 1 100%;padding:22px}
+  main{padding-bottom:110px}
+}
+</style>
+</head>
+<body>
+
+<div class="blobs" aria-hidden="true">
+  <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="blob b4"></span>
+</div>
+
+<header class="bar">
+  <div class="logo" id="logo">
+    <img src="" alt="Sirocco Energy" onload="document.getElementById('logo').classList.add('has')">
+    <span class="ph">SIROCCO</span>
+  </div>
+  <div class="meta">
+    <span class="when"><span class="clock" id="clock">--:--</span><span class="date" id="today">—</span></span>
+    <span class="dot" id="net"></span>
+  </div>
+</header>
+
+<div class="shiftbar" id="shiftbar" style="display:none">
+  <span class="z">Зміна відкрита · Відповідальний — <b id="barResp">Ігор Савчук</b></span>
+</div>
+
+<div class="prog" id="prog" style="display:none">
+  <span class="pcount" id="pcount">1 з 7</span>
+  <span class="ptrack"><span class="pfill" id="pfill" style="width:0"></span></span>
+</div>
+
+<main>
+
+  <!-- 1. Старт -->
+  <section class="step on" id="s1">
+    <div class="eyebrow">Ігор Савчук · відповідальний</div>
+    <h1>Відкриваємо зміну</h1>
+    <p class="sub">Сім питань про робоче місце. По одному на екран.<br>Якщо щось не так — тисни «Не можу», зміна не зупиниться.</p>
+    <div class="acts">
+      <button class="glass big primary" id="begin"><span class="z">Почати</span></button>
+    </div>
+  </section>
+
+  <!-- 2. Питання -->
+  <section class="step" id="s2">
+    <div class="qplain" id="qtext">—</div>
+    <div class="acts">
+      <button class="glass big primary" id="ok"><span class="z">Так</span></button>
+      <button class="glass big warn" id="no"><span class="z">Ні</span></button>
+    </div>
+  </section>
+
+  <!-- 3. Проблема -->
+  <section class="step" id="s3">
+    <div class="eyebrow">Проблема</div>
+    <h1 id="ptitle">Що саме не так?</h1>
+    <div class="glass rec">
+      <div class="z" style="display:flex;flex-direction:column;gap:16px;align-items:center;width:100%">
+        <button class="micbtn" id="mic" aria-label="Записати голосом">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+            <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/>
+          </svg>
+        </button>
+        <div class="rectime" id="rectime" style="display:none">0:00</div>
+        <div class="rechint" id="rechint">Натисни і скажи. Так швидше, ніж друкувати</div>
+        <textarea id="ptext" placeholder="або напиши коротко"></textarea>
+      </div>
+    </div>
+    <div class="acts">
+      <button class="glass big primary" id="psend"><span class="z">Відправити і продовжити</span></button>
+      <button class="glass big" id="pback"><span class="z">Назад</span></button>
+    </div>
+  </section>
+
+  <!-- 4. Прийняття робочого місця -->
+  <section class="step" id="s4">
+    <div class="eyebrow">Останнє питання</div>
+    <div class="glass qcard">
+      <div class="z">
+        <div class="qtext">Робоче місце після попередньої зміни відповідає?</div>
+        <p class="sub" style="margin-top:16px">Робимо систему кращою, щоб проблема не переїхала далі непоміченою.</p>
+      </div>
+    </div>
+    <div class="acts">
+      <button class="glass big primary" id="hOk"><span class="z">Так, приймаю</span></button>
+      <button class="glass big warn" id="hNo"><span class="z">Ні</span></button>
+    </div>
+  </section>
+
+  <!-- 4b. Причина неготовності -->
+  <section class="step" id="s7">
+    <div class="eyebrow">Дільниця не готова</div>
+    <h1>Вкажіть причину</h1>
+    <div class="glass rec">
+      <div class="z" style="display:flex;flex-direction:column;gap:16px;align-items:center;width:100%">
+        <button class="micbtn" id="mic2" aria-label="Записати голосом">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+            <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/>
+          </svg>
+        </button>
+        <div class="rectime" id="rectime2" style="display:none">0:00</div>
+        <div class="rechint" id="rechint2">Натисни і скажи. Так швидше, ніж друкувати</div>
+        <textarea id="ptext2" placeholder="або напиши коротко"></textarea>
+      </div>
+    </div>
+    <div class="acts">
+      <button class="glass big primary" id="notifyBad"><span class="z">Повідомити про неготовність дільниці</span></button>
+    </div>
+  </section>
+
+  <!-- 5. Підсумок + повідомлення -->
+  <section class="step" id="s5">
+    <div class="done">
+      <div class="ini" id="dIni" style="width:88px;height:88px;font-size:31px;margin:0 auto 24px;border-radius:50%;background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));display:flex;align-items:center;justify-content:center;font-weight:800">✓</div>
+      <div class="eyebrow" style="text-align:center">Зміну відкрито · відповідальний</div>
+      <h1 id="doneResp" style="text-align:center;font-size:clamp(30px,6vw,46px)">Ігор Савчук</h1>
+    </div>
+    <div class="acts">
+      <button class="glass big primary" id="toTasks"><span class="z">До задач на сьогодні</span></button>
+    </div>
+  </section>
+
+</main>
+
+<div class="dock" id="dock" style="display:none">
+  <button class="glass dockbtn" id="say"><span class="z">Додати нотатку до процесу</span></button>
+  <button class="glass dockbtn stop" id="stopbtn"><span class="z">Повідомити про критичну проблему</span></button>
+</div>
+
+<script>
+const items=[
+  "Провітрено, освітлення працює",
+  "Робоче місце прибране, стіл вільний",
+  "Інструмент на місці, весь комплект",
+  "Акумулятори заряджені",
+  "Розхідники на місці, вистачає на зміну",
+  "Комплектація деталей перевірена по списку",
+  "Аркуш операції на цю зміну є на столі"
+];
+
+const $=id=>document.getElementById(id);
+const go=n=>{
+  document.querySelectorAll(".step").forEach(s=>s.classList.toggle("on",s.id==="s"+n));
+  $("dock").style.display = "none";
+  $("prog").style.display = (n===2||n===3) ? "flex" : "none";
+  window.scrollTo(0,0);
+};
+
+let i=0, answers=[];
+
+function render(){
+  $("qtext").textContent=items[i];
+  $("pcount").textContent=(i+1)+" з "+items.length;
+  $("pfill").style.width=((i)/items.length*100)+"%";
+}
+
+$("begin").onclick=()=>{i=0;answers=[];render();go(2)};
+
+$("ok").onclick=()=>{
+  answers.push({t:items[i],ok:true});
+  next();
+};
+$("no").onclick=()=>{
+  $("ptitle").textContent="Що саме не так?";
+  $("ptext").value=""; stopRec();
+  go(3);
+};
+$("pback").onclick=()=>go(2);
+$("psend").onclick=()=>{
+  answers.push({t:items[i],ok:false,note:$("ptext").value||"голосовий запис"});
+  stopRec(); next();
+};
+
+function next(){
+  i++;
+  if(i<items.length){ render(); go(2); }
+  else { $("pfill").style.width="100%"; go(4); }
+}
+
+$("hOk").onclick=()=>finish();
+$("hNo").onclick=()=>{ $("ptext2").value=""; stopRec2(); go(7); };
+$("notifyBad").onclick=()=>{ stopRec2(); alert("Термінове повідомлення про неготовність дільниці відправлено Тарасу й бригадиру"); };
+
+function finish(){ $("shiftbar").style.display="block"; go(5); }
+
+$("toTasks").onclick=()=>alert("Далі — екран задач на сьогодні");
+$("stopbtn").onclick=()=>alert("Дзвінок відповідальному / бригадиру");
+$("say").onclick=()=>{$("ptitle").textContent="Що хочеш сказати?";$("ptext").value="";go(3)};
+
+/* ---- запис голосу (універсальний) ---- */
+function makeRec(micId,timeId,hintId){
+  let rec=null,t0=0,timer=null;
+  const mic=$(micId),time=$(timeId),hint=$(hintId);
+  const idle="Натисни і скажи. Так швидше, ніж друкувати";
+  mic.onclick=async()=>{
+    if(rec&&rec.state==="recording"){stop();return}
+    try{
+      const st=await navigator.mediaDevices.getUserMedia({audio:true});
+      rec=new MediaRecorder(st); rec.start(); t0=Date.now();
+      mic.classList.add("on"); time.style.display="block";
+      hint.textContent="Записую. Натисни ще раз, щоб зупинити";
+      timer=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);
+        time.textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0")},300);
+    }catch(e){ hint.textContent="Мікрофон недоступний — напиши текстом"; }
+  };
+  function stop(){
+    if(rec&&rec.state==="recording"){rec.stop();rec.stream.getTracks().forEach(t=>t.stop())}
+    clearInterval(timer); mic.classList.remove("on");
+    time.style.display="none"; hint.textContent=idle;
+  }
+  return stop;
+}
+const stopRec  = makeRec("mic","rectime","rechint");
+const stopRec2 = makeRec("mic2","rectime2","rechint2");
+
+/* ---- час і мережа ---- */
+function tick(){
+  const d=new Date();
+  $("clock").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  const dw=["неділя","понеділок","вівторок","середа","четвер","п'ятниця","субота"];
+  const mo=["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+  $("today").textContent=dw[d.getDay()]+", "+d.getDate()+" "+mo[d.getMonth()];
+}
+tick(); setInterval(tick,10000);
+function net(){const on=navigator.onLine;$("net").classList.toggle("off",!on);
+  $("net").title=on?"Мережа є":"Працюємо офлайн"}
+net(); addEventListener("online",net); addEventListener("offline",net);
+</script>
+</body>
+</html>

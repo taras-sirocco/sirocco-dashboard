@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sirocco — вхід на зміну</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-page:#0b1020;
+  --accent:#7f77dd;
+  --accent-lo:#544bc0;
+  --accent-hi:#a49cf6;
+  --text-primary:#ffffff;
+  --text-secondary:#b8b2f0;
+  --danger-text:#ff9a9a;
+  --ok:#5dcaa5;
+  --r:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button{-webkit-appearance:none;appearance:none;font:inherit;color:inherit;
+  -webkit-text-fill-color:currentColor;background:none;border:none;cursor:pointer;text-align:left}
+html{height:100%}
+body{
+  min-height:100%;background:var(--bg-page);color:var(--text-primary);
+  font-family:"Manrope",system-ui,-apple-system,sans-serif;
+  display:flex;flex-direction:column;user-select:none;
+  position:relative;overflow-x:hidden;isolation:isolate;
+}
+
+/* ---- кольорові плями під склом ---- */
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(70px)}
+.b1{width:60vmax;height:60vmax;left:-20vmax;top:-24vmax;
+    background:radial-gradient(circle,rgba(120,86,255,.75),rgba(120,86,255,0) 66%)}
+.b2{width:52vmax;height:52vmax;right:-18vmax;top:8vmax;
+    background:radial-gradient(circle,rgba(40,110,255,.62),rgba(40,110,255,0) 68%)}
+.b3{width:40vmax;height:40vmax;left:18vmax;bottom:-20vmax;
+    background:radial-gradient(circle,rgba(255,110,70,.36),rgba(255,110,70,0) 70%)}
+.b4{width:34vmax;height:34vmax;right:6vmax;bottom:-14vmax;
+    background:radial-gradient(circle,rgba(0,220,190,.28),rgba(0,220,190,0) 70%)}
+
+/* ---- скло ---- */
+.glass{
+  position:relative;
+  border-radius:var(--r);
+  background:
+    linear-gradient(140deg,rgba(255,255,255,.20),rgba(255,255,255,.05) 42%,rgba(255,255,255,.10));
+  backdrop-filter:blur(26px) saturate(170%);
+  -webkit-backdrop-filter:blur(26px) saturate(170%);
+  box-shadow:0 22px 60px rgba(0,0,0,.42);
+  overflow:hidden;
+}
+/* світлий кант по периметру */
+.glass::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(140deg,rgba(255,255,255,.75),rgba(255,255,255,.06) 46%,rgba(255,255,255,.34));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;pointer-events:none;
+}
+/* відблиск у верхньому лівому куті */
+.glass::before{
+  content:"";position:absolute;left:-30%;top:-70%;width:90%;height:150%;
+  background:linear-gradient(135deg,rgba(255,255,255,.30),rgba(255,255,255,0) 62%);
+  transform:rotate(18deg);pointer-events:none;
+}
+
+/* ---- шапка ---- */
+.bar{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+  gap:14px;padding:16px 20px 6px;
+}
+.logo{display:flex;align-items:center;gap:10px;height:38px;padding:0 14px;
+  border:1px dashed rgba(255,255,255,.35);border-radius:10px;
+  color:var(--text-secondary);font-size:13px;letter-spacing:.20em;font-weight:700}
+.logo img{height:24px;display:none}
+.logo.has{border:0;padding:0}
+.logo.has img{display:block}
+.logo.has .ph{display:none}
+.meta{display:flex;align-items:center;gap:14px}
+.when{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.clock{font-size:22px;color:#fff;font-weight:700;font-variant-numeric:tabular-nums}
+.date{font-size:13px;color:var(--text-secondary);font-weight:500;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+.dot.off{background:var(--danger-text);box-shadow:0 0 12px var(--danger-text)}
+
+main{flex:1 1 auto;padding:28px 20px 36px;display:flex;flex-direction:column;justify-content:center}
+.step{display:none}
+.step.on{display:block}
+h1{font-size:clamp(27px,5.2vw,38px);font-weight:800;letter-spacing:-.025em;line-height:1.12;margin-bottom:24px}
+
+/* ---- люди ---- */
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:16px}
+.person{padding:22px;min-height:136px;display:flex;align-items:center;gap:16px;
+  transition:transform .1s,box-shadow .18s}
+.person:active{transform:scale(.98)}
+.person:hover{box-shadow:0 26px 70px rgba(0,0,0,.5)}
+.person:focus-visible{outline:3px solid var(--accent-hi);outline-offset:4px}
+.ini{flex:0 0 auto;width:58px;height:58px;border-radius:50%;
+  background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));
+  box-shadow:0 8px 22px rgba(127,119,221,.5),inset 0 1px 0 rgba(255,255,255,.45);
+  color:#fff;font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  position:relative;z-index:1}
+.pinfo{min-width:0;position:relative;z-index:1}
+.pname{display:block;font-size:20px;font-weight:700;line-height:1.25;color:#fff}
+.prole{display:block;font-size:14px;color:var(--text-secondary);margin-top:4px;font-weight:500}
+
+/* ---- PIN ---- */
+.pinwrap{display:flex;flex-wrap:wrap;gap:30px;align-items:center}
+.who{flex:1 1 260px;min-width:0}
+.who .ini{width:76px;height:76px;font-size:26px;margin-bottom:18px}
+.who h2{font-size:clamp(25px,4.6vw,35px);font-weight:800;letter-spacing:-.025em}
+.who .prole{font-size:16px;margin-top:6px}
+.dots{display:flex;gap:14px;margin:26px 0 12px}
+.pd{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.32)}
+.pd.f{background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));border-color:transparent;
+  box-shadow:0 0 16px rgba(127,119,221,.75)}
+.err{font-size:15px;color:var(--danger-text);min-height:22px;font-weight:500}
+.ghost{margin-top:12px;display:inline-block;padding:13px 24px;border-radius:14px;
+  font-size:16px;color:var(--text-secondary);font-weight:500}
+.pad{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,minmax(90px,112px));gap:12px;margin-inline:auto}
+.key{height:76px;border-radius:16px;font-size:28px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;transition:transform .08s}
+.key span{position:relative;z-index:1}
+.key:active{transform:scale(.94)}
+.key:focus-visible{outline:3px solid var(--accent-hi);outline-offset:4px}
+.key.sm{font-size:16px;color:var(--text-secondary);font-weight:600}
+.key.go{
+  background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));
+  font-size:17px;font-weight:800;
+  box-shadow:0 14px 36px rgba(127,119,221,.55),inset 0 1px 0 rgba(255,255,255,.4);
+}
+.key.go::after{background:linear-gradient(140deg,rgba(255,255,255,.6),rgba(255,255,255,.1))}
+
+.done{text-align:center;padding:52px 26px}
+.done .ini{width:88px;height:88px;font-size:31px;margin:0 auto 24px}
+.done h2{font-size:clamp(27px,5vw,35px);font-weight:800;letter-spacing:-.025em}
+.done p{color:var(--text-secondary);margin-top:10px;font-size:17px;font-weight:500}
+
+.shake{animation:s .32s}
+@keyframes s{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+@media (max-width:560px){
+  .people{grid-template-columns:1fr}
+  .person{min-height:0;padding:18px}
+  .ini{width:50px;height:50px;font-size:17px}
+  .pname{font-size:18px}
+  .pad{width:100%;grid-template-columns:repeat(3,1fr)}
+  .key{height:68px}
+}
+</style>
+</head>
+<body>
+
+<div class="blobs" aria-hidden="true">
+  <span class="blob b1"></span><span class="blob b2"></span>
+  <span class="blob b3"></span><span class="blob b4"></span>
+</div>
+
+<header class="bar">
+  <!-- ЛОГО: встав src у <img> — рамка-плейсхолдер зникне сама -->
+  <div class="logo" id="logo">
+    <img src="" alt="Sirocco Energy" onload="document.getElementById('logo').classList.add('has')">
+    <span class="ph">SIROCCO</span>
+  </div>
+  <div class="meta">
+    <span class="when">
+      <span class="clock" id="clock">--:--</span>
+      <span class="date" id="today">—</span>
+    </span>
+    <span class="dot" id="net" title="Мережа є"></span>
+  </div>
+</header>
+
+<main>
+  <section class="step on" id="s1">
+    <h1>Відповідальний за зміну</h1>
+    <div class="people" id="people"></div>
+  </section>
+
+  <section class="step" id="s2">
+    <div class="pinwrap">
+      <div class="who">
+        <div class="ini" id="pIni">АМ</div>
+        <h2 id="pName">—</h2>
+        <span class="prole" id="pRole">—</span>
+        <div class="dots" id="dots">
+          <span class="pd"></span><span class="pd"></span><span class="pd"></span><span class="pd"></span>
+        </div>
+        <div class="err" id="err"></div>
+        <button class="glass ghost" id="back"><span>Це не я</span></button>
+      </div>
+      <div class="pad" id="pad"></div>
+    </div>
+  </section>
+
+  <section class="step" id="s3">
+    <div class="done">
+      <div class="ini" id="dIni">АМ</div>
+      <h2 id="dHi">Вітаю</h2>
+      <p id="dSub">Відкриваємо зміну…</p>
+    </div>
+  </section>
+</main>
+
+<script>
+const people=[
+ {n:"Андрій Мельник",r:"Монтажник",p:"1234"},
+ {n:"Богдан Кравець",r:"Монтажник",p:"2345"},
+ {n:"Максим Гнатюк",r:"Монтажник",p:"3456"},
+ {n:"Ігор Савчук",r:"Бригадир",p:"4567"}
+];
+const ini=s=>s.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+const $=id=>document.getElementById(id);
+const go=n=>document.querySelectorAll(".step").forEach(s=>s.classList.toggle("on",s.id==="s"+n));
+
+$("people").innerHTML=people.map((p,i)=>`<button class="glass person" data-i="${i}">
+  <span class="ini">${ini(p.n)}</span>
+  <span class="pinfo"><span class="pname">${p.n}</span><span class="prole">${p.r}</span></span>
+</button>`).join("");
+
+$("pad").innerHTML=[1,2,3,4,5,6,7,8,9].map(d=>`<button class="glass key" data-d="${d}"><span>${d}</span></button>`).join("")
+ +`<button class="glass key sm" data-a="del"><span>Стерти</span></button>
+   <button class="glass key" data-d="0"><span>0</span></button>
+   <button class="glass key go" data-a="go"><span>Вхід</span></button>`;
+
+let me=null,buf="";
+const draw=()=>document.querySelectorAll("#dots .pd").forEach((d,i)=>d.classList.toggle("f",i<buf.length));
+
+$("people").onclick=e=>{
+  const b=e.target.closest(".person"); if(!b)return;
+  me=people[+b.dataset.i];
+  $("pIni").textContent=ini(me.n); $("pName").textContent=me.n; $("pRole").textContent=me.r;
+  buf=""; $("err").textContent=""; draw(); go(2);
+};
+$("back").onclick=()=>go(1);
+
+$("pad").onclick=e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  if(b.dataset.d){ if(buf.length<4){buf+=b.dataset.d;$("err").textContent="";draw();
+    if(buf.length===4)setTimeout(check,150);} return;}
+  if(b.dataset.a==="del"){buf=buf.slice(0,-1);draw();return;}
+  if(b.dataset.a==="go")check();
+};
+
+function check(){
+  if(buf.length<4){$("err").textContent="Введи чотири цифри";return;}
+  if(buf===me.p){
+    $("dIni").textContent=ini(me.n);
+    $("dHi").textContent="Вітаю, "+me.n.split(" ")[0];
+    go(3);
+  } else {
+    $("err").textContent="Код не підходить. Спробуй ще раз";
+    $("dots").classList.add("shake");
+    setTimeout(()=>$("dots").classList.remove("shake"),340);
+    buf=""; draw();
+  }
+}
+
+function tick(){
+  const d=new Date();
+  $("clock").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  const dw=["неділя","понеділок","вівторок","середа","четвер","п'ятниця","субота"];
+  const mo=["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+  $("today").textContent=dw[d.getDay()]+", "+d.getDate()+" "+mo[d.getMonth()];
+}
+tick(); setInterval(tick,10000);
+
+function net(){
+  const on=navigator.onLine;
+  $("net").classList.toggle("off",!on);
+  $("net").title = on ? "Мережа є" : "Працюємо офлайн";
+}
+net(); addEventListener("online",net); addEventListener("offline",net);
+</script>
+</body>
+</html>

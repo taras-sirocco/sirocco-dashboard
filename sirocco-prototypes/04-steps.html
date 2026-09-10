@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sirocco — інструкція по кроках</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-page:#0b1020;--accent:#7f77dd;--accent-lo:#544bc0;--accent-hi:#a49cf6;
+  --text-primary:#fff;--text-secondary:#b8b2f0;--danger-text:#ff9a9a;--danger:#e2564f;
+  --ok:#5dcaa5;--warn:#ffcf5d;--r:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button{-webkit-appearance:none;appearance:none;font:inherit;color:inherit;
+  -webkit-text-fill-color:currentColor;background:none;border:none;cursor:pointer;text-align:left}
+html{height:100%}
+body{min-height:100%;background:var(--bg-page);color:var(--text-primary);
+  font-family:"Manrope",system-ui,-apple-system,sans-serif;
+  display:flex;flex-direction:column;user-select:none;position:relative;overflow-x:hidden;isolation:isolate}
+
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(70px)}
+.b1{width:60vmax;height:60vmax;left:-20vmax;top:-24vmax;background:radial-gradient(circle,rgba(120,86,255,.7),rgba(120,86,255,0) 66%)}
+.b2{width:52vmax;height:52vmax;right:-18vmax;top:8vmax;background:radial-gradient(circle,rgba(40,110,255,.55),rgba(40,110,255,0) 68%)}
+.b3{width:40vmax;height:40vmax;left:18vmax;bottom:-20vmax;background:radial-gradient(circle,rgba(255,110,70,.32),rgba(255,110,70,0) 70%)}
+
+.glass{position:relative;border-radius:var(--r);
+  background:linear-gradient(140deg,rgba(255,255,255,.20),rgba(255,255,255,.05) 42%,rgba(255,255,255,.10));
+  backdrop-filter:blur(26px) saturate(170%);-webkit-backdrop-filter:blur(26px) saturate(170%);
+  box-shadow:0 22px 60px rgba(0,0,0,.42);overflow:hidden}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(140deg,rgba(255,255,255,.7),rgba(255,255,255,.06) 46%,rgba(255,255,255,.3));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none}
+.z{position:relative;z-index:1}
+
+.bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px 6px}
+.logo{display:flex;align-items:center;gap:10px;height:38px;padding:0 14px;
+  border:1px dashed rgba(255,255,255,.35);border-radius:10px;color:var(--text-secondary);
+  font-size:13px;letter-spacing:.20em;font-weight:700}
+.meta{display:flex;align-items:center;gap:14px}
+.when{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.clock{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.date{font-size:13px;color:var(--text-secondary);font-weight:500}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+.shiftbar{padding:8px 20px 12px;font-size:14px;color:var(--text-secondary);font-weight:500;
+  border-bottom:1px solid rgba(255,255,255,.08)}
+.shiftbar b{color:#fff;font-weight:700}
+
+/* прогрес по кроках */
+.steps{display:flex;gap:6px;padding:14px 20px 0}
+.sg{flex:1;height:6px;border-radius:4px;background:rgba(255,255,255,.14)}
+.sg.done{background:linear-gradient(90deg,var(--accent-lo),var(--accent-hi))}
+.sg.cur{background:rgba(255,255,255,.45)}
+
+main{flex:1 1 auto;padding:18px 20px 120px}
+.step{display:none}.step.on{display:block}
+
+.crumb{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.crumb .task{font-size:14px;color:var(--text-secondary);font-weight:600}
+.crumb .count{font-size:14px;color:var(--text-secondary);font-weight:700}
+
+.kicker{font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-hi);font-weight:800;margin-bottom:10px}
+.title{font-size:clamp(27px,5.4vw,40px);font-weight:800;letter-spacing:-.025em;line-height:1.16;margin-bottom:20px}
+
+.media{width:100%;aspect-ratio:16/10;border-radius:var(--r);margin-bottom:20px;
+  background:
+    linear-gradient(140deg,rgba(255,255,255,.14),rgba(255,255,255,.03)),
+    repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 12px,transparent 12px 24px);
+  border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);font-size:14px;font-weight:600;gap:10px}
+
+.block{padding:20px 22px;margin-bottom:14px}
+.block .lab{font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;margin-bottom:8px}
+.block .val{font-size:19px;font-weight:600;line-height:1.4}
+.key .lab{color:var(--warn)}
+.key{border:1px solid rgba(255,207,93,.35)}
+.why .lab{color:var(--text-secondary)}
+.why .val{font-weight:500;color:var(--text-secondary)}
+
+/* перевірка якості */
+  border-top:1px solid rgba(255,255,255,.1);cursor:pointer}
+  display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;transition:.12s}
+
+.nav{display:flex;gap:12px;margin-top:8px}
+.big{padding:24px;border-radius:var(--r);text-align:center;font-size:20px;font-weight:800;transition:transform .08s}
+.big:active{transform:scale(.99)}
+.primary{flex:1;background:linear-gradient(150deg,var(--accent-hi),var(--accent-lo));color:#fff;
+  box-shadow:0 16px 40px rgba(127,119,221,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.primary::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(140deg,rgba(255,255,255,.55),rgba(255,255,255,.08));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+.primary{position:relative;overflow:hidden}
+.primary[disabled]{opacity:.4;box-shadow:none;cursor:default}
+.back{flex:0 0 auto;width:34%;color:var(--text-secondary)}
+
+/* звірка з еталоном */
+.lead{font-size:19px;font-weight:500;line-height:1.5;color:var(--text-secondary);margin-bottom:28px;max-width:26ch}
+.stack{display:flex;flex-direction:column;gap:12px}
+.stack .big{width:100%}
+.warn{color:var(--danger-text)}
+.warn::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(140deg,rgba(255,154,154,.55),rgba(255,154,154,.08));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+
+/* стоп першої деталі */
+
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;gap:12px;padding:14px 20px 18px;
+  background:linear-gradient(to top,rgba(11,16,32,.96),rgba(11,16,32,0))}
+.dockbtn{flex:1;padding:18px;border-radius:16px;text-align:center;font-size:16px;font-weight:700;line-height:1.25}
+.dockbtn.stop{color:var(--danger-text)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="blobs" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+
+<header class="bar">
+  <div class="logo"><span>SIROCCO</span></div>
+  <div class="meta">
+    <span class="when"><span class="clock" id="clock">--:--</span><span class="date" id="today">—</span></span>
+    <span class="dot"></span>
+  </div>
+</header>
+<div class="shiftbar">Зміна відкрита · Відповідальний — <b>Ігор Савчук</b></div>
+
+<div class="steps" id="steps"></div>
+
+<main>
+  <!-- крок -->
+  <section class="step on" id="stepView">
+    <div class="crumb">
+      <span class="task">Збірка лопаті, етап 1</span>
+      <span class="count" id="count">Крок 1 з 4</span>
+    </div>
+
+    <div class="kicker">Важливий крок</div>
+    <div class="title" id="stitle">—</div>
+
+    <div class="media" id="media">📷 фото / схема кроку</div>
+
+    <div class="glass block key">
+      <div class="z"><div class="lab">Ключовий момент</div><div class="val" id="skey">—</div></div>
+    </div>
+    <div class="glass block why">
+      <div class="z"><div class="lab">Чому</div><div class="val" id="swhy">—</div></div>
+    </div>
+
+    <div class="nav">
+      <button class="glass big back" id="prev"><span class="z">Назад</span></button>
+      <button class="big primary" id="next"><span class="z">Далі</span></button>
+    </div>
+  </section>
+
+  <!-- звірка з еталоном -->
+  <section class="step" id="firstView">
+    <div class="crumb">
+      <span class="task">Збірка лопаті, етап 1</span>
+      <span class="count">Звірка з еталоном</span>
+    </div>
+    <div class="kicker" style="color:var(--ok)">Контроль якості</div>
+    <div class="title">Порівняй з еталонною деталлю</div>
+    <p class="lead">Зроби візуальне порівняння з еталонною деталлю на столі.</p>
+
+    <div class="stack">
+      <button class="big primary" id="qcYes"><span class="z">Так, відповідає</span></button>
+      <button class="glass big warn" id="qcNo"><span class="z">Ні, не відповідає</span></button>
+    </div>
+  </section>
+</main>
+
+<div class="dock" id="dock">
+  <button class="glass dockbtn" id="note"><span class="z">Додати нотатку до процесу</span></button>
+  <button class="glass dockbtn stop" id="crit"><span class="z">Повідомити про критичну проблему</span></button>
+</div>
+
+<script>
+// демо. У проді — з Payload: procedures.steps[]
+const proc={
+  task:"Збірка лопаті, етап 1",
+  steps:[
+    {title:"Розкласти секції лопаті на столі за номерами",
+     key:"Стик 1 завжди зліва, маркування вгору",
+     why:"Інакше переплутаєш полярність і збереш дзеркально"},
+    {title:"Нанести клей по всьому периметру фланця",
+     key:"Шар рівний, без розривів. Працюєш поки клей відкритий — 8 хвилин",
+     why:"Розрив у шві дає протікання під навантаженням на висоті"},
+    {title:"Стягнути секції та затягнути 16 болтів хрест-навхрест",
+     key:"Момент 24 Н·м. Хрест-навхрест, не по колу",
+     why:"По колу веде фланець, з'являється перекіс і вібрація"},
+  ]
+};
+
+const $=id=>document.getElementById(id);
+const go=s=>{
+  document.querySelectorAll(".step").forEach(x=>x.classList.toggle("on",x.id===s));
+  window.scrollTo(0,0);
+};
+
+let i=0;
+const total=proc.steps.length;
+
+function renderSteps(){
+  // сегменти: кроки + перевірка якості
+  const n=total+1;
+  let html="";
+  for(let k=0;k<n;k++){
+    const cls = k<i ? "done" : (k===i ? "cur":"");
+    html+=`<span class="sg ${cls}"></span>`;
+  }
+  $("steps").innerHTML=html;
+}
+
+function renderStep(){
+  const s=proc.steps[i];
+  $("count").textContent="Крок "+(i+1)+" з "+total;
+  $("stitle").textContent=s.title;
+  $("skey").textContent=s.key;
+  $("swhy").textContent=s.why;
+  $("prev").style.visibility = i===0 ? "hidden" : "visible";
+  renderSteps();
+}
+
+$("next").onclick=()=>{
+  if(i<total-1){ i++; renderStep(); go("stepView"); }
+  else { i=total; renderSteps(); go("firstView"); }
+};
+$("prev").onclick=()=>{ if(i>0){ i--; renderStep(); } };
+
+$("qcYes").onclick=()=>alert("Деталь відповідає еталону. Повертаємось на екран задачі — фіксуємо кількість");
+$("qcNo").onclick=()=>alert("Деталь не відповідає — запис причини (голос/текст) і сигнал відповідальному");
+
+$("note").onclick=()=>alert("Запис нотатки: голос або текст");
+$("crit").onclick=()=>alert("Термінове повідомлення про критичну проблему");
+
+renderStep();
+
+function tick(){
+  const d=new Date();
+  $("clock").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  const dw=["неділя","понеділок","вівторок","середа","четвер","п'ятниця","субота"];
+  const mo=["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+  $("today").textContent=dw[d.getDay()]+", "+d.getDate()+" "+mo[d.getMonth()];
+}
+tick(); setInterval(tick,10000);
+</script>
+</body>
+</html>
