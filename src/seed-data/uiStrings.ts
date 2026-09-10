@@ -178,6 +178,7 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   },
 
   // ---------- hub.* (07-hub.html) ----------
+  { key: 'hub.no_tasks', value: 'На сьогодні задач не призначено', note: 'Показується, якщо на дату немає жодної задачі.' },
   { key: 'hub.eyebrow', value: 'Головна зміни' },
   { key: 'hub.title', value: 'Сьогодні' },
   {

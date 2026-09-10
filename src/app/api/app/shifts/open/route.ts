@@ -2,15 +2,8 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
+import { todayRange } from '@/lib/shifts'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
-
-function todayRange() {
-  const start = new Date()
-  start.setHours(0, 0, 0, 0)
-  const end = new Date(start)
-  end.setDate(end.getDate() + 1)
-  return { start: start.toISOString(), end: end.toISOString() }
-}
 
 /**
  * Починає (або продовжує) відкриття зміни на сьогодні. Відповідального
