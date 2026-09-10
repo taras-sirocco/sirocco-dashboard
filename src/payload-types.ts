@@ -69,6 +69,19 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    workers: Worker;
+    shifts: Shift;
+    checklistTemplates: ChecklistTemplate;
+    checklistRuns: ChecklistRun;
+    checklistAnswers: ChecklistAnswer;
+    tasks: Task;
+    taskProgress: TaskProgress;
+    blockers: Blocker;
+    comments: Comment;
+    changesLog: ChangesLog;
+    broadcasts: Broadcast;
+    broadcastAcks: BroadcastAck;
+    uiStrings: UiString;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +91,19 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    workers: WorkersSelect<false> | WorkersSelect<true>;
+    shifts: ShiftsSelect<false> | ShiftsSelect<true>;
+    checklistTemplates: ChecklistTemplatesSelect<false> | ChecklistTemplatesSelect<true>;
+    checklistRuns: ChecklistRunsSelect<false> | ChecklistRunsSelect<true>;
+    checklistAnswers: ChecklistAnswersSelect<false> | ChecklistAnswersSelect<true>;
+    tasks: TasksSelect<false> | TasksSelect<true>;
+    taskProgress: TaskProgressSelect<false> | TaskProgressSelect<true>;
+    blockers: BlockersSelect<false> | BlockersSelect<true>;
+    comments: CommentsSelect<false> | CommentsSelect<true>;
+    changesLog: ChangesLogSelect<false> | ChangesLogSelect<true>;
+    broadcasts: BroadcastsSelect<false> | BroadcastsSelect<true>;
+    broadcastAcks: BroadcastAcksSelect<false> | BroadcastAcksSelect<true>;
+    uiStrings: UiStringsSelect<false> | UiStringsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -118,6 +144,8 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Вхід у Payload-адмінку (email+пароль). Не плутати з Workers — монтажники входять на планшеті за PIN.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -149,6 +177,10 @@ export interface User {
 export interface Media {
   id: number;
   alt: string;
+  type?: ('photo' | 'video' | 'audio') | null;
+  source?: ('task_step' | 'closing_checklist' | 'blocker' | 'comment' | 'broadcast' | 'admin') | null;
+  takenAt?: string | null;
+  shift?: (number | null) | Shift;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -160,6 +192,319 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * Одна зміна на дільниці — від відкриття до закриття.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shifts".
+ */
+export interface Shift {
+  id: number;
+  date: string;
+  responsibleUser: number | Worker;
+  openedAt?: string | null;
+  closedAt?: string | null;
+  /**
+   * Відповідь на останнє питання відкриття зміни.
+   */
+  handoverOk?: boolean | null;
+  handoverNote?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Список людей, які входять на планшеті за іменем і 4-значним PIN. Не плутати з Users — це адмінський вхід у Payload.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workers".
+ */
+export interface Worker {
+  id: number;
+  name: string;
+  /**
+   * Наразі лише підпис у списку входу — без різниці у правах на планшеті.
+   */
+  role: 'worker' | 'foreman';
+  /**
+   * Вимкни, якщо людина більше не працює — зникне зі списку входу на планшеті.
+   */
+  active?: boolean | null;
+  /**
+   * 4 цифри. Введи, щоб встановити або змінити PIN. Залиш порожнім, щоб не чіпати поточний — поточний PIN ніде не показується.
+   */
+  pin?: string | null;
+  pinHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Питання відкриття/закриття зміни. Порядок пунктів — перетягуванням. Версія оновлюється автоматично при зміні пунктів, щоб історія старих відповідей лишалась порівнюваною.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checklistTemplates".
+ */
+export interface ChecklistTemplate {
+  id: number;
+  type: 'opening' | 'closing';
+  /**
+   * Змінюється автоматично при редагуванні пунктів нижче.
+   */
+  version?: number | null;
+  /**
+   * Перетягуй, щоб змінити порядок. Кожен пункт — окреме питання так/ні.
+   */
+  items?:
+    | {
+        /**
+         * Технічний ідентифікатор пункту, напр. "battery_charging". Не показується працівнику.
+         */
+        key: string;
+        text: string;
+        /**
+         * Тільки для закриття зміни: без фото пункт не зараховується.
+         */
+        requiresPhoto?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Один прохід чек-листа (відкриття або закриття) в межах конкретної зміни. Заповнюється застосунком, тут — лише для перегляду історії.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checklistRuns".
+ */
+export interface ChecklistRun {
+  id: number;
+  shift: number | Shift;
+  template: number | ChecklistTemplate;
+  /**
+   * Фіксується автоматично — щоб історію можна було звірити навіть після правки шаблону.
+   */
+  templateVersion: number;
+  completedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Одна відповідь (так/ні) на один пункт чек-листа. Заповнюється застосунком.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checklistAnswers".
+ */
+export interface ChecklistAnswer {
+  id: number;
+  run: number | ChecklistRun;
+  itemKey: string;
+  status: 'ok' | 'problem';
+  /**
+   * Обов’язково для пунктів закриття з requiresPhoto.
+   */
+  photo?: (number | null) | Media;
+  note?: string | null;
+  answeredAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Задача і її покрокова процедура редагуються тут-таки, в одному місці. Кроки — кнопкою "Add Step" нижче, перетягуванням міняються місцями, кнопкою на рядку — дублюються.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tasks".
+ */
+export interface Task {
+  id: number;
+  _order?: string | null;
+  title: string;
+  date: string;
+  stageNo?: number | null;
+  targetQty: number;
+  /**
+   * Заповнюється, коли залишок з учора переноситься на сьогодні.
+   */
+  carriedFromTask?: (number | null) | Task;
+  /**
+   * Текст на останньому кроці процедури, напр. "Зроби візуальне порівняння з еталонною деталлю на столі".
+   */
+  referenceNote?: string | null;
+  /**
+   * Перетягуй рядки, щоб змінити порядок кроку в інструкції.
+   */
+  steps?:
+    | {
+        title: string;
+        keyPoint?: string | null;
+        why?: string | null;
+        media?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Інкременти "+N шт", а не одне число, що перезаписується — так історію можна відновити і додати облік по одиницях пізніше.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "taskProgress".
+ */
+export interface TaskProgress {
+  id: number;
+  task: number | Task;
+  shift: number | Shift;
+  worker: number | Worker;
+  qtyDelta: number;
+  /**
+   * Поки не використовується — місце під поштучний облік пізніше.
+   */
+  unitIds?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Причини недобору, неготовності дільниці, критичних проблем і невідповідності еталону — все, що записує монтажник голосом/текстом у відповідних екранах.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blockers".
+ */
+export interface Blocker {
+  id: number;
+  kind: 'gap' | 'not_ready' | 'critical' | 'defect';
+  task?: (number | null) | Task;
+  shift: number | Shift;
+  worker: number | Worker;
+  text?: string | null;
+  /**
+   * Заповнюється при синхронізації офлайн-запису.
+   */
+  audioUrl?: string | null;
+  /**
+   * Заповнюється Whisper API при синхронізації, не одразу під час запису.
+   */
+  transcript?: string | null;
+  media?: (number | Media)[] | null;
+  qtyDone?: number | null;
+  targetQty?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Нотатки до процесу, зібрані за день. Показуються в аркуші дня як є — не редагуються, лише доповнюються.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments".
+ */
+export interface Comment {
+  id: number;
+  shift: number | Shift;
+  worker: number | Worker;
+  text?: string | null;
+  audioUrl?: string | null;
+  /**
+   * Заповнюється Whisper API при синхронізації.
+   */
+  transcript?: string | null;
+  contextType?: ('task' | 'step' | 'general') | null;
+  /**
+   * id задачі або кроку, якщо contextType не "загальне".
+   */
+  contextId?: string | null;
+  media?: (number | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Наповнюється вручну: що сказали монтажники і що зробили у відповідь. Без цього коментарі стають ящиком скарг — показується окремим екраном на планшеті.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "changesLog".
+ */
+export interface ChangesLog {
+  id: number;
+  date: string;
+  whatWasSaid: string;
+  whatChanged: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Модальне повідомлення (світло-сіре, «Прочитано») або нова задача (жовта, «Прийнято») — показується на весь екран на планшеті, поки не підтверджено.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "broadcasts".
+ */
+export interface Broadcast {
+  id: number;
+  kind: 'message' | 'task';
+  body: string;
+  /**
+   * Напр. «Ціль: 14 шт. Перед закриттям зміни».
+   */
+  extra?: string | null;
+  /**
+   * Тільки для типу «Нова задача» — задачу створи заздалегідь у колекції Задачі.
+   */
+  task?: (number | null) | Task;
+  /**
+   * Тарас (CEO) або бригадир — як підпишеться відправник у модалці.
+   */
+  createdBy:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'workers';
+        value: number | Worker;
+      };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Час показу і час підтвердження модалки для кожного працівника — заповнюється застосунком.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "broadcastAcks".
+ */
+export interface BroadcastAck {
+  id: number;
+  broadcast: number | Broadcast;
+  worker: number | Worker;
+  shownAt?: string | null;
+  ackedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Кожен напис в застосунку — заголовки, підписи кнопок, підказки. Ключ визначає екран: усе, що починається на "login.", належить екрану входу, "opening." — відкриттю зміни, і так далі. Шукай через поле пошуку зверху списку.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uiStrings".
+ */
+export interface UiString {
+  id: number;
+  /**
+   * Напр. login.title, opening.done_button, closing.confirm.
+   */
+  key: string;
+  value: string;
+  /**
+   * Необов’язково: де саме на екрані це з’являється, якщо ключ не очевидний.
+   */
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -192,6 +537,58 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'workers';
+        value: number | Worker;
+      } | null)
+    | ({
+        relationTo: 'shifts';
+        value: number | Shift;
+      } | null)
+    | ({
+        relationTo: 'checklistTemplates';
+        value: number | ChecklistTemplate;
+      } | null)
+    | ({
+        relationTo: 'checklistRuns';
+        value: number | ChecklistRun;
+      } | null)
+    | ({
+        relationTo: 'checklistAnswers';
+        value: number | ChecklistAnswer;
+      } | null)
+    | ({
+        relationTo: 'tasks';
+        value: number | Task;
+      } | null)
+    | ({
+        relationTo: 'taskProgress';
+        value: number | TaskProgress;
+      } | null)
+    | ({
+        relationTo: 'blockers';
+        value: number | Blocker;
+      } | null)
+    | ({
+        relationTo: 'comments';
+        value: number | Comment;
+      } | null)
+    | ({
+        relationTo: 'changesLog';
+        value: number | ChangesLog;
+      } | null)
+    | ({
+        relationTo: 'broadcasts';
+        value: number | Broadcast;
+      } | null)
+    | ({
+        relationTo: 'broadcastAcks';
+        value: number | BroadcastAck;
+      } | null)
+    | ({
+        relationTo: 'uiStrings';
+        value: number | UiString;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -263,6 +660,10 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  type?: T;
+  source?: T;
+  takenAt?: T;
+  shift?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -274,6 +675,195 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workers_select".
+ */
+export interface WorkersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  active?: T;
+  pin?: T;
+  pinHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shifts_select".
+ */
+export interface ShiftsSelect<T extends boolean = true> {
+  date?: T;
+  responsibleUser?: T;
+  openedAt?: T;
+  closedAt?: T;
+  handoverOk?: T;
+  handoverNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checklistTemplates_select".
+ */
+export interface ChecklistTemplatesSelect<T extends boolean = true> {
+  type?: T;
+  version?: T;
+  items?:
+    | T
+    | {
+        key?: T;
+        text?: T;
+        requiresPhoto?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checklistRuns_select".
+ */
+export interface ChecklistRunsSelect<T extends boolean = true> {
+  shift?: T;
+  template?: T;
+  templateVersion?: T;
+  completedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checklistAnswers_select".
+ */
+export interface ChecklistAnswersSelect<T extends boolean = true> {
+  run?: T;
+  itemKey?: T;
+  status?: T;
+  photo?: T;
+  note?: T;
+  answeredAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tasks_select".
+ */
+export interface TasksSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  date?: T;
+  stageNo?: T;
+  targetQty?: T;
+  carriedFromTask?: T;
+  referenceNote?: T;
+  steps?:
+    | T
+    | {
+        title?: T;
+        keyPoint?: T;
+        why?: T;
+        media?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "taskProgress_select".
+ */
+export interface TaskProgressSelect<T extends boolean = true> {
+  task?: T;
+  shift?: T;
+  worker?: T;
+  qtyDelta?: T;
+  unitIds?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blockers_select".
+ */
+export interface BlockersSelect<T extends boolean = true> {
+  kind?: T;
+  task?: T;
+  shift?: T;
+  worker?: T;
+  text?: T;
+  audioUrl?: T;
+  transcript?: T;
+  media?: T;
+  qtyDone?: T;
+  targetQty?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments_select".
+ */
+export interface CommentsSelect<T extends boolean = true> {
+  shift?: T;
+  worker?: T;
+  text?: T;
+  audioUrl?: T;
+  transcript?: T;
+  contextType?: T;
+  contextId?: T;
+  media?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "changesLog_select".
+ */
+export interface ChangesLogSelect<T extends boolean = true> {
+  date?: T;
+  whatWasSaid?: T;
+  whatChanged?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "broadcasts_select".
+ */
+export interface BroadcastsSelect<T extends boolean = true> {
+  kind?: T;
+  body?: T;
+  extra?: T;
+  task?: T;
+  createdBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "broadcastAcks_select".
+ */
+export interface BroadcastAcksSelect<T extends boolean = true> {
+  broadcast?: T;
+  worker?: T;
+  shownAt?: T;
+  ackedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uiStrings_select".
+ */
+export interface UiStringsSelect<T extends boolean = true> {
+  key?: T;
+  value?: T;
+  note?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
