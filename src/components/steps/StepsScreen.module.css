@@ -166,9 +166,3 @@
 .stack .big {
   width: 100%;
 }
-.warn {
-  color: var(--danger-text);
-}
-.glass.warn::after {
-  background: linear-gradient(140deg, rgba(255, 154, 154, 0.55), rgba(255, 154, 154, 0.08));
-}

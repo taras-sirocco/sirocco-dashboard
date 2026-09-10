@@ -163,7 +163,7 @@ export function OpeningScreen({ strings, workerName, items }: OpeningScreenProps
               >
                 {tt('opening.yes')}
               </button>
-              <button className={`glass ${styles.big} ${styles.warn}`} disabled={busy} onClick={openProblem}>
+              <button className={`glass ${styles.big} danger-solid`} disabled={busy} onClick={openProblem}>
                 {tt('opening.no')}
               </button>
             </div>
@@ -206,7 +206,7 @@ export function OpeningScreen({ strings, workerName, items }: OpeningScreenProps
             {tt('opening.handover_yes')}
           </button>
           <button
-            className={`glass ${styles.big} ${styles.warn}`}
+            className={`glass ${styles.big} danger-solid`}
             disabled={busy}
             onClick={() => handover(false)}
           >

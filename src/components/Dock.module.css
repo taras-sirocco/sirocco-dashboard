@@ -18,9 +18,3 @@
   font-weight: 700;
   line-height: 1.25;
 }
-.stop {
-  color: var(--danger-text);
-}
-.glass.stop::after {
-  background: linear-gradient(140deg, rgba(255, 154, 154, 0.6), rgba(255, 154, 154, 0.08));
-}

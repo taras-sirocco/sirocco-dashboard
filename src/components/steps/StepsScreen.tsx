@@ -142,7 +142,7 @@ export function StepsScreen({ strings, workerName, task }: StepsScreenProps) {
                 <button className={`glass ${styles.big} ${styles.primary}`} disabled={busy} onClick={() => confirmMatch(true)}>
                   {tt('steps.reference_yes')}
                 </button>
-                <button className={`glass ${styles.big} ${styles.warn}`} disabled={busy} onClick={() => confirmMatch(false)}>
+                <button className={`glass ${styles.big} danger-solid`} disabled={busy} onClick={() => confirmMatch(false)}>
                   {tt('steps.reference_no')}
                 </button>
               </div>

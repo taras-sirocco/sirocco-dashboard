@@ -111,6 +111,20 @@ body {
   z-index: 1;
 }
 
+/* ---- небезпечний варіант кнопки: усі «Ні», «Критична проблема» ----
+   Той самий принцип, що й .primary (суцільний градієнт, не прозорий,
+   але зі скляним глянцем/кантом від .glass) — тільки в червоному. */
+.danger-solid {
+  background: linear-gradient(150deg, #ff8f8f, var(--danger));
+  color: #fff;
+  box-shadow:
+    0 16px 40px rgba(226, 86, 79, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.glass.danger-solid::after {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1));
+}
+
 /* ---- кольорові плями під склом (фон) ---- */
 .blobs {
   position: fixed;

@@ -35,6 +35,10 @@ export function HubScreen({ strings, workerName, tasks, changes }: HubScreenProp
       {/* --- ХАБ --- */}
       <section className={`${styles.view} ${view === 'hub' ? styles.on : ''}`}>
         <ShiftStatusBar strings={strings} name={workerName} />
+        <button className={`glass ${styles.closeTop}`} onClick={() => router.push('/blocker')}>
+          <span className={styles.tileIc}>🌙</span>
+          <span>{tt('hub.close_shift_tile')}</span>
+        </button>
         <div className={styles.eyebrow}>{tt('hub.eyebrow')}</div>
         <h1 className={styles.h1}>{tt('hub.title')}</h1>
         <p className={styles.sub}>
@@ -83,7 +87,7 @@ export function HubScreen({ strings, workerName, tasks, changes }: HubScreenProp
             <span className={styles.tileT}>{tt('shared.dock_note')}</span>
           </button>
           <button
-            className={`glass ${styles.tile} ${styles.crit}`}
+            className={`glass ${styles.tile} danger-solid`}
             onClick={() => router.push('/report?kind=critical')}
           >
             <span className={styles.tileIc}>⚠️</span>
@@ -93,10 +97,6 @@ export function HubScreen({ strings, workerName, tasks, changes }: HubScreenProp
             <span className={styles.tileIc}>✨</span>
             <span className={styles.tileT}>{tt('hub.changes_tile')}</span>
             {changes.newCount > 0 && <span className={styles.badge}>{changes.newCount}</span>}
-          </button>
-          <button className={`glass ${styles.tile} ${styles.wide}`} onClick={() => router.push('/blocker')}>
-            <span className={styles.tileIc}>🌙</span>
-            <span className={styles.tileT}>{tt('hub.close_shift_tile')}</span>
           </button>
         </div>
       </section>

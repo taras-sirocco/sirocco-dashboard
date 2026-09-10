@@ -21,7 +21,7 @@ export function Dock({ strings }: DockProps) {
         {tt('shared.dock_note')}
       </button>
       <button
-        className={`glass ${styles.btn} ${styles.stop}`}
+        className={`glass ${styles.btn} danger-solid`}
         onClick={() => router.push('/report?kind=critical')}
       >
         {tt('shared.dock_critical')}
