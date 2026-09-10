@@ -62,7 +62,7 @@ export function TaskScreen({ strings, workerName, tasks }: TaskScreenProps) {
           <h1>{tt('task.all_done_title')}</h1>
           <p>{tt('task.all_done_sub')}</p>
         </div>
-        <button className={`glass ${styles.big} ${styles.primary}`} onClick={() => router.push('/close')}>
+        <button className={`glass ${styles.big} ${styles.primary}`} onClick={() => router.push('/blocker')}>
           {tt('task.to_daily_sheet')}
         </button>
       </main>

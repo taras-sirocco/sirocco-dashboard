@@ -94,7 +94,7 @@ export function HubScreen({ strings, workerName, tasks, changes }: HubScreenProp
             <span className={styles.tileT}>{tt('hub.changes_tile')}</span>
             {changes.newCount > 0 && <span className={styles.badge}>{changes.newCount}</span>}
           </button>
-          <button className={`glass ${styles.tile} ${styles.wide}`} onClick={() => router.push('/close')}>
+          <button className={`glass ${styles.tile} ${styles.wide}`} onClick={() => router.push('/blocker')}>
             <span className={styles.tileIc}>🌙</span>
             <span className={styles.tileT}>{tt('hub.close_shift_tile')}</span>
           </button>

@@ -163,6 +163,7 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'blocker.position_template', value: 'Недобір {n} з {total}' },
   { key: 'blocker.title', value: 'Що завадило?' },
   { key: 'blocker.qty_template', value: '{done} з {target}' },
+  { key: 'blocker.of_target_template', value: 'з {target}', note: 'Дрібніший рядок поруч із великим числом done, напр. "14 з 20".' },
   { key: 'blocker.miss_template', value: '−{n}', note: '{n} — скільки бракує до цілі.' },
   {
     key: 'blocker.voice_hint_idle',

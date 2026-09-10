@@ -1,0 +1,133 @@
+.dots {
+  display: flex;
+  gap: 8px;
+  padding: 14px 20px 0;
+}
+.pd {
+  flex: 1;
+  height: 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.pd.done {
+  background: linear-gradient(90deg, var(--accent-lo), var(--accent-hi));
+}
+.pd.cur {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.main {
+  flex: 1 1 auto;
+  padding: 20px 20px 40px;
+}
+.eyebrow {
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--warn);
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+.h1 {
+  font-size: clamp(30px, 6vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  margin-bottom: 20px;
+}
+
+.gap {
+  padding: 22px 24px;
+  margin-bottom: 24px;
+}
+.tn {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.nums {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.big {
+  font-size: 46px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.of {
+  font-size: 18px;
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+.miss {
+  margin-left: auto;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--warn);
+  background: rgba(255, 207, 93, 0.15);
+  padding: 8px 14px;
+  border-radius: 10px;
+}
+.track {
+  height: 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  margin-top: 16px;
+  overflow: hidden;
+  display: flex;
+}
+.fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-lo), var(--accent-hi));
+}
+
+.carry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 10px;
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  line-height: 1.4;
+}
+.carryIc {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(127, 119, 221, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-hi);
+  font-size: 18px;
+}
+.carry b {
+  color: #fff;
+  font-weight: 700;
+}
+
+.cta {
+  width: 100%;
+  padding: 24px;
+  border-radius: var(--r);
+  text-align: center;
+  font-size: 19px;
+  font-weight: 800;
+  transition: transform 0.08s;
+  margin-top: 8px;
+  background: linear-gradient(150deg, var(--accent-hi), var(--accent-lo));
+  color: #fff;
+  box-shadow:
+    0 16px 40px rgba(127, 119, 221, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.cta:active {
+  transform: scale(0.99);
+}
+.glass.cta::after {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.08));
+}
