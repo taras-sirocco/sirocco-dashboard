@@ -98,6 +98,11 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'task.to_daily_sheet', value: 'До аркуша дня' },
   { key: 'task.position_template', value: 'Задача {n} з {total}', note: '{n} — номер поточної задачі, {total} — всього задач у черзі.' },
   { key: 'task.progress_of_template', value: 'з {target}', note: 'Другий, дрібніший рядок лічильника: "{done} " + це поруч, напр. "6 з 20".' },
+  {
+    key: 'task.progress_save_failed',
+    value: 'Не вдалося зберегти — перевір з’єднання й спробуй ще раз.',
+    note: 'Показується, якщо запис прогресу не дійшов до сервера (оптимістичне оновлення відкочується).',
+  },
 
   // ---------- steps.* (04-steps.html) ----------
   { key: 'steps.important_step_label', value: 'Важливий крок' },

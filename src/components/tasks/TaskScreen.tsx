@@ -18,13 +18,17 @@ type TaskScreenProps = {
   tasks: TaskWithProgress[]
 }
 
-export function TaskScreen({ strings, workerName, tasks }: TaskScreenProps) {
+export function TaskScreen({ strings, workerName, tasks: initialTasks }: TaskScreenProps) {
   const router = useRouter()
   const tt = (key: string, vars?: Record<string, string>) => t(strings, key, vars)
 
+  // Локальна копія — оптимістичний UI оновлює її одразу, не чекаючи мережі.
+  // Сервер лишається єдиним джерелом правди (BFF рахує реальний done), але
+  // клієнт коректно передбачає результат для того самого простого додавання.
+  const [tasks, setTasks] = useState(initialTasks)
   const [step, setStep] = useState<Step>('task')
   const [qty, setQty] = useState(1)
-  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
 
   const currentIndex = getCurrentTaskIndex(tasks)
   const allDone = tasks.length > 0 && currentIndex === -1
@@ -32,24 +36,38 @@ export function TaskScreen({ strings, workerName, tasks }: TaskScreenProps) {
 
   function openQty() {
     setQty(1)
+    setError('')
     setStep('qty')
   }
 
   async function confirm() {
-    if (!current || busy) return
-    setBusy(true)
+    if (!current) return
+    const taskId = current.id
+    const confirmedQty = qty
+    const previousTasks = tasks
+
+    // Оптимістично: перехід на наступну задачу відбувається миттєво,
+    // синк із сервером — фоном.
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId ? { ...t, done: Math.min(t.targetQty, t.done + confirmedQty) } : t,
+      ),
+    )
+    setStep('task')
+    setQty(1)
+    setError('')
+
     try {
       const res = await fetch('/api/app/tasks/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId: current.id, qty }),
+        body: JSON.stringify({ taskId, qty: confirmedQty }),
       })
-      if (res.ok) {
-        setStep('task')
-        router.refresh()
-      }
-    } finally {
-      setBusy(false)
+      if (!res.ok) throw new Error('not ok')
+    } catch {
+      // Відкат: те, що показали, не збереглось насправді.
+      setTasks(previousTasks)
+      setError(tt('task.progress_save_failed'))
     }
   }
 
@@ -88,6 +106,8 @@ export function TaskScreen({ strings, workerName, tasks }: TaskScreenProps) {
             {tt('task.position_template', { n: String(currentIndex + 1), total: String(tasks.length) })}
           </div>
           <div className={styles.tname}>{current?.title}</div>
+
+          {error && <p style={{ color: 'var(--danger-text)', fontWeight: 600, marginBottom: 12 }}>{error}</p>}
 
           <div className={`glass ${styles.counter}`}>
             <div className={styles.crow}>
@@ -136,7 +156,7 @@ export function TaskScreen({ strings, workerName, tasks }: TaskScreenProps) {
             </button>
           </div>
 
-          <button className={`glass ${styles.big} ${styles.primary}`} disabled={busy} onClick={confirm}>
+          <button className={`glass ${styles.big} ${styles.primary}`} onClick={confirm}>
             {tt('task.qty_confirm')}
           </button>
           <button className={`glass ${styles.instr}`} style={{ marginTop: 12 }} onClick={() => setStep('task')}>
