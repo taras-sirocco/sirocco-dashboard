@@ -29,23 +29,30 @@ export async function POST(req: NextRequest) {
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
-  const doc = await payload.create({
-    collection: 'media',
-    data: {
-      alt: 'Фото з планшета',
-      type: 'photo',
-      source: typeof source === 'string' ? (source as 'closing_checklist' | 'blocker' | 'comment') : 'closing_checklist',
-      shift: shift.id,
-      takenAt: new Date().toISOString(),
-    },
-    file: {
-      data: buffer,
-      mimetype: file.type || 'image/jpeg',
-      name: file.name || `photo-${Date.now()}.jpg`,
-      size: buffer.length,
-    },
-    overrideAccess: true,
-  })
-
-  return NextResponse.json({ id: doc.id })
+  try {
+    const doc = await payload.create({
+      collection: 'media',
+      data: {
+        alt: 'Фото з планшета',
+        type: 'photo',
+        source:
+          typeof source === 'string' ? (source as 'closing_checklist' | 'blocker' | 'comment') : 'closing_checklist',
+        shift: shift.id,
+        takenAt: new Date().toISOString(),
+      },
+      file: {
+        data: buffer,
+        mimetype: file.type || 'image/jpeg',
+        name: file.name || `photo-${Date.now()}.jpg`,
+        size: buffer.length,
+      },
+      overrideAccess: true,
+    })
+    return NextResponse.json({ id: doc.id })
+  } catch (err) {
+    // Найімовірніша причина: Blob-сховище вимкнене (нема BLOB_READ_WRITE_TOKEN),
+    // Payload падає назад на локальний диск, якого на Vercel немає для запису.
+    console.error('Media upload failed:', err)
+    return NextResponse.json({ error: 'UPLOAD_FAILED' }, { status: 500 })
+  }
 }

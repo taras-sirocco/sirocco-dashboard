@@ -59,7 +59,11 @@ export function ClosingChecklistScreen({ strings, workerName, initialItems }: Cl
     form.append('file', file)
     form.append('source', 'closing_checklist')
     const res = await fetch('/api/app/media', { method: 'POST', body: form })
-    if (!res.ok) return
+    if (!res.ok) {
+      setError(tt('close.photo_upload_failed'))
+      return
+    }
+    setError('')
     const { id } = (await res.json()) as { id: number }
     await answer(key, 'ok', id)
   }

@@ -149,6 +149,11 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
     value: 'Щось не збіглося — перевір, чи всі пункти позначені й фото на місці.',
     note: 'Показується, якщо сервер відхилив закриття (неповний чек-лист), хоча кнопка на клієнті виглядала активною.',
   },
+  {
+    key: 'close.photo_upload_failed',
+    value: 'Не вдалося завантажити фото. Спробуй ще раз.',
+    note: 'Показується, якщо запит на завантаження фото (камера) повернув помилку.',
+  },
   { key: 'close.checklist_submit', value: 'Все зроблено, закрити зміну' },
   { key: 'close.photo_present', value: 'фото є' },
   { key: 'close.photo_required', value: 'фото' },
