@@ -9,7 +9,9 @@
 import { getPayload } from 'payload'
 
 import config from './payload.config'
+import { closingItems, openingItems } from './seed-data/checklistTemplates'
 import { uiStrings } from './seed-data/uiStrings'
+import { upsertChecklistTemplate } from './seed-data/upsertChecklistTemplate'
 
 async function seed() {
   const payloadConfig = await config
@@ -46,33 +48,8 @@ async function seed() {
   }
   console.log(`✓ workers: ${workersData.length}`)
 
-  // ---- ChecklistTemplates: opening (02-opening.html `items`) ----
-  const openingItems = [
-    { key: 'ventilation_light', text: 'Провітрено, освітлення працює', requiresPhoto: false },
-    { key: 'workspace_clean', text: 'Робоче місце прибране, стіл вільний', requiresPhoto: false },
-    { key: 'tools_complete', text: 'Інструмент на місці, весь комплект', requiresPhoto: false },
-    { key: 'batteries_charged', text: 'Акумулятори заряджені', requiresPhoto: false },
-    { key: 'consumables_stocked', text: 'Розхідники на місці, вистачає на зміну', requiresPhoto: false },
-    { key: 'parts_checked', text: 'Комплектація деталей перевірена по списку', requiresPhoto: false },
-    { key: 'ops_sheet_present', text: 'Аркуш операції на цю зміну є на столі', requiresPhoto: false },
-  ]
+  // ---- ChecklistTemplates: opening + closing (дані спільні з production-сідером) ----
   await upsertChecklistTemplate(payload, 'opening', openingItems)
-
-  // ---- ChecklistTemplates: closing (05-close.html `closeItems`) ----
-  // Рівно 3 з 7 пунктів вимагають фото — узгоджено з користувачем окремо.
-  const closingItems = [
-    { key: 'tools_put_away', text: 'Інструмент на місці, нічого не залишилось на столі', requiresPhoto: false },
-    { key: 'batteries_charging', text: 'Акумулятори на зарядці', requiresPhoto: true },
-    { key: 'consumables_closed', text: 'Розхідники закриті та прибрані', requiresPhoto: false },
-    {
-      key: 'unfinished_units_marked',
-      text: 'Незавершені вузли позначені: на якому етапі зупинились',
-      requiresPhoto: true,
-    },
-    { key: 'table_floor_clean', text: 'Стіл і підлога прибрані', requiresPhoto: true },
-    { key: 'utilities_off', text: 'Вода / повітря / світло вимкнені', requiresPhoto: false },
-    { key: 'doors_locked', text: 'Двері зачинені', requiresPhoto: false },
-  ]
   await upsertChecklistTemplate(payload, 'closing', closingItems)
   console.log('✓ checklistTemplates: opening, closing')
 
@@ -179,33 +156,6 @@ async function seed() {
   console.log(`✓ uiStrings: ${uiStrings.length}`)
 
   console.log('\nГотово.')
-}
-
-async function upsertChecklistTemplate(
-  payload: Awaited<ReturnType<typeof getPayload>>,
-  type: 'opening' | 'closing',
-  items: { key: string; text: string; requiresPhoto: boolean }[],
-) {
-  const found = await payload.find({
-    collection: 'checklistTemplates',
-    where: { type: { equals: type } },
-    limit: 1,
-    overrideAccess: true,
-  })
-  if (found.docs[0]) {
-    await payload.update({
-      collection: 'checklistTemplates',
-      id: found.docs[0].id,
-      data: { items },
-      overrideAccess: true,
-    })
-  } else {
-    await payload.create({
-      collection: 'checklistTemplates',
-      data: { type, items },
-      overrideAccess: true,
-    })
-  }
 }
 
 // `payload run` dynamic-imports this module and exits as soon as module
