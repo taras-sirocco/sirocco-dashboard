@@ -61,6 +61,11 @@ export const Workers: CollectionConfig = {
         description:
           '4 цифри. Введи, щоб встановити або змінити PIN. Залиш порожнім, щоб не чіпати поточний — поточний PIN ніде не показується.',
         position: 'sidebar',
+        // Payload сам ставить readOnly:true для будь-якого virtual-поля
+        // (типовий випадок — дані з relationship, тільки читання). Тут
+        // навпаки: поле для вводу нового PIN, яке ніколи не зберігається
+        // як є (див. beforeChange нижче) — тому явно вимикаємо readOnly.
+        readOnly: false,
       },
       validate: (value: unknown, { operation, siblingData }: any) => {
         if (!value) {
