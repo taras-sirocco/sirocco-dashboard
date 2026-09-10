@@ -1,164 +1,160 @@
+/* Дизайн-токени й базові скидання — з sirocco-prototypes/README.md.
+   Спільні для всіх екранів застосунку, тому глобальні (не CSS Module). */
 :root {
-  --font-mono: 'Roboto Mono', monospace;
+  --bg-page: #0b1020;
+  --accent: #7f77dd;
+  --accent-lo: #544bc0;
+  --accent-hi: #a49cf6;
+  --text-primary: #ffffff;
+  --text-secondary: #b8b2f0;
+  --danger-text: #ff9a9a;
+  --danger: #e2564f;
+  --ok: #5dcaa5;
+  --warn: #ffcf5d;
+  --r: 20px;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  -webkit-appearance: none;
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  -webkit-text-fill-color: currentColor;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
 }
 
 html {
-  font-size: 18px;
-  line-height: 32px;
-
-  background: rgb(0, 0, 0);
-  -webkit-font-smoothing: antialiased;
-}
-
-html,
-body,
-#app {
   height: 100%;
 }
 
 body {
-  font-family: system-ui;
-  font-size: 18px;
-  line-height: 32px;
-
-  margin: 0;
-  color: rgb(1000, 1000, 1000);
-
-  @media (max-width: 1024px) {
-    font-size: 15px;
-    line-height: 24px;
-  }
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-h1 {
-  margin: 40px 0;
-  font-size: 64px;
-  line-height: 70px;
-  font-weight: bold;
-
-  @media (max-width: 1024px) {
-    margin: 24px 0;
-    font-size: 42px;
-    line-height: 42px;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 38px;
-    line-height: 38px;
-  }
-
-  @media (max-width: 400px) {
-    font-size: 32px;
-    line-height: 32px;
-  }
-}
-
-p {
-  margin: 24px 0;
-
-  @media (max-width: 1024px) {
-    margin: calc(var(--base) * 0.75) 0;
-  }
-}
-
-a {
-  color: currentColor;
-
-  &:focus {
-    opacity: 0.8;
-    outline: none;
-  }
-
-  &:active {
-    opacity: 0.7;
-    outline: none;
-  }
-}
-
-svg {
-  vertical-align: middle;
-}
-
-.home {
+  min-height: 100%;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-manrope), system-ui, -apple-system, sans-serif;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  height: 100vh;
-  padding: 45px;
-  max-width: 1024px;
-  margin: 0 auto;
+  user-select: none;
+  position: relative;
+  overflow-x: hidden;
+  isolation: isolate;
+}
+
+/* Наскрізна вимога: усі клікабельні цілі — не менші за 60×60px (рукавички).
+   Пильнується в розмірах кожного компонента окремо (padding/height), а не
+   глобальним min-height/width — бо є й дрібні елементи (крапки PIN, бейджі),
+   яким чужий розмір кнопки нашкодить. */
+
+/* ---- скляні картки (glassmorphism) — спільний елемент майже всіх екранів ---- */
+.glass {
+  position: relative;
+  border-radius: var(--r);
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.05) 42%,
+    rgba(255, 255, 255, 0.1)
+  );
+  backdrop-filter: blur(26px) saturate(170%);
+  -webkit-backdrop-filter: blur(26px) saturate(170%);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
   overflow: hidden;
+}
+.glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0.06) 46%,
+    rgba(255, 255, 255, 0.34)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.glass::before {
+  content: '';
+  position: absolute;
+  left: -30%;
+  top: -70%;
+  width: 90%;
+  height: 150%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 62%);
+  transform: rotate(18deg);
+  pointer-events: none;
+}
+/* контент над псевдо-елементами картки */
+.z {
+  position: relative;
+  z-index: 1;
+}
 
-  @media (max-width: 400px) {
-    padding: 24px;
-  }
+/* ---- кольорові плями під склом (фон) ---- */
+.blobs {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+}
+.blob-1 {
+  width: 60vmax;
+  height: 60vmax;
+  left: -20vmax;
+  top: -24vmax;
+  background: radial-gradient(circle, rgba(120, 86, 255, 0.75), rgba(120, 86, 255, 0) 66%);
+}
+.blob-2 {
+  width: 52vmax;
+  height: 52vmax;
+  right: -18vmax;
+  top: 8vmax;
+  background: radial-gradient(circle, rgba(40, 110, 255, 0.62), rgba(40, 110, 255, 0) 68%);
+}
+.blob-3 {
+  width: 40vmax;
+  height: 40vmax;
+  left: 18vmax;
+  bottom: -20vmax;
+  background: radial-gradient(circle, rgba(255, 110, 70, 0.36), rgba(255, 110, 70, 0) 70%);
+}
+.blob-4 {
+  width: 34vmax;
+  height: 34vmax;
+  right: 6vmax;
+  bottom: -14vmax;
+  background: radial-gradient(circle, rgba(0, 220, 190, 0.28), rgba(0, 220, 190, 0) 70%);
+}
 
-  .content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex-grow: 1;
-
-    h1 {
-      text-align: center;
-    }
-  }
-
-  .links {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    a {
-      text-decoration: none;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-    }
-
-    .admin {
-      color: rgb(0, 0, 0);
-      background: rgb(1000, 1000, 1000);
-      border: 1px solid rgb(0, 0, 0);
-    }
-
-    .docs {
-      color: rgb(1000, 1000, 1000);
-      background: rgb(0, 0, 0);
-      border: 1px solid rgb(1000, 1000, 1000);
-    }
-  }
-
-  .footer {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    @media (max-width: 1024px) {
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    p {
-      margin: 0;
-    }
-
-    .codeLink {
-      text-decoration: none;
-      padding: 0 0.5rem;
-      background: rgb(60, 60, 60);
-      border-radius: 4px;
-    }
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
   }
 }

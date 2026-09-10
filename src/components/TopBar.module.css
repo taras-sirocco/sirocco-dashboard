@@ -1,0 +1,55 @@
+.bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 20px 6px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.when {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.15;
+}
+.clock {
+  font-size: 22px;
+  color: #fff;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.date {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 12px var(--ok);
+}
+.dot.off {
+  background: var(--danger-text);
+  box-shadow: 0 0 12px var(--danger-text);
+}

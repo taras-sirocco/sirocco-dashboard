@@ -23,6 +23,9 @@
 .DS_Store
 *.pem
 
+# local dev logs (dev server output written here, not /tmp)
+/.logs/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
