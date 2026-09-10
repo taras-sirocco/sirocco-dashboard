@@ -1,0 +1,149 @@
+.main {
+  flex: 1 1 auto;
+  padding: 24px 20px 40px;
+}
+.eyebrow {
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.h1 {
+  font-size: clamp(28px, 5.4vw, 40px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+.sub {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: 22px;
+}
+.sect {
+  margin: 26px 0 12px;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-hi);
+  font-weight: 800;
+}
+
+.trow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+}
+.tn {
+  flex: 1;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+.tq {
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tq small {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+.badge {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 8px;
+}
+.bDone {
+  background: rgba(93, 202, 165, 0.2);
+  color: var(--ok);
+}
+.bPart {
+  background: rgba(255, 207, 93, 0.18);
+  color: var(--warn);
+}
+.bNotStarted {
+  background: rgba(255, 207, 93, 0.18);
+  color: var(--warn);
+  opacity: 0.6;
+}
+
+.cmt {
+  padding: 16px 18px;
+  margin-bottom: 10px;
+}
+.cmtTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.tm {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ctx {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.cmtBody {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.addcmt {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+.addcmtBtn {
+  flex: 1;
+  padding: 16px;
+  border-radius: 14px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.big {
+  width: 100%;
+  padding: 24px;
+  border-radius: var(--r);
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+  transition: transform 0.08s;
+  margin-top: 8px;
+}
+.big:active {
+  transform: scale(0.99);
+}
+.primary {
+  background: linear-gradient(150deg, var(--accent-hi), var(--accent-lo));
+  color: #fff;
+  box-shadow:
+    0 16px 40px rgba(127, 119, 221, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.glass.primary::after {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.08));
+}

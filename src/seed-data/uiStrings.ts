@@ -121,6 +121,8 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   },
 
   // ---------- close.* (05-close.html) ----------
+  { key: 'close.context_task', value: 'Задача', note: 'Позначка контексту коментаря.' },
+  { key: 'close.context_step', value: 'Крок', note: 'Позначка контексту коментаря.' },
   { key: 'close.sheet_eyebrow', value: 'Кінець зміни' },
   { key: 'close.sheet_title', value: 'Аркуш дня' },
   { key: 'close.sheet_sub', value: 'Перевір, що зробили, і додай, якщо є що сказати.' },
@@ -137,6 +139,8 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'close.badge_partial', value: 'частково' },
   { key: 'close.badge_not_started', value: 'не почато' },
   { key: 'close.qty_template', value: '{done} з {target}' },
+  { key: 'close.of_target_template', value: 'з {target}', note: 'Дрібніший рядок поруч із done у списку задач аркуша дня.' },
+  { key: 'close.add_send', value: 'Додати', note: 'Кнопка відправки нового коментаря (голос/текст) на аркуші дня.' },
   { key: 'close.checklist_eyebrow', value: 'Останнє перед виходом' },
   { key: 'close.checklist_title', value: 'Закриття зміни' },
   { key: 'close.checklist_sub', value: 'Пройди список. Три пункти потребують фото.' },
