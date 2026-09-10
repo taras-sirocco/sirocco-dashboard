@@ -39,10 +39,8 @@ export function TopBar({ onlineLabel, offlineLabel }: TopBarProps) {
 
   return (
     <header className={styles.bar}>
-      {/* Лого поки плейсхолдер — заміниться на файл (sirocco-prototypes/README.md) */}
-      <div className={styles.logo}>
-        <span>SIROCCO</span>
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element -- статичний файл з /public, next/image тут зайвий */}
+      <img className={styles.logo} src="/logo.svg" alt="Sirocco Energy" />
       <div className={styles.meta}>
         <span className={styles.when}>
           <span className={styles.clock}>{time}</span>

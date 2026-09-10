@@ -7,17 +7,9 @@
   padding: 16px 20px 6px;
 }
 .logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 38px;
-  padding: 0 14px;
-  border: 1px dashed rgba(255, 255, 255, 0.35);
-  border-radius: 10px;
-  color: var(--text-secondary);
-  font-size: 13px;
-  letter-spacing: 0.2em;
-  font-weight: 700;
+  height: 24px;
+  width: auto;
+  display: block;
 }
 .meta {
   display: flex;
