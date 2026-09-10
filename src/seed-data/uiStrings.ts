@@ -144,6 +144,11 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'close.checklist_eyebrow', value: 'Останнє перед виходом' },
   { key: 'close.checklist_title', value: 'Закриття зміни' },
   { key: 'close.checklist_sub', value: 'Пройди список. Три пункти потребують фото.' },
+  {
+    key: 'close.checklist_incomplete_error',
+    value: 'Щось не збіглося — перевір, чи всі пункти позначені й фото на місці.',
+    note: 'Показується, якщо сервер відхилив закриття (неповний чек-лист), хоча кнопка на клієнті виглядала активною.',
+  },
   { key: 'close.checklist_submit', value: 'Все зроблено, закрити зміну' },
   { key: 'close.photo_present', value: 'фото є' },
   { key: 'close.photo_required', value: 'фото' },
