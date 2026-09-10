@@ -4,12 +4,10 @@ import config from '@/payload.config'
 
 import { todayRange } from './shifts'
 
-export type TaskWithProgress = {
-  id: number
-  title: string
-  targetQty: number
-  done: number
-}
+export type { TaskWithProgress } from './tasksFormat'
+export { getCurrentTaskIndex } from './tasksFormat'
+
+import type { TaskWithProgress } from './tasksFormat'
 
 /** Задачі на сьогодні в черзі (нативний Payload `orderable`) з фактичним прогресом. */
 export async function getTodayTasksWithProgress(): Promise<TaskWithProgress[]> {

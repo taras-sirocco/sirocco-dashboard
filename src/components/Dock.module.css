@@ -1,0 +1,26 @@
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  gap: 12px;
+  padding: 14px 20px 18px;
+  background: linear-gradient(to top, rgba(11, 16, 32, 0.96), rgba(11, 16, 32, 0));
+}
+.btn {
+  flex: 1;
+  padding: 18px;
+  border-radius: 16px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.stop {
+  color: var(--danger-text);
+}
+.glass.stop::after {
+  background: linear-gradient(140deg, rgba(255, 154, 154, 0.6), rgba(255, 154, 154, 0.08));
+}

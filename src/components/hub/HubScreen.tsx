@@ -4,14 +4,13 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { ShiftStatusBar } from '@/components/ShiftStatusBar'
-import { VoiceRecorder } from '@/components/VoiceRecorder'
+import { getCurrentTaskIndex, type TaskWithProgress } from '@/lib/tasksFormat'
 import type { ChangesLogEntry } from '@/lib/changesLog'
-import type { TaskWithProgress } from '@/lib/tasks'
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
 
 import styles from './HubScreen.module.css'
 
-type View = 'hub' | 'changes' | 'note' | 'critical'
+type View = 'hub' | 'changes'
 
 type HubScreenProps = {
   strings: UiStringsMap
@@ -25,40 +24,11 @@ export function HubScreen({ strings, workerName, tasks, changes }: HubScreenProp
   const tt = (key: string, vars?: Record<string, string>) => t(strings, key, vars)
 
   const [view, setView] = useState<View>('hub')
-  const [note, setNote] = useState('')
-  const [hadVoice, setHadVoice] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const [sent, setSent] = useState(false)
 
-  const currentIndex = tasks.findIndex((task) => task.done < task.targetQty)
+  const currentIndex = getCurrentTaskIndex(tasks)
   const allDone = tasks.length > 0 && currentIndex === -1
   const current = allDone ? null : tasks[currentIndex] ?? null
   const inProgress = tasks.filter((task) => task.done < task.targetQty).length
-
-  function openRecorder(kind: 'note' | 'critical') {
-    setNote('')
-    setHadVoice(false)
-    setSent(false)
-    setView(kind)
-  }
-
-  async function send() {
-    if (busy) return
-    const text = note || (hadVoice ? 'голосовий запис' : '')
-    if (!text) return
-    setBusy(true)
-    try {
-      const url = view === 'critical' ? '/api/app/blockers/critical' : '/api/app/comments'
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      })
-      if (res.ok) setSent(true)
-    } finally {
-      setBusy(false)
-    }
-  }
 
   return (
     <main className={styles.main}>
@@ -108,11 +78,14 @@ export function HubScreen({ strings, workerName, tasks, changes }: HubScreenProp
         </button>
 
         <div className={styles.tiles}>
-          <button className={`glass ${styles.tile}`} onClick={() => openRecorder('note')}>
+          <button className={`glass ${styles.tile}`} onClick={() => router.push('/report?kind=note')}>
             <span className={styles.tileIc}>📝</span>
             <span className={styles.tileT}>{tt('shared.dock_note')}</span>
           </button>
-          <button className={`glass ${styles.tile} ${styles.crit}`} onClick={() => openRecorder('critical')}>
+          <button
+            className={`glass ${styles.tile} ${styles.crit}`}
+            onClick={() => router.push('/report?kind=critical')}
+          >
             <span className={styles.tileIc}>⚠️</span>
             <span className={styles.tileT}>{tt('shared.dock_critical')}</span>
           </button>
@@ -148,40 +121,6 @@ export function HubScreen({ strings, workerName, tasks, changes }: HubScreenProp
             </div>
           </div>
         ))}
-      </section>
-
-      {/* --- НОТАТКА / КРИТИЧНА ПРОБЛЕМА --- */}
-      <section className={`${styles.view} ${view === 'note' || view === 'critical' ? styles.on : ''}`}>
-        <button className={styles.back} onClick={() => setView('hub')}>
-          {tt('shared.back_link')}
-        </button>
-        <div className={styles.eyebrow}>
-          {view === 'critical' ? tt('hub.critical_eyebrow') : tt('hub.note_eyebrow')}
-        </div>
-        {sent ? (
-          <p className={styles.sub}>{tt('hub.send_confirmation')}</p>
-        ) : (
-          <>
-            <h1 className={styles.h1}>{view === 'critical' ? tt('hub.critical_title') : tt('hub.note_title')}</h1>
-            <p className={styles.sub}>{view === 'critical' ? tt('hub.critical_sub') : tt('hub.note_sub')}</p>
-            <VoiceRecorder
-              value={note}
-              onChange={setNote}
-              onRecordingStop={() => setHadVoice(true)}
-              critical={view === 'critical'}
-              idleHint={tt('hub.voice_hint_idle')}
-              recordingHint={tt('shared.voice_hint_recording')}
-              unavailableHint={tt('shared.voice_hint_unavailable')}
-              placeholder={tt('shared.text_placeholder_short')}
-              micAriaLabel={tt('hub.mic_aria_label')}
-            />
-            <div className={styles.acts}>
-              <button className={`glass ${styles.big} ${styles.primary}`} disabled={busy} onClick={send}>
-                {view === 'critical' ? tt('hub.send_button_critical') : tt('hub.send_button')}
-              </button>
-            </div>
-          </>
-        )}
       </section>
     </main>
   )

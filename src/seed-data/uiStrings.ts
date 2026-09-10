@@ -97,6 +97,7 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'task.all_done_sub', value: 'Час переходити до аркуша дня і закриття зміни' },
   { key: 'task.to_daily_sheet', value: 'До аркуша дня' },
   { key: 'task.position_template', value: 'Задача {n} з {total}', note: '{n} — номер поточної задачі, {total} — всього задач у черзі.' },
+  { key: 'task.progress_of_template', value: 'з {target}', note: 'Другий, дрібніший рядок лічильника: "{done} " + це поруч, напр. "6 з 20".' },
 
   // ---------- steps.* (04-steps.html) ----------
   { key: 'steps.important_step_label', value: 'Важливий крок' },

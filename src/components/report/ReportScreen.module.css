@@ -1,0 +1,63 @@
+.main {
+  flex: 1 1 auto;
+  padding: 24px 20px 40px;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+.eyebrow {
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.h1 {
+  font-size: clamp(28px, 5.6vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.14;
+  margin-bottom: 8px;
+}
+.sub {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: 22px;
+}
+.acts {
+  display: flex;
+  gap: 14px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+.big {
+  flex: 1 1 220px;
+  padding: 24px;
+  border-radius: var(--r);
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+  transition: transform 0.08s;
+}
+.big:active {
+  transform: scale(0.985);
+}
+.primary {
+  background: linear-gradient(150deg, var(--accent-hi), var(--accent-lo));
+  color: #fff;
+  box-shadow:
+    0 16px 40px rgba(127, 119, 221, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.glass.primary::after {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1));
+}
