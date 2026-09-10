@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { Blobs } from '@/components/Blobs'
+import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
 import { OpeningScreen } from '@/components/opening/OpeningScreen'
 import { getChecklistTemplate } from '@/lib/checklistTemplates'
@@ -28,6 +29,7 @@ export default async function OpeningPage() {
         offlineLabel={t(strings, 'shared.network_offline')}
       />
       <OpeningScreen strings={strings} workerName={session.name} items={template?.items ?? []} />
+      <BroadcastGate />
     </>
   )
 }

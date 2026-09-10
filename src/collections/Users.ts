@@ -14,6 +14,13 @@ export const Users: CollectionConfig = {
   auth: true,
   fields: [
     // Email added by default
-    // Add more fields as needed
+    {
+      name: 'name',
+      type: 'text',
+      label: "Ім'я",
+      admin: {
+        description: 'Показується як відправник у модалках повідомлень на планшеті (напр. "Тарас Водяний · CEO").',
+      },
+    },
   ],
 }

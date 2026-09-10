@@ -91,7 +91,14 @@ export function StepsScreen({ strings, workerName, task }: StepsScreenProps) {
               <div className={styles.kicker}>{tt('steps.important_step_label')}</div>
               <div className={styles.title}>{step.title}</div>
 
-              <div className={styles.media}>{tt('steps.media_placeholder')}</div>
+              <div className={styles.media}>
+                {step.mediaId ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- авторизований проксі, не Next Image loader
+                  <img src={`/api/app/media/${step.mediaId}`} alt={step.title} />
+                ) : (
+                  tt('steps.media_placeholder')
+                )}
+              </div>
 
               <div className={`glass ${styles.block} ${styles.key}`}>
                 <div className={styles.blockLab}>{tt('steps.key_point_label')}</div>

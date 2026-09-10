@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { Blobs } from '@/components/Blobs'
+import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
 import { StepsScreen } from '@/components/steps/StepsScreen'
 import { getTaskWithSteps } from '@/lib/taskSteps'
@@ -42,6 +43,7 @@ export default async function StepsPage({
         offlineLabel={t(strings, 'shared.network_offline')}
       />
       <StepsScreen strings={strings} workerName={session.name} task={task} />
+      <BroadcastGate />
     </>
   )
 }

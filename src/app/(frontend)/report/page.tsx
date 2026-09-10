@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { Blobs } from '@/components/Blobs'
+import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
 import { ReportScreen } from '@/components/report/ReportScreen'
 import { getUiStrings, t } from '@/lib/uiStrings'
@@ -31,6 +32,7 @@ export default async function ReportPage({
         offlineLabel={t(strings, 'shared.network_offline')}
       />
       <ReportScreen kind={kind} strings={strings} />
+      <BroadcastGate />
     </>
   )
 }

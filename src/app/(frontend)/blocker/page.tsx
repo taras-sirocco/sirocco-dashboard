@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { Blobs } from '@/components/Blobs'
+import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
 import { BlockerScreen } from '@/components/blocker/BlockerScreen'
 import { getTodayShift } from '@/lib/shifts'
@@ -39,6 +40,7 @@ export default async function BlockerPage() {
         offlineLabel={t(strings, 'shared.network_offline')}
       />
       <BlockerScreen strings={strings} workerName={session.name} gaps={gaps} />
+      <BroadcastGate />
     </>
   )
 }

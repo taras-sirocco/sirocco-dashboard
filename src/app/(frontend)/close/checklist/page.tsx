@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { Blobs } from '@/components/Blobs'
+import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
 import { ShiftStatusBar } from '@/components/ShiftStatusBar'
 import { ClosingChecklistScreen } from '@/components/close/ClosingChecklistScreen'
@@ -36,6 +37,7 @@ export default async function ClosingChecklistPage() {
       />
       <ShiftStatusBar strings={strings} name={session.name} />
       <ClosingChecklistScreen strings={strings} workerName={session.name} initialItems={items} />
+      <BroadcastGate />
     </>
   )
 }

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { Blobs } from '@/components/Blobs'
+import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
 import { TaskScreen } from '@/components/tasks/TaskScreen'
 import { getTodayShift } from '@/lib/shifts'
@@ -34,6 +35,7 @@ export default async function TasksPage() {
         offlineLabel={t(strings, 'shared.network_offline')}
       />
       <TaskScreen strings={strings} workerName={session.name} tasks={tasks} />
+      <BroadcastGate />
     </>
   )
 }

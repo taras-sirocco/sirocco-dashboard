@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { Blobs } from '@/components/Blobs'
+import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
 import { HubScreen } from '@/components/hub/HubScreen'
 import { getChangesLog } from '@/lib/changesLog'
@@ -36,6 +37,7 @@ export default async function HubPage() {
         offlineLabel={t(strings, 'shared.network_offline')}
       />
       <HubScreen strings={strings} workerName={session.name} tasks={tasks} changes={changes} />
+      <BroadcastGate />
     </>
   )
 }

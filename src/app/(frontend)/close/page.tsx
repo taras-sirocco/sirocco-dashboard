@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { Blobs } from '@/components/Blobs'
+import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
 import { DailySheetScreen } from '@/components/close/DailySheetScreen'
 import { getTodayComments } from '@/lib/comments'
@@ -36,6 +37,7 @@ export default async function DailySheetPage() {
         offlineLabel={t(strings, 'shared.network_offline')}
       />
       <DailySheetScreen strings={strings} workerName={session.name} tasks={tasks} comments={comments} />
+      <BroadcastGate />
     </>
   )
 }

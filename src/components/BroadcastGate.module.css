@@ -1,0 +1,69 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(8, 10, 20, 0.72);
+  backdrop-filter: blur(4px);
+}
+.modal {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 24px;
+  padding: 32px 28px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+.message {
+  background: #e8e9f0;
+  color: #1a1740;
+}
+.task {
+  background: #f5cf5a;
+  color: #3a2e05;
+}
+.kind {
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-bottom: 14px;
+  opacity: 0.7;
+}
+.from {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  opacity: 0.75;
+}
+.body {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+.extra {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: 24px;
+  opacity: 0.85;
+}
+.ack {
+  width: 100%;
+  padding: 22px;
+  border-radius: 16px;
+  text-align: center;
+  font-size: 19px;
+  font-weight: 800;
+}
+.message .ack {
+  background: #1a1740;
+  color: #fff;
+}
+.task .ack {
+  background: #3a2e05;
+  color: #f5cf5a;
+}

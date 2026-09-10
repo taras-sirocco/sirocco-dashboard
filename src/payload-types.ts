@@ -151,6 +151,10 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  /**
+   * Показується як відправник у модалках повідомлень на планшеті (напр. "Тарас Водяний · CEO").
+   */
+  name?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -637,6 +641,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
