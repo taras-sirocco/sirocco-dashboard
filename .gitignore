@@ -42,6 +42,7 @@ yarn-error.log*
 next-env.d.ts
 
 .env
+.env.production
 
 /media
 
@@ -51,3 +52,4 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+.neon
