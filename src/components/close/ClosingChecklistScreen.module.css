@@ -164,14 +164,8 @@
   justify-content: center;
 }
 .idlelogo {
-  font-size: clamp(30px, 8vw, 54px);
-  font-weight: 800;
-  letter-spacing: 0.28em;
-  color: var(--text-secondary);
-  opacity: 0.55;
-  border: 1.5px dashed rgba(255, 255, 255, 0.28);
-  border-radius: 16px;
-  padding: 22px 34px;
+  width: clamp(220px, 40vw, 420px);
+  height: auto;
 }
 .idletap {
   position: fixed;

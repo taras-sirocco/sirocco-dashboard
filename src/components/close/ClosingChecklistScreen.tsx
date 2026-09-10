@@ -171,7 +171,8 @@ export function ClosingChecklistScreen({ strings, workerName, initialItems }: Cl
 
       <section className={`${styles.view} ${view === 'idle' ? styles.on : ''}`}>
         <div className={styles.idlewrap}>
-          <div className={styles.idlelogo}>SIROCCO</div>
+          {/* eslint-disable-next-line @next/next/no-img-element -- статичний файл з /public */}
+          <img className={styles.idlelogo} src="/logo.svg" alt="Sirocco Energy" />
         </div>
       </section>
 
