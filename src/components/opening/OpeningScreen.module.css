@@ -45,12 +45,14 @@
   color: var(--text-secondary);
   font-weight: 700;
   margin-bottom: 14px;
+  text-align: center;
 }
 .h1 {
   font-size: clamp(28px, 5.4vw, 42px);
   font-weight: 800;
   letter-spacing: -0.025em;
   line-height: 1.14;
+  text-align: center;
 }
 .sub {
   font-size: clamp(15px, 2.6vw, 18px);

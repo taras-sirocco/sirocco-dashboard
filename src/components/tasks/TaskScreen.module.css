@@ -37,6 +37,7 @@
   color: var(--text-secondary);
   font-weight: 700;
   margin-bottom: 12px;
+  text-align: center;
 }
 .tname {
   font-size: clamp(30px, 6vw, 46px);
@@ -44,6 +45,7 @@
   letter-spacing: -0.03em;
   line-height: 1.14;
   margin-bottom: 26px;
+  text-align: center;
 }
 
 .counter {

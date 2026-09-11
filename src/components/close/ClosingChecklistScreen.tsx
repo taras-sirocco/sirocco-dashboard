@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
+import { ShiftStatusBar } from '@/components/ShiftStatusBar'
 import type { ClosingChecklistItem } from '@/lib/closingChecklist'
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
 import { submitForm, submitJson } from '@/offline/submit'
@@ -135,6 +136,9 @@ export function ClosingChecklistScreen({ strings, workerName, initialItems }: Cl
 
   return (
     <main className={styles.main}>
+      {(view === 'checklist' || view === 'confirm') && (
+        <ShiftStatusBar strings={strings} name={workerName} />
+      )}
       <input
         ref={camInput}
         className={styles.hiddenInput}

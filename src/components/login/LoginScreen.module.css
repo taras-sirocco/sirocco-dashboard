@@ -17,6 +17,7 @@
   letter-spacing: -0.025em;
   line-height: 1.12;
   margin-bottom: 24px;
+  text-align: center;
 }
 
 /* ---- люди ---- */
@@ -64,6 +65,7 @@
   min-width: 0;
   position: relative;
   z-index: 1;
+  text-align: left;
 }
 .pname {
   display: block;

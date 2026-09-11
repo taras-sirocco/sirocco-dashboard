@@ -18,6 +18,7 @@
   color: var(--text-secondary);
   font-weight: 800;
   margin-bottom: 10px;
+  text-align: center;
 }
 .h1 {
   font-size: clamp(28px, 5.6vw, 42px);
@@ -25,6 +26,7 @@
   letter-spacing: -0.03em;
   line-height: 1.14;
   margin-bottom: 8px;
+  text-align: center;
 }
 .sub {
   font-size: 16px;

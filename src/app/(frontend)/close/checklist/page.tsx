@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { Blobs } from '@/components/Blobs'
 import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
-import { ShiftStatusBar } from '@/components/ShiftStatusBar'
 import { ClosingChecklistScreen } from '@/components/close/ClosingChecklistScreen'
 import { getClosingChecklistState } from '@/lib/closingChecklist'
 import { getTodayShift } from '@/lib/shifts'
@@ -36,7 +35,6 @@ export default async function ClosingChecklistPage() {
         offlineLabel={t(strings, 'shared.network_offline')}
         pendingSyncTemplate={t(strings, 'shared.pending_sync_template')}
       />
-      <ShiftStatusBar strings={strings} name={session.name} />
       <ClosingChecklistScreen strings={strings} workerName={session.name} initialItems={items} />
       <BroadcastGate />
     </>
