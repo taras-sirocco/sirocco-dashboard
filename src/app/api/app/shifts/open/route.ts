@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
+import { isShiftStale } from '@/lib/shifts'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
+import type { Shift } from '@/payload-types'
 
 /**
  * Починає (або продовжує) відкриття зміни. НЕ прив'язано до календарного
@@ -11,6 +13,12 @@ import { getSessionWorker } from '@/utilities/getSessionWorker'
  * чи є незакрита, а не по даті). Відповідального завжди беремо з сесії,
  * НІКОЛИ з тіла запиту — інакше будь-хто міг би відкрити зміну від
  * чужого імені.
+ *
+ * Самозагоєння: якщо знайдена незакрита зміна висить довше STALE_SHIFT_HOURS
+ * (забули закрити — планшет розрядився, пішли додому), ми сама її
+ * закриваємо з autoClosed:true і продовжуємо як з чистого аркуша. Це
+ * єдина точка входу для нового робочого циклу, тому саме тут і чистимо —
+ * жодного окремого крон-завдання не треба.
  */
 export async function POST() {
   const session = await getSessionWorker()
@@ -32,7 +40,19 @@ export async function POST() {
     overrideAccess: true,
   })
 
-  let shift = existingShifts.docs[0] ?? null
+  let shift: Shift | null = existingShifts.docs[0] ?? null
+
+  if (shift && isShiftStale(shift)) {
+    // Забута зміна (тривала б реально стільки годин ніколи) — закриваємо
+    // самі, помічаємо autoClosed, і далі поводимось так, ніби її не було.
+    await payload.update({
+      collection: 'shifts',
+      id: shift.id,
+      data: { closedAt: new Date().toISOString(), autoClosed: true },
+      overrideAccess: true,
+    })
+    shift = null
+  }
 
   if (shift?.openedAt) {
     // Уже повністю відкрита й ще не закрита — повертаємо як є, клієнт

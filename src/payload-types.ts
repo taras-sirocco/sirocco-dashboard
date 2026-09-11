@@ -202,7 +202,7 @@ export interface Media {
   focalY?: number | null;
 }
 /**
- * Одна зміна на дільниці — від відкриття до закриття.
+ * Один цикл відкриття-закриття на дільниці. Не прив’язано до календарного дня — за день може бути кілька записів.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "shifts".
@@ -213,6 +213,10 @@ export interface Shift {
   responsibleUser: number | Worker;
   openedAt?: string | null;
   closedAt?: string | null;
+  /**
+   * Система сама закрила зміну — вона лишалась відкритою понад 16 годин, ніхто не пройшов чек-лист закриття. Операційний сигнал: хтось забув закрити зміну.
+   */
+  autoClosed?: boolean | null;
   /**
    * Відповідь на останнє питання відкриття зміни.
    */
@@ -708,6 +712,7 @@ export interface ShiftsSelect<T extends boolean = true> {
   responsibleUser?: T;
   openedAt?: T;
   closedAt?: T;
+  autoClosed?: T;
   handoverOk?: T;
   handoverNote?: T;
   updatedAt?: T;

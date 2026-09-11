@@ -10,8 +10,9 @@ export const Shifts: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'date',
-    defaultColumns: ['date', 'responsibleUser', 'openedAt', 'closedAt'],
-    description: 'Одна зміна на дільниці — від відкриття до закриття.',
+    defaultColumns: ['date', 'responsibleUser', 'openedAt', 'closedAt', 'autoClosed'],
+    description:
+      'Один цикл відкриття-закриття на дільниці. Не прив’язано до календарного дня — за день може бути кілька записів.',
     group: 'Зміна',
   },
   access: {
@@ -51,6 +52,16 @@ export const Shifts: CollectionConfig = {
       label: 'Закрито о',
       admin: {
         date: { pickerAppearance: 'dayAndTime' },
+      },
+    },
+    {
+      name: 'autoClosed',
+      type: 'checkbox',
+      label: 'Закрито автоматично (забули)',
+      defaultValue: false,
+      admin: {
+        description:
+          'Система сама закрила зміну — вона лишалась відкритою понад 16 годин, ніхто не пройшов чек-лист закриття. Операційний сигнал: хтось забув закрити зміну.',
       },
     },
     {
