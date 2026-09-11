@@ -91,11 +91,7 @@ export async function POST(req: NextRequest) {
       mediaId = photoDoc.id
     } catch (err) {
       console.error('Closing checklist photo upload failed:', err)
-      // TODO(temp-diagnostic): прибрати деталі помилки з відповіді після діагностики Blob на проді.
-      return NextResponse.json(
-        { error: 'UPLOAD_FAILED', detail: err instanceof Error ? err.message : String(err) },
-        { status: 500 },
-      )
+      return NextResponse.json({ error: 'UPLOAD_FAILED' }, { status: 500 })
     }
   }
 
