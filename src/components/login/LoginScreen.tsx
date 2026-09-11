@@ -143,7 +143,7 @@ export function LoginScreen({ workers, strings }: LoginScreenProps) {
                 ))}
               </div>
               <div className={styles.err}>{error}</div>
-              <button className={`glass ${styles.ghost}`} onClick={backToPeople}>
+              <button className={styles.notMe} onClick={backToPeople}>
                 {tt('login.not_me')}
               </button>
             </div>

@@ -140,7 +140,11 @@ export function OpeningScreen({ strings, workerName, items }: OpeningScreenProps
         {/* eslint-disable-next-line react/no-danger -- текст з uiStrings (адмінка), не від користувача */}
         <p className={styles.sub} dangerouslySetInnerHTML={{ __html: tt('opening.intro') }} />
         <div className={styles.acts}>
-          <button className={`glass ${styles.big} ${styles.primary}`} disabled={busy} onClick={begin}>
+          <button
+            className={`glass ${styles.big} ${styles.primary} ${styles.narrow}`}
+            disabled={busy}
+            onClick={begin}
+          >
             {tt('opening.start_button')}
           </button>
         </div>

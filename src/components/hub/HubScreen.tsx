@@ -35,7 +35,7 @@ export function HubScreen({ strings, workerName, tasks, changes }: HubScreenProp
       {/* --- ХАБ --- */}
       <section className={`${styles.view} ${view === 'hub' ? styles.on : ''}`}>
         <ShiftStatusBar strings={strings} name={workerName} />
-        <button className={`glass ${styles.closeTop}`} onClick={() => router.push('/blocker')}>
+        <button className={styles.closeTop} onClick={() => router.push('/blocker')}>
           <span className={styles.tileIc}>🌙</span>
           <span>{tt('hub.close_shift_tile')}</span>
         </button>
@@ -93,12 +93,12 @@ export function HubScreen({ strings, workerName, tasks, changes }: HubScreenProp
             <span className={styles.tileIc}>⚠️</span>
             <span className={styles.tileT}>{tt('shared.dock_critical')}</span>
           </button>
-          <button className={`glass ${styles.tile} ${styles.wide}`} onClick={() => setView('changes')}>
-            <span className={styles.tileIc}>✨</span>
-            <span className={styles.tileT}>{tt('hub.changes_tile')}</span>
-            {changes.newCount > 0 && <span className={styles.badge}>{changes.newCount}</span>}
-          </button>
         </div>
+
+        <button className={styles.changesLink} onClick={() => setView('changes')}>
+          {tt('hub.changes_tile')}
+          {changes.newCount > 0 && <span className={styles.badge}>{changes.newCount}</span>}
+        </button>
       </section>
 
       {/* --- ЩО ЗМІНИЛИ --- */}

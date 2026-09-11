@@ -60,6 +60,7 @@
   margin-top: 10px;
   font-weight: 500;
   line-height: 1.45;
+  text-align: center;
 }
 
 .qplain {
@@ -100,6 +101,11 @@
 }
 .big:active {
   transform: scale(0.985);
+}
+/* Кнопка "Почати" — не на всю ширину, лише приблизно третина екрана, по центру. */
+.narrow {
+  max-width: 320px;
+  margin-inline: auto;
 }
 .primary {
   background: linear-gradient(150deg, var(--accent-hi), var(--accent-lo));

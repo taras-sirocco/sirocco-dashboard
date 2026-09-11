@@ -22,11 +22,16 @@
 
 /* ---- люди ---- */
 .people {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 16px;
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
 }
 .person {
+  width: 100%;
   padding: 22px;
   min-height: 136px;
   display: flex;
@@ -85,12 +90,15 @@
 /* ---- PIN ---- */
 .pinwrap {
   display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
+  flex-direction: column;
   align-items: center;
+  gap: 22px;
+  text-align: center;
 }
 .who {
-  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   min-width: 0;
 }
 .who .ini {
@@ -103,13 +111,16 @@
   font-size: clamp(25px, 4.6vw, 35px);
   font-weight: 800;
   letter-spacing: -0.025em;
+  text-align: center;
 }
 .who .prole {
   font-size: 16px;
   margin-top: 6px;
+  text-align: center;
 }
 .dots {
   display: flex;
+  justify-content: center;
   gap: 14px;
   margin: 26px 0 12px;
 }
@@ -129,19 +140,21 @@
   color: var(--danger-text);
   min-height: 22px;
   font-weight: 500;
+  text-align: center;
 }
-.ghost {
-  margin-top: 12px;
-  display: inline-block;
-  padding: 13px 24px;
-  border-radius: 14px;
+.notMe {
+  /* Виглядає як просте підкреслене посилання, але з достатньою зоною
+     дотику (padding) — той самий принцип 60×60px, що й для звичайних
+     кнопок, просто невидимий тут. */
+  padding: 18px 20px;
+  margin: -12px 0;
   font-size: 16px;
   color: var(--text-secondary);
   font-weight: 500;
-  min-height: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .pad {
-  flex: 0 0 auto;
   display: grid;
   grid-template-columns: repeat(3, minmax(90px, 112px));
   gap: 12px;
@@ -223,7 +236,7 @@
 
 @media (max-width: 560px) {
   .people {
-    grid-template-columns: 1fr;
+    max-width: 100%;
   }
   .person {
     min-height: 0;

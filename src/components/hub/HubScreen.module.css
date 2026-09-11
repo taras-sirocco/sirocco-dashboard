@@ -31,16 +31,21 @@
   font-weight: 500;
   line-height: 1.45;
   margin-bottom: 22px;
+  text-align: center;
 }
 .closeTop {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   align-items: center;
-  gap: 10px;
-  padding: 14px 20px;
-  border-radius: 14px;
-  font-size: 15px;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 700;
-  margin-bottom: 18px;
+  margin: 0 auto 18px;
+  background: #000;
+  border: 1.5px solid #fff;
+  color: #fff;
 }
 .back {
   display: inline-flex;
@@ -119,46 +124,54 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 .tile {
-  padding: 20px;
-  min-height: 104px;
+  padding: 8px;
+  min-height: 36px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   transition: transform 0.08s;
 }
 .tile:active {
   transform: scale(0.98);
 }
 .tileIc {
-  font-size: 24px;
+  font-size: 14px;
 }
 .tileT {
-  font-size: 16px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1.25;
 }
-.tile.wide {
-  grid-column: 1 / -1;
-  min-height: 0;
-  flex-direction: row;
-  align-items: center;
-  gap: 14px;
+.changesLink {
+  display: block;
+  width: fit-content;
+  margin: 0 auto;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-align: center;
+  padding: 14px 10px;
 }
 .badge {
-  margin-left: auto;
+  margin-left: 8px;
   background: var(--accent);
   color: #1a1740;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
-  width: 26px;
-  height: 26px;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  display: flex;
   align-items: center;
   justify-content: center;
+  vertical-align: middle;
 }
 /* --- ЩО ЗМІНИЛИ --- */
 .chg {
