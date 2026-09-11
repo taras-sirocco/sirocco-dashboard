@@ -29,9 +29,9 @@ export async function POST() {
 
   let shift = existingShifts.docs[0] ?? null
 
-  if (shift?.openedAt) {
-    // Зміна на сьогодні вже повністю відкрита — повертаємо як є,
-    // клієнт веде користувача одразу на хаб, а не по чек-листу знову.
+  if (shift?.openedAt && !shift?.closedAt) {
+    // Зміна на сьогодні вже повністю відкрита й ще не закрита — повертаємо
+    // як є, клієнт веде користувача одразу на хаб, а не по чек-листу знову.
     return NextResponse.json({ shiftId: shift.id, alreadyOpen: true })
   }
 
@@ -41,13 +41,15 @@ export async function POST() {
       data: { date: start, responsibleUser: session.workerId },
       overrideAccess: true,
     })
-  } else if (shift.responsibleUser !== session.workerId) {
-    // Хтось інший почав, але не закінчив — відповідальним стає той, хто
-    // зараз реально проходить чек-лист.
+  } else {
+    // Або досі нема відповідального, або зміну відкривають повторно того
+    // самого дня (закрили й почали заново) — обидва випадки скидають
+    // closedAt, інакше /shifts/close одразу побачить старе значення й
+    // поверне його замість того, щоб обробити нове закриття.
     shift = await payload.update({
       collection: 'shifts',
       id: shift.id,
-      data: { responsibleUser: session.workerId },
+      data: { responsibleUser: session.workerId, closedAt: null },
       overrideAccess: true,
     })
   }

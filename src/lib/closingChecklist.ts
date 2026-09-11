@@ -32,10 +32,19 @@ export async function getClosingChecklistState(): Promise<ClosingChecklistItem[]
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
+  // Лише незавершений run — завершений належить попередньому циклу
+  // (зміну закрили й відкрили знову того самого дня), його старі
+  // відповіді/фото тут показувати не треба, починаємо з чистого.
   const run = await payload
     .find({
       collection: 'checklistRuns',
-      where: { and: [{ shift: { equals: shift.id } }, { template: { equals: template.id } }] },
+      where: {
+        and: [
+          { shift: { equals: shift.id } },
+          { template: { equals: template.id } },
+          { completedAt: { exists: false } },
+        ],
+      },
       limit: 1,
       overrideAccess: true,
     })

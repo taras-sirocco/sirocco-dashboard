@@ -107,9 +107,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'NO_TEMPLATE' }, { status: 500 })
   }
 
+  // Лише незавершений run — якщо попередній цикл (закрили й відкрили
+  // знову того самого дня) уже завершив цей шаблон, починаємо новий, а не
+  // дописуємо у старий.
   const existingRuns = await payload.find({
     collection: 'checklistRuns',
-    where: { and: [{ shift: { equals: shift.id } }, { template: { equals: template.id } }] },
+    where: {
+      and: [
+        { shift: { equals: shift.id } },
+        { template: { equals: template.id } },
+        { completedAt: { exists: false } },
+      ],
+    },
     limit: 1,
     overrideAccess: true,
   })
