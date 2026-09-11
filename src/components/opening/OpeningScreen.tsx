@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { NoteField } from '@/components/NoteField'
 import { ShiftStatusBar } from '@/components/ShiftStatusBar'
-import { VoiceRecorder } from '@/components/VoiceRecorder'
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
 import type { ChecklistItem } from '@/lib/checklistTemplates'
 
@@ -27,7 +27,6 @@ export function OpeningScreen({ strings, workerName, items }: OpeningScreenProps
   const [shiftId, setShiftId] = useState<number | null>(null)
   const [runId, setRunId] = useState<number | null>(null)
   const [note, setNote] = useState('')
-  const [hadVoice, setHadVoice] = useState(false)
   const [busy, setBusy] = useState(false)
   const [notReadySent, setNotReadySent] = useState(false)
 
@@ -80,20 +79,17 @@ export function OpeningScreen({ strings, workerName, items }: OpeningScreenProps
 
   function openProblem() {
     setNote('')
-    setHadVoice(false)
     setStep('problem')
   }
 
   async function sendProblem() {
-    const text = note || (hadVoice ? 'голосовий запис' : '')
-    await answer('problem', text || undefined)
+    await answer('problem', note.trim() || undefined)
   }
 
   async function handover(accepted: boolean) {
     if (!shiftId || busy) return
     if (!accepted) {
       setNote('')
-      setHadVoice(false)
       setStep('notReadyReason')
       return
     }
@@ -114,11 +110,10 @@ export function OpeningScreen({ strings, workerName, items }: OpeningScreenProps
     if (!shiftId || busy) return
     setBusy(true)
     try {
-      const text = note || (hadVoice ? 'голосовий запис' : '')
       await fetch('/api/app/shifts/handover', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shiftId, accepted: false, note: text || undefined }),
+        body: JSON.stringify({ shiftId, accepted: false, note: note.trim() || undefined }),
       })
       setNotReadySent(true)
     } finally {
@@ -174,16 +169,7 @@ export function OpeningScreen({ strings, workerName, items }: OpeningScreenProps
       <section className={`${styles.step} ${step === 'problem' ? styles.on : ''}`}>
         <div className={styles.eyebrow}>{tt('opening.problem_eyebrow')}</div>
         <h1 className={styles.h1}>{tt('opening.problem_title')}</h1>
-        <VoiceRecorder
-          value={note}
-          onChange={setNote}
-          onRecordingStop={() => setHadVoice(true)}
-          idleHint={tt('shared.voice_hint_idle')}
-          recordingHint={tt('shared.voice_hint_recording')}
-          unavailableHint={tt('shared.voice_hint_unavailable')}
-          placeholder={tt('shared.text_placeholder_short')}
-          micAriaLabel={tt('shared.mic_aria_label')}
-        />
+        <NoteField value={note} onChange={setNote} placeholder={tt('shared.text_placeholder_short')} />
         <div className={styles.acts}>
           <button className={`glass ${styles.big} ${styles.primary}`} disabled={busy} onClick={sendProblem}>
             {tt('opening.problem_send')}
@@ -225,16 +211,7 @@ export function OpeningScreen({ strings, workerName, items }: OpeningScreenProps
           <>
             <div className={styles.eyebrow}>{tt('opening.not_ready_eyebrow')}</div>
             <h1 className={styles.h1}>{tt('opening.not_ready_title')}</h1>
-            <VoiceRecorder
-              value={note}
-              onChange={setNote}
-              onRecordingStop={() => setHadVoice(true)}
-              idleHint={tt('shared.voice_hint_idle')}
-              recordingHint={tt('shared.voice_hint_recording')}
-              unavailableHint={tt('shared.voice_hint_unavailable')}
-              placeholder={tt('shared.text_placeholder_short')}
-              micAriaLabel={tt('shared.mic_aria_label')}
-            />
+            <NoteField value={note} onChange={setNote} placeholder={tt('shared.text_placeholder_short')} />
             <div className={styles.acts}>
               <button className={`glass ${styles.big} ${styles.primary}`} disabled={busy} onClick={sendNotReady}>
                 {tt('opening.not_ready_send')}

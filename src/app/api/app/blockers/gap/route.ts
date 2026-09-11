@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
-import { createAudioMedia } from '@/lib/audioMedia'
 import { getTodayShift, todayRange } from '@/lib/shifts'
 import { getTodayTasksWithProgress } from '@/lib/tasks'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
@@ -12,8 +11,7 @@ import { getSessionWorker } from '@/utilities/getSessionWorker'
  * kind: gap) і автоматично переносить залишок на завтра — нову задачу
  * з targetQty = залишок, carriedFromTask = ця задача. done/target
  * беремо із сервера (getTodayTasksWithProgress), не з тіла запиту —
- * клієнт не може підробити цифри недобору. Приймає JSON або multipart
- * (taskId, text, audio) — як /api/app/comments.
+ * клієнт не може підробити цифри недобору.
  */
 export async function POST(req: NextRequest) {
   const session = await getSessionWorker()
@@ -21,35 +19,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'UNAUTHENTICATED' }, { status: 401 })
   }
 
-  const contentType = req.headers.get('content-type') || ''
-  let taskId: number | null = null
-  let text = ''
-  let audioFile: File | null = null
-
-  if (contentType.includes('multipart/form-data')) {
-    const formData = await req.formData().catch(() => null)
-    if (!formData) {
-      return NextResponse.json({ error: 'INVALID_BODY' }, { status: 400 })
-    }
-    const rawTaskId = formData.get('taskId')
-    taskId = typeof rawTaskId === 'string' && rawTaskId.trim() ? Number(rawTaskId) : null
-    const rawText = formData.get('text')
-    if (typeof rawText === 'string') text = rawText
-    const rawAudio = formData.get('audio')
-    if (rawAudio instanceof File) audioFile = rawAudio
-  } else {
-    let body: unknown
-    try {
-      body = await req.json()
-    } catch {
-      return NextResponse.json({ error: 'INVALID_BODY' }, { status: 400 })
-    }
-    const { taskId: rawTaskId, text: rawText } = (body ?? {}) as { taskId?: unknown; text?: unknown }
-    taskId = typeof rawTaskId === 'number' ? rawTaskId : null
-    if (typeof rawText === 'string') text = rawText
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'INVALID_BODY' }, { status: 400 })
   }
 
-  if (taskId === null || !Number.isInteger(taskId)) {
+  const { taskId, text } = (body ?? {}) as { taskId?: unknown; text?: unknown }
+  if (typeof taskId !== 'number') {
     return NextResponse.json({ error: 'INVALID_INPUT' }, { status: 400 })
   }
 
@@ -72,21 +50,6 @@ export async function POST(req: NextRequest) {
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
-  let mediaId: number | undefined
-  let transcript: string | undefined
-  if (audioFile) {
-    const buffer = Buffer.from(await audioFile.arrayBuffer())
-    const result = await createAudioMedia(payload, {
-      buffer,
-      mimetype: audioFile.type || 'audio/webm',
-      filename: audioFile.name || `voice-${Date.now()}.webm`,
-      source: 'blocker',
-      shiftId: shift.id,
-    })
-    mediaId = result.mediaId
-    transcript = result.transcript
-  }
-
   await payload.create({
     collection: 'blockers',
     data: {
@@ -94,9 +57,7 @@ export async function POST(req: NextRequest) {
       task: taskId,
       shift: shift.id,
       worker: session.workerId,
-      text: text.trim() || undefined,
-      transcript,
-      media: mediaId ? [mediaId] : undefined,
+      text: typeof text === 'string' ? text : undefined,
       qtyDone: task.done,
       targetQty: task.targetQty,
     },

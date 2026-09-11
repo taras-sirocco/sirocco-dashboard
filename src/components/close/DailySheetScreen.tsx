@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { NoteField } from '@/components/NoteField'
 import { ShiftStatusBar } from '@/components/ShiftStatusBar'
-import { VoiceRecorder } from '@/components/VoiceRecorder'
 import type { CommentEntry } from '@/lib/comments'
 import type { TaskWithProgress } from '@/lib/tasksFormat'
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
@@ -24,11 +24,10 @@ export function DailySheetScreen({ strings, workerName, tasks, comments }: Daily
 
   const [showRecorder, setShowRecorder] = useState(false)
   const [note, setNote] = useState('')
-  const [hadVoice, setHadVoice] = useState(false)
   const [busy, setBusy] = useState(false)
 
   async function sendComment() {
-    const text = note || (hadVoice ? 'голосовий запис' : '')
+    const text = note.trim()
     if (!text || busy) return
     setBusy(true)
     try {
@@ -39,7 +38,6 @@ export function DailySheetScreen({ strings, workerName, tasks, comments }: Daily
       })
       if (res.ok) {
         setNote('')
-        setHadVoice(false)
         setShowRecorder(false)
         router.refresh()
       }
@@ -101,21 +99,9 @@ export function DailySheetScreen({ strings, workerName, tasks, comments }: Daily
         })}
 
         {showRecorder ? (
-          <VoiceRecorder
-            value={note}
-            onChange={setNote}
-            onRecordingStop={() => setHadVoice(true)}
-            idleHint={tt('shared.voice_hint_idle')}
-            recordingHint={tt('shared.voice_hint_recording')}
-            unavailableHint={tt('shared.voice_hint_unavailable')}
-            placeholder={tt('shared.text_placeholder_short')}
-            micAriaLabel={tt('shared.mic_aria_label')}
-          />
+          <NoteField value={note} onChange={setNote} placeholder={tt('shared.text_placeholder_short')} />
         ) : (
           <div className={styles.addcmt}>
-            <button className={`glass ${styles.addcmtBtn}`} onClick={() => setShowRecorder(true)}>
-              {tt('close.add_voice')}
-            </button>
             <button className={`glass ${styles.addcmtBtn}`} onClick={() => setShowRecorder(true)}>
               {tt('close.add_text')}
             </button>

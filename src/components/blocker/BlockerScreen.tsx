@@ -3,11 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { NoteField } from '@/components/NoteField'
 import { ShiftStatusBar } from '@/components/ShiftStatusBar'
-import { VoiceRecorder } from '@/components/VoiceRecorder'
 import type { TaskWithProgress } from '@/lib/tasksFormat'
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
-import { submitForm, submitJson } from '@/offline/submit'
+import { submitJson } from '@/offline/submit'
 
 import styles from './BlockerScreen.module.css'
 
@@ -23,7 +23,6 @@ export function BlockerScreen({ strings, workerName, gaps }: BlockerScreenProps)
 
   const [index, setIndex] = useState(0)
   const [note, setNote] = useState('')
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [busy, setBusy] = useState(false)
 
   const current = gaps[index]
@@ -36,18 +35,13 @@ export function BlockerScreen({ strings, workerName, gaps }: BlockerScreenProps)
     if (!current || busy) return
     setBusy(true)
     try {
-      const result = audioBlob
-        ? await submitForm(
-            '/api/app/blockers/gap',
-            'blocker-gap',
-            { taskId: String(current.id), text: note },
-            { blob: audioBlob, fieldName: 'audio', fileName: `voice-${Date.now()}.webm` },
-          )
-        : await submitJson('/api/app/blockers/gap', 'blocker-gap', { taskId: current.id, text: note || undefined })
+      const result = await submitJson('/api/app/blockers/gap', 'blocker-gap', {
+        taskId: current.id,
+        text: note.trim() || undefined,
+      })
 
       if (result.ok) {
         setNote('')
-        setAudioBlob(null)
         if (index + 1 < gaps.length) {
           setIndex(index + 1)
         } else {
@@ -93,16 +87,7 @@ export function BlockerScreen({ strings, workerName, gaps }: BlockerScreenProps)
           </div>
         </div>
 
-        <VoiceRecorder
-          value={note}
-          onChange={setNote}
-          onRecordingStop={setAudioBlob}
-          idleHint={tt('blocker.voice_hint_idle')}
-          recordingHint={tt('shared.voice_hint_recording')}
-          unavailableHint={tt('shared.voice_hint_unavailable')}
-          placeholder={tt('shared.text_placeholder_short')}
-          micAriaLabel={tt('shared.mic_aria_label')}
-        />
+        <NoteField value={note} onChange={setNote} placeholder={tt('shared.text_placeholder_short')} />
 
         <div className={styles.carry}>
           <span className={styles.carryIc}>↻</span>

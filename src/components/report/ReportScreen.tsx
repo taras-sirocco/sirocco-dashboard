@@ -3,9 +3,9 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { VoiceRecorder } from '@/components/VoiceRecorder'
+import { NoteField } from '@/components/NoteField'
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
-import { submitForm, submitJson } from '@/offline/submit'
+import { submitJson } from '@/offline/submit'
 
 import styles from './ReportScreen.module.css'
 
@@ -26,7 +26,6 @@ export function ReportScreen({ kind, strings }: ReportScreenProps) {
   const tt = (key: string) => t(strings, key)
 
   const [note, setNote] = useState('')
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
   const [queued, setQueued] = useState(false)
@@ -35,19 +34,12 @@ export function ReportScreen({ kind, strings }: ReportScreenProps) {
 
   async function send() {
     if (busy) return
-    if (!note.trim() && !audioBlob) return
+    if (!note.trim()) return
     setBusy(true)
     try {
       const url = critical ? '/api/app/blockers/critical' : '/api/app/comments'
       const kindTag = critical ? 'blocker-critical' : 'comment'
-      const result = audioBlob
-        ? await submitForm(
-            url,
-            kindTag,
-            { text: note },
-            { blob: audioBlob, fieldName: 'audio', fileName: `voice-${Date.now()}.webm` },
-          )
-        : await submitJson(url, kindTag, { text: note })
+      const result = await submitJson(url, kindTag, { text: note })
 
       if (result.ok) {
         setSent(true)
@@ -71,17 +63,7 @@ export function ReportScreen({ kind, strings }: ReportScreenProps) {
         <>
           <h1 className={styles.h1}>{critical ? tt('hub.critical_title') : tt('hub.note_title')}</h1>
           <p className={styles.sub}>{critical ? tt('hub.critical_sub') : tt('hub.note_sub')}</p>
-          <VoiceRecorder
-            value={note}
-            onChange={setNote}
-            onRecordingStop={setAudioBlob}
-            critical={critical}
-            idleHint={tt('hub.voice_hint_idle')}
-            recordingHint={tt('shared.voice_hint_recording')}
-            unavailableHint={tt('shared.voice_hint_unavailable')}
-            placeholder={tt('shared.text_placeholder_short')}
-            micAriaLabel={tt('hub.mic_aria_label')}
-          />
+          <NoteField value={note} onChange={setNote} placeholder={tt('shared.text_placeholder_short')} />
           <div className={styles.acts}>
             <button className={`glass ${styles.big} ${styles.primary}`} disabled={busy} onClick={send}>
               {critical ? tt('hub.send_button_critical') : tt('hub.send_button')}
