@@ -9,6 +9,11 @@ import { getSessionWorker } from '@/utilities/getSessionWorker'
  * Одна відповідь чек-листа закриття (toggle ok/problem, опційно фото).
  * Run для сьогоднішньої зміни резолвиться/створюється тут-таки — клієнт
  * не знає і не передає runId/shiftId, тільки itemKey.
+ *
+ * Приймає або JSON { itemKey, status, mediaId }, або multipart з полями
+ * itemKey, status і файлом photo — фото завантажується і прив'язується в
+ * одному запиті, щоб офлайн-черзі не довелось склеювати завантаження фото
+ * (окремий id) з наступним записом відповіді.
  */
 export async function POST(req: NextRequest) {
   const session = await getSessionWorker()
@@ -16,19 +21,37 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'UNAUTHENTICATED' }, { status: 401 })
   }
 
-  let body: unknown
-  try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ error: 'INVALID_BODY' }, { status: 400 })
+  const contentType = req.headers.get('content-type') || ''
+  let itemKey: string | null = null
+  let status: 'ok' | 'problem' | null = null
+  let mediaId: number | undefined
+  let photoFile: File | null = null
+
+  if (contentType.includes('multipart/form-data')) {
+    const formData = await req.formData().catch(() => null)
+    if (!formData) {
+      return NextResponse.json({ error: 'INVALID_BODY' }, { status: 400 })
+    }
+    const rawItemKey = formData.get('itemKey')
+    itemKey = typeof rawItemKey === 'string' ? rawItemKey : null
+    const rawStatus = formData.get('status')
+    status = rawStatus === 'ok' || rawStatus === 'problem' ? rawStatus : null
+    const rawPhoto = formData.get('photo')
+    if (rawPhoto instanceof File) photoFile = rawPhoto
+  } else {
+    let body: unknown
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ error: 'INVALID_BODY' }, { status: 400 })
+    }
+    const parsed = (body ?? {}) as { itemKey?: unknown; status?: unknown; mediaId?: unknown }
+    itemKey = typeof parsed.itemKey === 'string' ? parsed.itemKey : null
+    status = parsed.status === 'ok' || parsed.status === 'problem' ? parsed.status : null
+    mediaId = typeof parsed.mediaId === 'number' ? parsed.mediaId : undefined
   }
 
-  const { itemKey, status, mediaId } = (body ?? {}) as {
-    itemKey?: unknown
-    status?: unknown
-    mediaId?: unknown
-  }
-  if (typeof itemKey !== 'string' || (status !== 'ok' && status !== 'problem')) {
+  if (!itemKey || !status) {
     return NextResponse.json({ error: 'INVALID_INPUT' }, { status: 400 })
   }
 
@@ -39,6 +62,33 @@ export async function POST(req: NextRequest) {
 
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
+
+  if (photoFile) {
+    const buffer = Buffer.from(await photoFile.arrayBuffer())
+    try {
+      const photoDoc = await payload.create({
+        collection: 'media',
+        data: {
+          alt: 'Фото з планшета',
+          type: 'photo',
+          source: 'closing_checklist',
+          shift: shift.id,
+          takenAt: new Date().toISOString(),
+        },
+        file: {
+          data: buffer,
+          mimetype: photoFile.type || 'image/jpeg',
+          name: photoFile.name || `photo-${Date.now()}.jpg`,
+          size: buffer.length,
+        },
+        overrideAccess: true,
+      })
+      mediaId = photoDoc.id
+    } catch (err) {
+      console.error('Closing checklist photo upload failed:', err)
+      return NextResponse.json({ error: 'UPLOAD_FAILED' }, { status: 500 })
+    }
+  }
 
   const template = await payload
     .find({
@@ -75,7 +125,7 @@ export async function POST(req: NextRequest) {
 
   const data: { status: 'ok' | 'problem'; photo?: number; answeredAt: string } = {
     status,
-    photo: typeof mediaId === 'number' ? mediaId : undefined,
+    photo: mediaId,
     answeredAt: new Date().toISOString(),
   }
 
@@ -94,5 +144,5 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, mediaId })
 }

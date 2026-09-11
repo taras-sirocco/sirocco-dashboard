@@ -26,6 +26,7 @@ export default async function OpeningPage() {
       <TopBar
         onlineLabel={t(strings, 'shared.network_online')}
         offlineLabel={t(strings, 'shared.network_offline')}
+        pendingSyncTemplate={t(strings, 'shared.pending_sync_template')}
       />
       <OpeningScreen strings={strings} workerName={session.name} items={template?.items ?? []} />
     </>

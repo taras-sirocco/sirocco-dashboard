@@ -35,6 +35,7 @@ export default async function HubPage() {
       <TopBar
         onlineLabel={t(strings, 'shared.network_online')}
         offlineLabel={t(strings, 'shared.network_offline')}
+        pendingSyncTemplate={t(strings, 'shared.pending_sync_template')}
       />
       <HubScreen strings={strings} workerName={session.name} tasks={tasks} changes={changes} />
       <BroadcastGate />

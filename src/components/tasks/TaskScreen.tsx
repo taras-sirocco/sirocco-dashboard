@@ -7,6 +7,7 @@ import { Dock } from '@/components/Dock'
 import { ShiftStatusBar } from '@/components/ShiftStatusBar'
 import { getCurrentTaskIndex, type TaskWithProgress } from '@/lib/tasksFormat'
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
+import { submitJson } from '@/offline/submit'
 
 import styles from './TaskScreen.module.css'
 
@@ -57,15 +58,11 @@ export function TaskScreen({ strings, workerName, tasks: initialTasks }: TaskScr
     setQty(1)
     setError('')
 
-    try {
-      const res = await fetch('/api/app/tasks/progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId, qty: confirmedQty }),
-      })
-      if (!res.ok) throw new Error('not ok')
-    } catch {
-      // Відкат: те, що показали, не збереглось насправді.
+    const result = await submitJson('/api/app/tasks/progress', 'task-progress', { taskId, qty: confirmedQty })
+    if (!result.ok) {
+      // Відкат: те, що показали, не збереглось насправді (реальна помилка
+      // сервера — не мережа: мережеву відсутність submitJson сам поставив
+      // у чергу й повернув ok:true, queued:true).
       setTasks(previousTasks)
       setError(tt('task.progress_save_failed'))
     }

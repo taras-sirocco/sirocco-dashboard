@@ -30,6 +30,16 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'shared.text_placeholder_short', value: 'або напиши коротко', note: 'Плейсхолдер текстового поля під мікрофоном.' },
   { key: 'shared.network_online', value: 'Мережа є', note: 'Підказка (title) на індикаторі мережі в шапці.' },
   { key: 'shared.network_offline', value: 'Працюємо офлайн', note: 'Підказка (title) на індикаторі мережі в шапці.' },
+  {
+    key: 'shared.pending_sync_template',
+    value: '{n} дій очікують синхронізації',
+    note: 'Підказка (title) на бейджі кількості дій у черзі офлайн-синку.',
+  },
+  {
+    key: 'shared.queued_offline_notice',
+    value: 'Збережено. Немає мережі — надішлеться сама, щойно з’явиться.',
+    note: 'Показується замість помилки, коли дію прийнято в офлайн-чергу, а не втрачено.',
+  },
 
   // ---------- login.* (01-login.html) ----------
   { key: 'login.title', value: 'Відповідальний за зміну' },
@@ -158,6 +168,16 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
     key: 'close.photo_upload_failed',
     value: 'Не вдалося завантажити фото. Спробуй ще раз.',
     note: 'Показується, якщо запит на завантаження фото (камера) повернув помилку.',
+  },
+  {
+    key: 'close.answer_save_failed',
+    value: 'Не вдалося зберегти відповідь. Спробуй ще раз.',
+    note: 'Показується, якщо сервер відхилив відповідь пункту чек-листа (не про мережу — це йде в офлайн-чергу самостійно).',
+  },
+  {
+    key: 'close.confirm_needs_network',
+    value: 'Немає мережі — закриття зміни потребує з’єднання. Спробуй ще раз, коли з’явиться.',
+    note: 'Показується, якщо фінальне закриття зміни не змогло достукатись до сервера (мережа впала саме зараз).',
   },
   { key: 'close.checklist_submit', value: 'Все зроблено, закрити зміну' },
   { key: 'close.photo_present', value: 'фото є' },

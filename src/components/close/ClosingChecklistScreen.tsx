@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import type { ClosingChecklistItem } from '@/lib/closingChecklist'
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
+import { submitForm, submitJson } from '@/offline/submit'
 
 import styles from './ClosingChecklistScreen.module.css'
 
@@ -22,21 +23,30 @@ export function ClosingChecklistScreen({ strings, workerName, initialItems }: Cl
 
   const [view, setView] = useState<View>('checklist')
   const [items, setItems] = useState(initialItems)
+  // Локальні прев'ю фото, ще не синхронізованих (photoId === PENDING_PHOTO_ID) — блоб з камери,
+  // не з проксі-роуту, бо на сервері їх ще нема.
+  const [pendingPhotos, setPendingPhotos] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [closedAt, setClosedAt] = useState('')
   const camTarget = useRef<string | null>(null)
   const camInput = useRef<HTMLInputElement>(null)
 
+  const PENDING_PHOTO_ID = -1
+
   const allDone = items.every((item) => item.status === 'ok' && (!item.requiresPhoto || item.photoId))
 
-  async function answer(key: string, status: 'ok' | 'problem', mediaId?: number) {
-    setItems((prev) => prev.map((i) => (i.key === key ? { ...i, status, photoId: mediaId ?? i.photoId } : i)))
-    await fetch('/api/app/checklist/closing-answer', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ itemKey: key, status, mediaId }),
+  async function answer(key: string, status: 'ok' | 'problem') {
+    const previousItems = items
+    setItems((prev) => prev.map((i) => (i.key === key ? { ...i, status } : i)))
+    const result = await submitJson('/api/app/checklist/closing-answer', 'checklist-closing-answer', {
+      itemKey: key,
+      status,
     })
+    if (!result.ok) {
+      setItems(previousItems)
+      setError(tt('close.answer_save_failed'))
+    }
   }
 
   function tapItem(item: ClosingChecklistItem) {
@@ -55,17 +65,38 @@ export function ClosingChecklistScreen({ strings, workerName, initialItems }: Cl
     camTarget.current = null
     if (!file || !key) return
 
-    const form = new FormData()
-    form.append('file', file)
-    form.append('source', 'closing_checklist')
-    const res = await fetch('/api/app/media', { method: 'POST', body: form })
-    if (!res.ok) {
+    const previousItems = items
+    const previewUrl = URL.createObjectURL(file)
+    setPendingPhotos((prev) => ({ ...prev, [key]: previewUrl }))
+    setItems((prev) => prev.map((i) => (i.key === key ? { ...i, status: 'ok', photoId: PENDING_PHOTO_ID } : i)))
+    setError('')
+
+    const result = await submitForm(
+      '/api/app/checklist/closing-answer',
+      'checklist-closing-photo',
+      { itemKey: key, status: 'ok' },
+      { blob: file, fieldName: 'photo', fileName: file.name || `photo-${Date.now()}.jpg` },
+    )
+
+    if (!result.ok) {
+      setItems(previousItems)
+      setPendingPhotos((prev) => {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
       setError(tt('close.photo_upload_failed'))
       return
     }
-    setError('')
-    const { id } = (await res.json()) as { id: number }
-    await answer(key, 'ok', id)
+
+    if (!result.queued) {
+      const data = result.data as { mediaId?: number } | null
+      const mediaId = data?.mediaId
+      if (typeof mediaId === 'number') {
+        setItems((prev) => prev.map((i) => (i.key === key ? { ...i, photoId: mediaId } : i)))
+      }
+    }
+    // Якщо queued — лишаємо PENDING_PHOTO_ID + локальний прев'ю: синхронізується фоном.
   }
 
   async function confirmClose() {
@@ -82,6 +113,11 @@ export function ClosingChecklistScreen({ strings, workerName, initialItems }: Cl
         setError(tt('close.checklist_incomplete_error'))
         setView('checklist')
       }
+    } catch {
+      // Закриття зміни — єдина дія тут, що НЕ йде в офлайн-чергу: це
+      // фінальний, авторитетний момент, його свідомо не відкладаємо.
+      setError(tt('close.confirm_needs_network'))
+      setView('checklist')
     } finally {
       setBusy(false)
     }
@@ -130,8 +166,12 @@ export function ClosingChecklistScreen({ strings, workerName, initialItems }: Cl
               </div>
               {item.requiresPhoto && item.photoId && (
                 <div className={styles.photostrip}>
-                  {/* eslint-disable-next-line @next/next/no-img-element -- авторизований проксі, не Next Image loader */}
-                  <img className={styles.thumb} src={`/api/app/media/${item.photoId}`} alt="" />
+                  {/* eslint-disable-next-line @next/next/no-img-element -- авторизований проксі (або локальний прев'ю, поки не синхронізовано) */}
+                  <img
+                    className={styles.thumb}
+                    src={item.photoId > 0 ? `/api/app/media/${item.photoId}` : pendingPhotos[item.key]}
+                    alt=""
+                  />
                 </div>
               )}
             </div>

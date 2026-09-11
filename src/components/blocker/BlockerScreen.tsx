@@ -7,6 +7,7 @@ import { ShiftStatusBar } from '@/components/ShiftStatusBar'
 import { VoiceRecorder } from '@/components/VoiceRecorder'
 import type { TaskWithProgress } from '@/lib/tasksFormat'
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
+import { submitForm, submitJson } from '@/offline/submit'
 
 import styles from './BlockerScreen.module.css'
 
@@ -22,7 +23,7 @@ export function BlockerScreen({ strings, workerName, gaps }: BlockerScreenProps)
 
   const [index, setIndex] = useState(0)
   const [note, setNote] = useState('')
-  const [hadVoice, setHadVoice] = useState(false)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [busy, setBusy] = useState(false)
 
   const current = gaps[index]
@@ -35,15 +36,18 @@ export function BlockerScreen({ strings, workerName, gaps }: BlockerScreenProps)
     if (!current || busy) return
     setBusy(true)
     try {
-      const text = note || (hadVoice ? 'голосовий запис' : '')
-      const res = await fetch('/api/app/blockers/gap', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId: current.id, text: text || undefined }),
-      })
-      if (res.ok) {
+      const result = audioBlob
+        ? await submitForm(
+            '/api/app/blockers/gap',
+            'blocker-gap',
+            { taskId: String(current.id), text: note },
+            { blob: audioBlob, fieldName: 'audio', fileName: `voice-${Date.now()}.webm` },
+          )
+        : await submitJson('/api/app/blockers/gap', 'blocker-gap', { taskId: current.id, text: note || undefined })
+
+      if (result.ok) {
         setNote('')
-        setHadVoice(false)
+        setAudioBlob(null)
         if (index + 1 < gaps.length) {
           setIndex(index + 1)
         } else {
@@ -92,7 +96,7 @@ export function BlockerScreen({ strings, workerName, gaps }: BlockerScreenProps)
         <VoiceRecorder
           value={note}
           onChange={setNote}
-          onRecordingStop={() => setHadVoice(true)}
+          onRecordingStop={setAudioBlob}
           idleHint={tt('blocker.voice_hint_idle')}
           recordingHint={tt('shared.voice_hint_recording')}
           unavailableHint={tt('shared.voice_hint_unavailable')}

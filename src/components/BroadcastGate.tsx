@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
+import { submitJson } from '@/offline/submit'
 
 import styles from './BroadcastGate.module.css'
 
@@ -73,8 +74,8 @@ export function BroadcastGate() {
     if (busy) return
     setBusy(true)
     try {
-      await fetch(`/api/app/broadcasts/${current.id}/ack`, { method: 'POST' })
-      setQueue((prev) => prev.slice(1))
+      const result = await submitJson(`/api/app/broadcasts/${current.id}/ack`, 'broadcast-ack', {})
+      if (result.ok) setQueue((prev) => prev.slice(1))
     } finally {
       setBusy(false)
     }

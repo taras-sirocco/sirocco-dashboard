@@ -13,14 +13,14 @@ type VoiceRecorderProps = {
   placeholder: string
   micAriaLabel: string
   critical?: boolean
-  /** Викликається, коли запис зупинено — щоб батьківський екран знав, що є аудіо, навіть як текст порожній. */
-  onRecordingStop?: () => void
+  /** Викликається, коли запис зупинено, з готовим аудіо-блобом. */
+  onRecordingStop?: (blob: Blob) => void
 }
 
 /**
- * Тільки UX запису (MediaRecorder) — жодних рішень тут. Сам блоб поки не
- * вивантажується нікуди: реальне завантаження аудіо й транскрипція Whisper
- * заплановані на офлайн-синхронізацію (окремий крок), не на цей екран.
+ * UX запису (MediaRecorder) + збирання блоба. Сам блоб нікуди звідси не
+ * вивантажується — це робить батьківський екран (submitForm/офлайн-черга),
+ * разом із текстом, одним запитом.
  */
 export function VoiceRecorder({
   value,
@@ -39,11 +39,21 @@ export function VoiceRecorder({
   const recorderRef = useRef<MediaRecorder | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startRef = useRef(0)
+  const chunksRef = useRef<Blob[]>([])
 
   async function start() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const recorder = new MediaRecorder(stream)
+      chunksRef.current = []
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data)
+      }
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' })
+        chunksRef.current = []
+        onRecordingStop?.(blob)
+      }
       recorder.start()
       recorderRef.current = recorder
       startRef.current = Date.now()
@@ -67,7 +77,6 @@ export function VoiceRecorder({
     setRecording(false)
     setSeconds(0)
     setHint(idleHint)
-    if (recorder) onRecordingStop?.()
   }
 
   function toggle() {

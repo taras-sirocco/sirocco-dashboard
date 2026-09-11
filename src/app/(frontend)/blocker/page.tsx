@@ -38,6 +38,7 @@ export default async function BlockerPage() {
       <TopBar
         onlineLabel={t(strings, 'shared.network_online')}
         offlineLabel={t(strings, 'shared.network_offline')}
+        pendingSyncTemplate={t(strings, 'shared.pending_sync_template')}
       />
       <BlockerScreen strings={strings} workerName={session.name} gaps={gaps} />
       <BroadcastGate />

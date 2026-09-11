@@ -1,6 +1,8 @@
 import React from 'react'
 import { Manrope } from 'next/font/google'
 
+import { OfflineInit } from '@/offline/OfflineInit'
+
 import './styles.css'
 
 // next/font замість <link> на Google Fonts з прототипів: шрифт
@@ -29,7 +31,10 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   return (
     <html lang="uk" className={manrope.variable}>
-      <body>{children}</body>
+      <body>
+        <OfflineInit />
+        {children}
+      </body>
     </html>
   )
 }

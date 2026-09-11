@@ -34,6 +34,7 @@ export default async function ClosingChecklistPage() {
       <TopBar
         onlineLabel={t(strings, 'shared.network_online')}
         offlineLabel={t(strings, 'shared.network_offline')}
+        pendingSyncTemplate={t(strings, 'shared.pending_sync_template')}
       />
       <ShiftStatusBar strings={strings} name={session.name} />
       <ClosingChecklistScreen strings={strings} workerName={session.name} initialItems={items} />

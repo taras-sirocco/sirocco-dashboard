@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from 'react'
 
+import { useOutboxCount } from '@/offline/useOutboxCount'
+
 import styles from './TopBar.module.css'
 
 type TopBarProps = {
   onlineLabel: string
   offlineLabel: string
+  pendingSyncTemplate: string
 }
 
-/** Верхня смуга: лого-плейсхолдер, час+дата, індикатор мережі. На всіх екранах. */
-export function TopBar({ onlineLabel, offlineLabel }: TopBarProps) {
+/** Верхня смуга: лого, час+дата, індикатор мережі + бейдж дій, що чекають синку. */
+export function TopBar({ onlineLabel, offlineLabel, pendingSyncTemplate }: TopBarProps) {
   const [now, setNow] = useState<Date | null>(null)
   const [online, setOnline] = useState(true)
+  const pendingCount = useOutboxCount()
 
   useEffect(() => {
     setNow(new Date())
@@ -50,6 +54,11 @@ export function TopBar({ onlineLabel, offlineLabel }: TopBarProps) {
           className={`${styles.dot} ${online ? '' : styles.off}`}
           title={online ? onlineLabel : offlineLabel}
         />
+        {pendingCount > 0 && (
+          <span className={styles.pending} title={pendingSyncTemplate.replace('{n}', String(pendingCount))}>
+            {pendingCount}
+          </span>
+        )}
       </div>
     </header>
   )

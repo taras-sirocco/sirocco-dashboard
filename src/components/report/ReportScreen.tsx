@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { VoiceRecorder } from '@/components/VoiceRecorder'
 import { t, type UiStringsMap } from '@/lib/uiStringsFormat'
+import { submitForm, submitJson } from '@/offline/submit'
 
 import styles from './ReportScreen.module.css'
 
@@ -25,25 +26,33 @@ export function ReportScreen({ kind, strings }: ReportScreenProps) {
   const tt = (key: string) => t(strings, key)
 
   const [note, setNote] = useState('')
-  const [hadVoice, setHadVoice] = useState(false)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
+  const [queued, setQueued] = useState(false)
 
   const critical = kind === 'critical'
 
   async function send() {
     if (busy) return
-    const text = note || (hadVoice ? 'голосовий запис' : '')
-    if (!text) return
+    if (!note.trim() && !audioBlob) return
     setBusy(true)
     try {
       const url = critical ? '/api/app/blockers/critical' : '/api/app/comments'
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      })
-      if (res.ok) setSent(true)
+      const kindTag = critical ? 'blocker-critical' : 'comment'
+      const result = audioBlob
+        ? await submitForm(
+            url,
+            kindTag,
+            { text: note },
+            { blob: audioBlob, fieldName: 'audio', fileName: `voice-${Date.now()}.webm` },
+          )
+        : await submitJson(url, kindTag, { text: note })
+
+      if (result.ok) {
+        setSent(true)
+        setQueued(result.queued)
+      }
     } finally {
       setBusy(false)
     }
@@ -57,7 +66,7 @@ export function ReportScreen({ kind, strings }: ReportScreenProps) {
       <div className={styles.eyebrow}>{critical ? tt('hub.critical_eyebrow') : tt('hub.note_eyebrow')}</div>
 
       {sent ? (
-        <p className={styles.sub}>{tt('hub.send_confirmation')}</p>
+        <p className={styles.sub}>{queued ? tt('shared.queued_offline_notice') : tt('hub.send_confirmation')}</p>
       ) : (
         <>
           <h1 className={styles.h1}>{critical ? tt('hub.critical_title') : tt('hub.note_title')}</h1>
@@ -65,7 +74,7 @@ export function ReportScreen({ kind, strings }: ReportScreenProps) {
           <VoiceRecorder
             value={note}
             onChange={setNote}
-            onRecordingStop={() => setHadVoice(true)}
+            onRecordingStop={setAudioBlob}
             critical={critical}
             idleHint={tt('hub.voice_hint_idle')}
             recordingHint={tt('shared.voice_hint_recording')}
