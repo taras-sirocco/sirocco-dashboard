@@ -185,6 +185,10 @@ export interface Media {
   source?: ('task_step' | 'closing_checklist' | 'blocker' | 'comment' | 'broadcast' | 'admin') | null;
   takenAt?: string | null;
   shift?: (number | null) | Shift;
+  /**
+   * Заповнюється автоматично при завантаженні з планшета. Порожньо — файл на локальному диску (тільки для розробки).
+   */
+  blobPathname?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -669,6 +673,7 @@ export interface MediaSelect<T extends boolean = true> {
   source?: T;
   takenAt?: T;
   shift?: T;
+  blobPathname?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

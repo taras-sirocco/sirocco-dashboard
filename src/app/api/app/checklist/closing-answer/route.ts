@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
+import { saveMediaFile } from '@/lib/mediaStorage'
 import { getTodayShift } from '@/lib/shifts'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
 
@@ -65,7 +66,14 @@ export async function POST(req: NextRequest) {
 
   if (photoFile) {
     const buffer = Buffer.from(await photoFile.arrayBuffer())
+    const mimetype = photoFile.type || 'image/jpeg'
     try {
+      const saved = await saveMediaFile(
+        `closing-checklist/${shift.id}`,
+        buffer,
+        mimetype,
+        photoFile.name || `photo-${Date.now()}.jpg`,
+      )
       const photoDoc = await payload.create({
         collection: 'media',
         data: {
@@ -74,12 +82,9 @@ export async function POST(req: NextRequest) {
           source: 'closing_checklist',
           shift: shift.id,
           takenAt: new Date().toISOString(),
-        },
-        file: {
-          data: buffer,
-          mimetype: photoFile.type || 'image/jpeg',
-          name: photoFile.name || `photo-${Date.now()}.jpg`,
-          size: buffer.length,
+          blobPathname: saved.blobPathname,
+          filename: saved.filename,
+          mimeType: saved.mimeType,
         },
         overrideAccess: true,
       })

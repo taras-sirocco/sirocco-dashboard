@@ -64,6 +64,20 @@ export const Media: CollectionConfig = {
       relationTo: 'shifts',
       label: 'Зміна',
     },
+    {
+      name: 'blobPathname',
+      type: 'text',
+      label: 'Шлях у приватному Blob',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description:
+          'Заповнюється автоматично при завантаженні з планшета. Порожньо — файл на локальному диску (тільки для розробки).',
+      },
+    },
   ],
-  upload: true,
+  // filesRequiredOnCreate:false — БФФ-роути завантажують байти самі
+  // (приватний Vercel Blob, src/lib/mediaStorage.ts) і створюють Media-
+  // документ лише з метаданими, без Payload-файлу.
+  upload: { filesRequiredOnCreate: false },
 }
