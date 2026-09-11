@@ -10,15 +10,20 @@ export function todayRange() {
   return { start: start.toISOString(), end: end.toISOString() }
 }
 
-/** Сьогоднішня зміна (є щонайбільше одна на день — один відповідальний на дільницю). */
+/**
+ * Активна зараз зміна — відкрита (openedAt) і ще не закрита (closedAt).
+ * НЕ прив'язана до календарного дня: відкрити й закрити зміну можна
+ * скільки завгодно разів за день, кожен цикл — окремий запис у shifts.
+ * Назва лишилась історичною (getTodayShift), сенс змінено навмисно.
+ */
 export async function getTodayShift() {
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
-  const { start, end } = todayRange()
 
   const { docs } = await payload.find({
     collection: 'shifts',
-    where: { date: { greater_than_equal: start, less_than: end } },
+    where: { and: [{ openedAt: { exists: true } }, { closedAt: { exists: false } }] },
+    sort: '-openedAt',
     limit: 1,
     overrideAccess: true,
   })
