@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    stepMedia: StepMedia;
     workers: Worker;
     shifts: Shift;
     checklistTemplates: ChecklistTemplate;
@@ -91,6 +92,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    stepMedia: StepMediaSelect<false> | StepMediaSelect<true>;
     workers: WorkersSelect<false> | WorkersSelect<true>;
     shifts: ShiftsSelect<false> | ShiftsSelect<true>;
     checklistTemplates: ChecklistTemplatesSelect<false> | ChecklistTemplatesSelect<true>;
@@ -251,6 +253,26 @@ export interface Worker {
   createdAt: string;
 }
 /**
+ * Тільки файл — без опису, типу чи джерела. Використовується в кроках інструкції задач.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stepMedia".
+ */
+export interface StepMedia {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
  * Питання відкриття/закриття зміни. Порядок пунктів — перетягуванням. Версія оновлюється автоматично при зміні пунктів, щоб історія старих відповідей лишалась порівнюваною.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -350,7 +372,7 @@ export interface Task {
         title: string;
         keyPoint?: string | null;
         why?: string | null;
-        media?: (number | null) | Media;
+        media?: (number | null) | StepMedia;
         id?: string | null;
       }[]
     | null;
@@ -551,6 +573,10 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'stepMedia';
+        value: number | StepMedia;
+      } | null)
+    | ({
         relationTo: 'workers';
         value: number | Worker;
       } | null)
@@ -678,6 +704,23 @@ export interface MediaSelect<T extends boolean = true> {
   takenAt?: T;
   shift?: T;
   blobPathname?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stepMedia_select".
+ */
+export interface StepMediaSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;

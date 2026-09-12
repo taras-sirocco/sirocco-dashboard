@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -7,6 +8,8 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { StepMedia } from './collections/StepMedia'
+import { stepMediaAdapter } from './lib/stepMediaAdapter'
 import { Workers } from './collections/Workers'
 import { Shifts } from './collections/Shifts'
 import { ChecklistTemplates } from './collections/ChecklistTemplates'
@@ -34,6 +37,7 @@ export default buildConfig({
   collections: [
     Users,
     Media,
+    StepMedia,
     Workers,
     Shifts,
     ChecklistTemplates,
@@ -63,4 +67,17 @@ export default buildConfig({
   // access:'public', а наше сховище (sirocco-dashboard-blob) — приватне.
   // Байти йдуть напряму через @vercel/blob (src/lib/mediaStorage.ts),
   // Media зберігає лише метадані.
+  //
+  // StepMedia — інакший випадок: адмін завантажує файл через ЗВИЧАЙНУ
+  // Payload-форму (без нашого BFF), тому їй потрібен справжній storage
+  // adapter — власний, під те саме приватне сховище (src/lib/stepMediaAdapter.ts).
+  plugins: [
+    cloudStoragePlugin({
+      collections: {
+        stepMedia: {
+          adapter: stepMediaAdapter,
+        },
+      },
+    }),
+  ],
 })

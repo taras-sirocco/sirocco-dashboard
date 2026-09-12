@@ -94,7 +94,7 @@ export function StepsScreen({ strings, workerName, task }: StepsScreenProps) {
               <div className={styles.media}>
                 {step.mediaId ? (
                   // eslint-disable-next-line @next/next/no-img-element -- авторизований проксі, не Next Image loader
-                  <img src={`/api/app/media/${step.mediaId}`} alt={step.title} />
+                  <img src={`/api/app/step-media/${step.mediaId}`} alt={step.title} />
                 ) : (
                   tt('steps.media_placeholder')
                 )}

@@ -117,7 +117,7 @@ export const Tasks: CollectionConfig = {
             {
               name: 'media',
               type: 'upload',
-              relationTo: 'media',
+              relationTo: 'stepMedia',
               label: 'Фото / схема',
             },
           ],
