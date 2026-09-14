@@ -1,8 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
+import { notifyReport } from '@/lib/slack/notify'
 import { getTodayShift } from '@/lib/shifts'
+import { getTodayTasksWithProgress } from '@/lib/tasks'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
 
 /**
@@ -99,6 +101,15 @@ export async function POST() {
     id: shift.id,
     data: { closedAt },
     overrideAccess: true,
+  })
+
+  after(async () => {
+    const tasks = await getTodayTasksWithProgress()
+    await notifyReport({
+      kind: 'shift_closed',
+      workerName: session.name,
+      tasks: tasks.map((t) => ({ title: t.title, done: t.done, targetQty: t.targetQty })),
+    })
   })
 
   return NextResponse.json({ ok: true, closedAt, name: session.name })

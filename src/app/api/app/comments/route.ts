@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
 import { getTodayShift } from '@/lib/shifts'
+import { notifyReport } from '@/lib/slack/notify'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
 
 /** «Нотатка до процесу» — нейтральний запис, потрапляє в аркуш дня. */
@@ -42,6 +43,8 @@ export async function POST(req: NextRequest) {
     },
     overrideAccess: true,
   })
+
+  after(() => notifyReport({ kind: 'note', workerName: session.name, text }))
 
   return NextResponse.json({ ok: true })
 }

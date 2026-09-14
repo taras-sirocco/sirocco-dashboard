@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
+import { notifyCritical } from '@/lib/slack/notify'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
 
 /** Записує одну відповідь чек-листа. Закриває проходження, коли відповіли на всі пункти. */
@@ -64,6 +65,18 @@ export async function POST(req: NextRequest) {
     overrideAccess: true,
   })
   const totalItems = template.items?.length ?? 0
+
+  if (status === 'problem') {
+    const item = template.items?.find((i) => i.key === itemKey)
+    after(() =>
+      notifyCritical({
+        kind: 'opening_no',
+        workerName: session.name,
+        itemText: item?.text ?? itemKey,
+        reason: typeof note === 'string' ? note : undefined,
+      }),
+    )
+  }
 
   const answeredCount = await payload.count({
     collection: 'checklistAnswers',

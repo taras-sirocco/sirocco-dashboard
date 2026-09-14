@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
 import { getTodayShift } from '@/lib/shifts'
+import { notifyCritical } from '@/lib/slack/notify'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
 
 /**
@@ -46,6 +47,17 @@ export async function POST(req: NextRequest) {
     },
     overrideAccess: true,
   })
+
+  after(() =>
+    notifyCritical({
+      kind: 'critical_problem',
+      workerName: session.name,
+      shiftDateLabel: new Intl.DateTimeFormat('uk-UA', { day: 'numeric', month: 'long' }).format(
+        new Date(shift.date),
+      ),
+      text,
+    }),
+  )
 
   return NextResponse.json({ ok: true })
 }

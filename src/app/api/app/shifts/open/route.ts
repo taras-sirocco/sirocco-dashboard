@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
 import { isShiftStale } from '@/lib/shifts'
+import { notifyCritical } from '@/lib/slack/notify'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
 import type { Shift } from '@/payload-types'
 
@@ -45,12 +46,33 @@ export async function POST() {
   if (shift && isShiftStale(shift)) {
     // Забута зміна (тривала б реально стільки годин ніколи) — закриваємо
     // самі, помічаємо autoClosed, і далі поводимось так, ніби її не було.
+    const abandonedShift = shift
     await payload.update({
       collection: 'shifts',
-      id: shift.id,
+      id: abandonedShift.id,
       data: { closedAt: new Date().toISOString(), autoClosed: true },
       overrideAccess: true,
     })
+
+    after(async () => {
+      const responsible = await payload
+        .findByID({
+          collection: 'workers',
+          id:
+            typeof abandonedShift.responsibleUser === 'object'
+              ? abandonedShift.responsibleUser.id
+              : abandonedShift.responsibleUser,
+          overrideAccess: true,
+        })
+        .catch(() => null)
+      await notifyCritical({
+        kind: 'shift_auto_closed',
+        workerName: responsible?.name ?? '—',
+        startedAt: abandonedShift.createdAt,
+        autoClosedAt: new Date().toISOString(),
+      })
+    })
+
     shift = null
   }
 

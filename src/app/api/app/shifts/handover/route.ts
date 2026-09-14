@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
+import { notifyCritical, notifyReport } from '@/lib/slack/notify'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
 
 /**
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
       data: { handoverOk: true, openedAt: new Date().toISOString() },
       overrideAccess: true,
     })
+    after(() => notifyReport({ kind: 'shift_opened', workerName: session.name }))
     return NextResponse.json({ ok: true })
   }
 
@@ -64,6 +66,10 @@ export async function POST(req: NextRequest) {
     },
     overrideAccess: true,
   })
+
+  after(() =>
+    notifyCritical({ kind: 'handover_not_ready', workerName: session.name, reason: noteText }),
+  )
 
   return NextResponse.json({ ok: true })
 }
