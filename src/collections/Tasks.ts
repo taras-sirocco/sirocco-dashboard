@@ -34,6 +34,14 @@ export const Tasks: CollectionConfig = {
       label: 'Назва задачі',
     },
     {
+      name: 'description',
+      type: 'textarea',
+      label: 'Опис задачі',
+      admin: {
+        description: 'Показується в картці задачі на планшеті, під назвою.',
+      },
+    },
+    {
       name: 'date',
       type: 'date',
       required: true,

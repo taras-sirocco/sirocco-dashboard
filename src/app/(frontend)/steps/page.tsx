@@ -4,6 +4,7 @@ import { Blobs } from '@/components/Blobs'
 import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
 import { StepsScreen } from '@/components/steps/StepsScreen'
+import { STEP_INSTRUCTIONS_ENABLED } from '@/lib/featureFlags'
 import { getTaskWithSteps } from '@/lib/taskSteps'
 import { getTodayShift } from '@/lib/shifts'
 import { getUiStrings, t } from '@/lib/uiStrings'
@@ -16,6 +17,11 @@ export default async function StepsPage({
 }: {
   searchParams: Promise<{ taskId?: string }>
 }) {
+  // Покрокова інструкція прибрана з планшета за фіче-прапорцем — див. lib/featureFlags.ts.
+  if (!STEP_INSTRUCTIONS_ENABLED) {
+    redirect('/tasks')
+  }
+
   const session = await getSessionWorker()
   if (!session) {
     redirect('/')

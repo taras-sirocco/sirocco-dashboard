@@ -353,6 +353,10 @@ export interface Task {
   id: number;
   _order?: string | null;
   title: string;
+  /**
+   * Показується в картці задачі на планшеті, під назвою.
+   */
+  description?: string | null;
   date: string;
   stageNo?: number | null;
   targetQty: number;
@@ -812,6 +816,7 @@ export interface ChecklistAnswersSelect<T extends boolean = true> {
 export interface TasksSelect<T extends boolean = true> {
   _order?: T;
   title?: T;
+  description?: T;
   date?: T;
   stageNo?: T;
   targetQty?: T;

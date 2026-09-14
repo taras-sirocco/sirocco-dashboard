@@ -96,22 +96,23 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
     note: 'У прототипі кнопка критичної проблеми на екрані відкриття веде на дзвінок, а не на повний екран нотатки — уточнити поведінку при збірці екрана.',
   },
 
-  // ---------- task.* (03-task.html) ----------
+  // ---------- task.* (сітка задач на сьогодні) ----------
+  { key: 'task.grid_title', value: 'Задачі на сьогодні' },
+  {
+    key: 'task.grid_empty',
+    value: 'На сьогодні задач ще немає — зверніться до бригадира.',
+    note: 'Показується, якщо на сьогодні в системі не заведено жодної задачі.',
+  },
   { key: 'task.progress_label', value: 'Зроблено сьогодні' },
-  { key: 'task.instructions_button', value: 'Інструкція по кроках' },
-  { key: 'task.done_button', value: 'Готово' },
-  { key: 'task.done_button_with_progress', value: 'Готово, записати кількість' },
-  { key: 'task.qty_prompt', value: 'Скільки зробили щойно?' },
-  { key: 'task.qty_confirm', value: 'Підтвердити' },
+  { key: 'task.done_button', value: 'Виконано' },
   { key: 'task.all_done_title', value: 'Усі задачі на сьогодні зроблено' },
   { key: 'task.all_done_sub', value: 'Час переходити до аркуша дня і закриття зміни' },
   { key: 'task.to_daily_sheet', value: 'До аркуша дня' },
-  { key: 'task.position_template', value: 'Задача {n} з {total}', note: '{n} — номер поточної задачі, {total} — всього задач у черзі.' },
-  { key: 'task.progress_of_template', value: 'з {target}', note: 'Другий, дрібніший рядок лічильника: "{done} " + це поруч, напр. "6 з 20".' },
+  { key: 'task.progress_of_template', value: 'з {target}', note: 'Другий, дрібніший рядок лічильника картки, напр. "6 з 20".' },
   {
     key: 'task.progress_save_failed',
     value: 'Не вдалося зберегти — перевір з’єднання й спробуй ще раз.',
-    note: 'Показується, якщо запис прогресу не дійшов до сервера (оптимістичне оновлення відкочується).',
+    note: 'Показується на картці задачі, якщо запис прогресу не дійшов до сервера (оптимістичне оновлення відкочується).',
   },
 
   // ---------- steps.* (04-steps.html) ----------

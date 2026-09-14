@@ -53,49 +53,68 @@ async function seed() {
   await upsertChecklistTemplate(payload, 'closing', closingItems)
   console.log('✓ checklistTemplates: opening, closing')
 
-  // ---- Tasks: "Збірка лопаті, етап 1" (04-steps.html `proc` + 03-task.html target) ----
-  const taskTitle = 'Збірка лопаті, етап 1'
-  const taskData = {
-    title: taskTitle,
-    date: new Date().toISOString(),
-    stageNo: 1,
-    targetQty: 20,
-    referenceNote: 'Зроби візуальне порівняння з еталонною деталлю на столі.',
-    steps: [
-      {
-        title: 'Розкласти секції лопаті на столі за номерами',
-        keyPoint: 'Стик 1 завжди зліва, маркування вгору',
-        why: 'Інакше переплутаєш полярність і збереш дзеркально',
-      },
-      {
-        title: 'Нанести клей по всьому периметру фланця',
-        keyPoint: 'Шар рівний, без розривів. Працюєш поки клей відкритий — 8 хвилин',
-        why: 'Розрив у шві дає протікання під навантаженням на висоті',
-      },
-      {
-        title: 'Стягнути секції та затягнути 16 болтів хрест-навхрест',
-        keyPoint: 'Момент 24 Н·м. Хрест-навхрест, не по колу',
-        why: "По колу веде фланець, з'являється перекіс і вібрація",
-      },
-    ],
-  }
-  const existingTask = await payload.find({
-    collection: 'tasks',
-    where: { title: { equals: taskTitle } },
-    limit: 1,
-    overrideAccess: true,
-  })
-  if (existingTask.docs[0]) {
-    await payload.update({
+  // ---- Tasks на сьогодні (04-steps.html `proc` + грід карток на планшеті) ----
+  const todayIso = new Date().toISOString()
+  const tasksData = [
+    {
+      title: 'Збірка лопаті, етап 1',
+      description: 'Зібрати й склеїти секції лопаті, затягнути фланцеві з’єднання за моментом.',
+      date: todayIso,
+      stageNo: 1,
+      targetQty: 20,
+      referenceNote: 'Зроби візуальне порівняння з еталонною деталлю на столі.',
+      steps: [
+        {
+          title: 'Розкласти секції лопаті на столі за номерами',
+          keyPoint: 'Стик 1 завжди зліва, маркування вгору',
+          why: 'Інакше переплутаєш полярність і збереш дзеркально',
+        },
+        {
+          title: 'Нанести клей по всьому периметру фланця',
+          keyPoint: 'Шар рівний, без розривів. Працюєш поки клей відкритий — 8 хвилин',
+          why: 'Розрив у шві дає протікання під навантаженням на висоті',
+        },
+        {
+          title: 'Стягнути секції та затягнути 16 болтів хрест-навхрест',
+          keyPoint: 'Момент 24 Н·м. Хрест-навхрест, не по колу',
+          why: "По колу веде фланець, з'являється перекіс і вібрація",
+        },
+      ],
+    },
+    {
+      title: 'Пакування готових вузлів',
+      description: 'Обгорнути кожен вузол плівкою, підписати бирку номером партії, скласти на палету.',
+      date: todayIso,
+      stageNo: 2,
+      targetQty: 12,
+    },
+    {
+      title: 'Контроль кріплення, дільниця Б',
+      description: 'Перевірити момент затяжки на вже зібраних вузлах вчорашньої партії, відмітити в журналі.',
+      date: todayIso,
+      stageNo: 3,
+      targetQty: 8,
+    },
+  ]
+  for (const taskData of tasksData) {
+    const existingTask = await payload.find({
       collection: 'tasks',
-      id: existingTask.docs[0].id,
-      data: taskData,
+      where: { title: { equals: taskData.title } },
+      limit: 1,
       overrideAccess: true,
     })
-  } else {
-    await payload.create({ collection: 'tasks', data: taskData, overrideAccess: true })
+    if (existingTask.docs[0]) {
+      await payload.update({
+        collection: 'tasks',
+        id: existingTask.docs[0].id,
+        data: taskData,
+        overrideAccess: true,
+      })
+    } else {
+      await payload.create({ collection: 'tasks', data: taskData, overrideAccess: true })
+    }
   }
-  console.log(`✓ tasks: ${taskTitle}`)
+  console.log(`✓ tasks: ${tasksData.length}`)
 
   // ---- ChangesLog (07-hub.html `changes`) ----
   const changesLogData = [

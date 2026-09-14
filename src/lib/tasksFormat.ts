@@ -6,6 +6,7 @@
 export type TaskWithProgress = {
   id: number
   title: string
+  description: string
   targetQty: number
   done: number
 }

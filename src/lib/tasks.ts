@@ -43,6 +43,7 @@ export async function getTodayTasksWithProgress(): Promise<TaskWithProgress[]> {
   return tasks.map((task) => ({
     id: task.id,
     title: task.title,
+    description: task.description ?? '',
     targetQty: task.targetQty,
     done: Math.min(task.targetQty, doneByTask.get(task.id) ?? 0),
   }))
