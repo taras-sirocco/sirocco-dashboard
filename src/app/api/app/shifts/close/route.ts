@@ -105,10 +105,33 @@ export async function POST() {
 
   after(async () => {
     const tasks = await getTodayTasksWithProgress()
+
+    // «Що завадило» для недобору — окремі blockers (kind: gap), не в comments.
+    // Одна на задачу, що недобрала ціль; підтягуємо тут же, щоб підсумок
+    // закриття одразу ніс причину, а не лише голі цифри.
+    const { docs: gapBlockers } = await payload.find({
+      collection: 'blockers',
+      where: { and: [{ kind: { equals: 'gap' } }, { shift: { equals: shift.id } }] },
+      depth: 0,
+      limit: 100,
+      overrideAccess: true,
+    })
+    const reasonByTaskId = new Map<number, string>()
+    for (const blocker of gapBlockers) {
+      if (!blocker.text) continue
+      const taskId = typeof blocker.task === 'object' ? blocker.task?.id : blocker.task
+      if (typeof taskId === 'number') reasonByTaskId.set(taskId, blocker.text)
+    }
+
     await notifyReport({
       kind: 'shift_closed',
       workerName: session.name,
-      tasks: tasks.map((t) => ({ title: t.title, done: t.done, targetQty: t.targetQty })),
+      tasks: tasks.map((t) => ({
+        title: t.title,
+        done: t.done,
+        targetQty: t.targetQty,
+        reason: reasonByTaskId.get(t.id),
+      })),
     })
   })
 

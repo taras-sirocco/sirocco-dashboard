@@ -19,7 +19,11 @@ type CriticalEvent =
 
 type ReportEvent =
   | { kind: 'shift_opened'; workerName: string }
-  | { kind: 'shift_closed'; workerName: string; tasks: { title: string; done: number; targetQty: number }[] }
+  | {
+      kind: 'shift_closed'
+      workerName: string
+      tasks: { title: string; done: number; targetQty: number; reason?: string }[]
+    }
   | { kind: 'note'; workerName: string; text: string }
 
 function formatDateTime(iso?: string): string {
@@ -154,7 +158,11 @@ export async function notifyReport(event: ReportEvent): Promise<void> {
       headerText = 'Зміну закрито'
       const taskLines =
         event.tasks.length > 0
-          ? event.tasks.map((t) => `• ${t.title}: ${t.done}/${t.targetQty}`)
+          ? event.tasks.map((t) =>
+              t.done < t.targetQty
+                ? `• ${t.title}: ${t.done}/${t.targetQty} — ${t.reason || 'причину не вказано'}`
+                : `• ${t.title}: ${t.done}/${t.targetQty}`,
+            )
           : ['Задач на сьогодні не було.']
       lines = [`Відповідальний: ${event.workerName}`, `Час: ${time}`, '', '*Підсумок задач:*', ...taskLines]
       fallbackText = `Зміну закрито — ${event.workerName}`
