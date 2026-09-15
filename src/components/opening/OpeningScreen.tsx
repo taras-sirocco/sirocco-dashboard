@@ -41,7 +41,7 @@ export function OpeningScreen({ strings, workerName, items }: OpeningScreenProps
       if (!res.ok) return
       const data = (await res.json()) as { shiftId: number; runId?: number; alreadyOpen: boolean }
       if (data.alreadyOpen) {
-        router.push('/hub')
+        router.push('/tasks')
         return
       }
       setShiftId(data.shiftId)
@@ -233,7 +233,7 @@ export function OpeningScreen({ strings, workerName, items }: OpeningScreenProps
           <h1 className={styles.h1}>{workerName}</h1>
         </div>
         <div className={styles.acts}>
-          <button className={`glass ${styles.big} ${styles.primary}`} onClick={() => router.push('/hub')}>
+          <button className={`glass ${styles.big} ${styles.primary}`} onClick={() => router.push('/tasks')}>
             {tt('opening.to_tasks')}
           </button>
         </div>

@@ -23,7 +23,7 @@ export default async function TasksPage() {
   }
 
   const [strings, tasks] = await Promise.all([
-    getUiStrings(['task', 'shared', 'close']),
+    getUiStrings(['task', 'shared', 'close', 'hub']),
     getTodayTasksWithProgress(),
   ])
 

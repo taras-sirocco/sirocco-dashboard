@@ -316,3 +316,46 @@
     height: 60px;
   }
 }
+
+/* ---- "Закрити зміну" — навмисно тихо, внизу, окремо від карток задач ---- */
+.closeShiftZone {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: center;
+}
+.closeShiftBtn {
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.closeConfirm {
+  width: 100%;
+  max-width: 420px;
+  padding: 18px;
+  border-radius: 16px;
+  text-align: center;
+}
+.closeConfirmLabel {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.closeConfirmActs {
+  display: flex;
+  gap: 10px;
+}
+.closeConfirmBack,
+.closeConfirmGo {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 800;
+}

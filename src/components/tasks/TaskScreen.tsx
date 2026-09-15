@@ -30,6 +30,9 @@ export function TaskScreen({ strings, workerName, tasks: initialTasks }: TaskScr
   // Задачі, що щойно закрились — коротко показують "✓ Закрито" замість
   // раптового зникнення з сітки, потім самі себе прибирають зі списку.
   const [closingIds, setClosingIds] = useState<Set<number>>(new Set())
+  // "Закрити зміну" — дія кінця зміни, тому вимагає другого підтвердження,
+  // щоб не натиснулась випадково посеред роботи.
+  const [confirmingClose, setConfirmingClose] = useState(false)
 
   // Список тепер = усі НЕЗАКРИТІ задачі (сервер уже відфільтрував). Якщо
   // почали з непорожнього списку й він спорожнів — усе зроблено. Якщо
@@ -120,6 +123,38 @@ export function TaskScreen({ strings, workerName, tasks: initialTasks }: TaskScr
             ))}
           </div>
         )}
+
+        <div className={styles.closeShiftZone}>
+          {confirmingClose ? (
+            <div className={`glass ${styles.closeConfirm}`}>
+              <div className={styles.closeConfirmLabel}>{tt('close.confirm_eyebrow')}</div>
+              <div className={styles.closeConfirmActs}>
+                <button
+                  type="button"
+                  className={`glass ${styles.closeConfirmBack}`}
+                  onClick={() => setConfirmingClose(false)}
+                >
+                  {tt('shared.back')}
+                </button>
+                <button
+                  type="button"
+                  className={`glass ${styles.closeConfirmGo} danger-solid`}
+                  onClick={() => router.push('/blocker')}
+                >
+                  {tt('hub.close_shift_tile')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className={styles.closeShiftBtn}
+              onClick={() => setConfirmingClose(true)}
+            >
+              {tt('hub.close_shift_tile')}
+            </button>
+          )}
+        </div>
       </main>
       <Dock strings={strings} />
     </>
