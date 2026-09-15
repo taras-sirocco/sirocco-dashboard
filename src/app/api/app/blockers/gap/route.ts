@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
-import { getTodayShift, todayRange } from '@/lib/shifts'
+import { getTodayShift } from '@/lib/shifts'
 import { getTodayTasksWithProgress } from '@/lib/tasks'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
 
 /**
- * «Що завадило?» для задачі з недобором. Записує причину (blockers,
- * kind: gap) і автоматично переносить залишок на завтра — нову задачу
- * з targetQty = залишок, carriedFromTask = ця задача. done/target
+ * «Що завадило?» для задачі з недобором. Записує ЛИШЕ причину (blockers,
+ * kind: gap) — задача НЕ копіюється в нову. Недороблена задача лишається
+ * тим самим відкритим записом (completedAt IS NULL) і природно з'являється
+ * в списку наступної зміни, поки лічильник сам не досягне цілі. done/target
  * беремо із сервера (getTodayTasksWithProgress), не з тіла запиту —
  * клієнт не може підробити цифри недобору.
  */
@@ -64,18 +65,5 @@ export async function POST(req: NextRequest) {
     overrideAccess: true,
   })
 
-  const { end: tomorrowStart } = todayRange()
-
-  await payload.create({
-    collection: 'tasks',
-    data: {
-      title: task.title,
-      targetQty: remaining,
-      date: tomorrowStart,
-      carriedFromTask: taskId,
-    },
-    overrideAccess: true,
-  })
-
-  return NextResponse.json({ ok: true, carriedOver: remaining })
+  return NextResponse.json({ ok: true, remaining })
 }

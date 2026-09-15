@@ -2,22 +2,26 @@ import { getPayload } from 'payload'
 
 import config from '@/payload.config'
 
-import { todayRange } from './shifts'
-
 export type { TaskWithProgress } from './tasksFormat'
 export { getCurrentTaskIndex } from './tasksFormat'
 
 import type { TaskWithProgress } from './tasksFormat'
 
-/** Задачі на сьогодні в черзі (нативний Payload `orderable`) з фактичним прогресом. */
+/**
+ * Усі НЕЗАКРИТІ задачі в черзі (нативний Payload `orderable`), з фактичним
+ * прогресом. Закриття — по лічильнику (completedAt проставляється в
+ * tasks/progress route, коли done досягає цілі), не по даті: `date`
+ * лишається в схемі лише як орієнтир планування, видимість більше не
+ * фільтрує. Назва функції історична (было "сьогоднішні") — сенс уже не
+ * прив'язаний до календарного дня, як і getTodayShift.
+ */
 export async function getTodayTasksWithProgress(): Promise<TaskWithProgress[]> {
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
-  const { start, end } = todayRange()
 
   const { docs: tasks } = await payload.find({
     collection: 'tasks',
-    where: { date: { greater_than_equal: start, less_than: end } },
+    where: { completedAt: { exists: false } },
     sort: '_order',
     limit: 100,
     depth: 0,
@@ -45,6 +49,8 @@ export async function getTodayTasksWithProgress(): Promise<TaskWithProgress[]> {
     title: task.title,
     description: task.description ?? '',
     targetQty: task.targetQty,
-    done: Math.min(task.targetQty, doneByTask.get(task.id) ?? 0),
+    // Перебір показуємо як є (10/9) — задача вже закрита сервером
+    // окремим completedAt, тут кліпати число більше нема сенсу.
+    done: doneByTask.get(task.id) ?? 0,
   }))
 }

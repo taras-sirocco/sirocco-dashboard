@@ -22,25 +22,31 @@ export function TaskScreen({ strings, workerName, tasks: initialTasks }: TaskScr
   const tt = (key: string, vars?: Record<string, string>) => t(strings, key, vars)
 
   // Локальна копія — оптимістичний UI оновлює її одразу, не чекаючи мережі.
-  // Сервер лишається єдиним джерелом правди (BFF рахує реальний done), але
-  // клієнт коректно передбачає результат для того самого простого додавання.
+  // Сервер лишається єдиним джерелом правди (BFF рахує реальний done й сам
+  // вирішує, чи задача закрита), клієнт лише коректно передбачає результат.
   const [tasks, setTasks] = useState(initialTasks)
   const [errors, setErrors] = useState<Record<number, string>>({})
   const [savingIds, setSavingIds] = useState<Set<number>>(new Set())
+  // Задачі, що щойно закрились — коротко показують "✓ Закрито" замість
+  // раптового зникнення з сітки, потім самі себе прибирають зі списку.
+  const [closingIds, setClosingIds] = useState<Set<number>>(new Set())
 
-  const allDone = tasks.length > 0 && tasks.every((task) => task.done >= task.targetQty)
+  // Список тепер = усі НЕЗАКРИТІ задачі (сервер уже відфільтрував). Якщо
+  // почали з непорожнього списку й він спорожнів — усе зроблено. Якщо
+  // спорожнів був із самого початку — задач просто ще не поставили.
+  const hadTasks = initialTasks.length > 0
+  const allDone = hadTasks && tasks.length === 0
 
   async function confirm(taskId: number, qty: number) {
+    const task = tasks.find((t) => t.id === taskId)
+    if (!task) return
     const previousTasks = tasks
+    const wasOpen = task.done < task.targetQty
 
     setErrors((prev) => ({ ...prev, [taskId]: '' }))
     setSavingIds((prev) => new Set(prev).add(taskId))
-    // Оптимістично: картка оновлюється миттєво, синк із сервером — фоном.
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === taskId ? { ...task, done: Math.min(task.targetQty, task.done + qty) } : task,
-      ),
-    )
+    // Оптимістично: цифра оновлюється миттєво, перебір (10/9) показуємо як є.
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, done: t.done + qty } : t)))
 
     const result = await submitJson('/api/app/tasks/progress', 'task-progress', { taskId, qty })
 
@@ -56,6 +62,25 @@ export function TaskScreen({ strings, workerName, tasks: initialTasks }: TaskScr
       // у чергу й повернув ok:true, queued:true).
       setTasks(previousTasks)
       setErrors((prev) => ({ ...prev, [taskId]: tt('task.progress_save_failed') }))
+      return
+    }
+
+    // Авторитетне "закрито" — з відповіді сервера, коли вона прийшла одразу.
+    // З офлайн-черги (queued) відповіді ще нема — оцінюємо локально, синк
+    // дожене справжній стан пізніше.
+    const data = result.queued ? null : (result.data as { closed?: boolean } | null)
+    const justClosed = data ? Boolean(data.closed) : wasOpen && task.done + qty >= task.targetQty
+
+    if (justClosed) {
+      setClosingIds((prev) => new Set(prev).add(taskId))
+      setTimeout(() => {
+        setTasks((prev) => prev.filter((t) => t.id !== taskId))
+        setClosingIds((prev) => {
+          const next = new Set(prev)
+          next.delete(taskId)
+          return next
+        })
+      }, 1600)
     }
   }
 
@@ -79,7 +104,7 @@ export function TaskScreen({ strings, workerName, tasks: initialTasks }: TaskScr
         )}
 
         {tasks.length === 0 ? (
-          <p className={styles.empty}>{tt('task.grid_empty')}</p>
+          hadTasks ? null : <p className={styles.empty}>{tt('task.grid_empty')}</p>
         ) : (
           <div className={styles.grid}>
             {tasks.map((task) => (
@@ -89,6 +114,7 @@ export function TaskScreen({ strings, workerName, tasks: initialTasks }: TaskScr
                 tt={tt}
                 error={errors[task.id]}
                 saving={savingIds.has(task.id)}
+                closing={closingIds.has(task.id)}
                 onConfirm={(qty) => confirm(task.id, qty)}
               />
             ))}
@@ -105,10 +131,11 @@ type TaskCardProps = {
   tt: (key: string, vars?: Record<string, string>) => string
   error?: string
   saving: boolean
+  closing: boolean
   onConfirm: (qty: number) => void
 }
 
-function TaskCard({ task, tt, error, saving, onConfirm }: TaskCardProps) {
+function TaskCard({ task, tt, error, saving, closing, onConfirm }: TaskCardProps) {
   const [qty, setQty] = useState(1)
   const isDone = task.done >= task.targetQty
   const pct = Math.min(100, (task.done / (task.targetQty || 1)) * 100)
@@ -122,6 +149,16 @@ function TaskCard({ task, tt, error, saving, onConfirm }: TaskCardProps) {
     if (saving) return
     onConfirm(qty)
     setQty(1)
+  }
+
+  if (closing) {
+    return (
+      <div className={`glass ${styles.card} ${styles.cardClosing}`}>
+        <div className={styles.closingBadge}>✓</div>
+        <div className={styles.closingTitle}>{tt('task.closed_title')}</div>
+        <div className={styles.closingSub}>{task.title}</div>
+      </div>
+    )
   }
 
   return (

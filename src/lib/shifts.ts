@@ -2,14 +2,6 @@ import { getPayload } from 'payload'
 
 import config from '@/payload.config'
 
-export function todayRange() {
-  const start = new Date()
-  start.setHours(0, 0, 0, 0)
-  const end = new Date(start)
-  end.setDate(end.getDate() + 1)
-  return { start: start.toISOString(), end: end.toISOString() }
-}
-
 /**
  * Скільки годин незакрита зміна вважається реальною роботою, а не
  * забутою (планшет розрядився, пішли додому). Межа по годинах, не по

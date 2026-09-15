@@ -15,9 +15,9 @@ export const Tasks: CollectionConfig = {
   // цим дублюється ціла задача разом з процедурою як шаблон.
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'date', 'stageNo', 'targetQty'],
+    defaultColumns: ['title', 'targetQty', 'completedAt', 'date'],
     description:
-      'Задача і її покрокова процедура редагуються тут-таки, в одному місці. Кроки — кнопкою "Add Step" нижче, перетягуванням міняються місцями, кнопкою на рядку — дублюються.',
+      'Задача і її покрокова процедура редагуються тут-таки, в одному місці. Кроки — кнопкою "Add Step" нижче, перетягуванням міняються місцями, кнопкою на рядку — дублюються. Задача лишається в списку на планшеті, поки лічильник не досягне цілі (Completed at порожнє) — дата нижче більше не фільтрує видимість, це лише орієнтир планування.',
     group: 'Задачі',
   },
   access: {
@@ -45,10 +45,12 @@ export const Tasks: CollectionConfig = {
       name: 'date',
       type: 'date',
       required: true,
-      label: 'Дата (на який день)',
+      label: 'Дата (коли заплановано)',
       admin: {
         date: { pickerAppearance: 'dayOnly' },
         position: 'sidebar',
+        description:
+          'Орієнтир планування — на видимість задачі на планшеті більше не впливає (див. Completed at).',
       },
     },
     {
@@ -65,13 +67,25 @@ export const Tasks: CollectionConfig = {
       admin: { position: 'sidebar' },
     },
     {
+      name: 'completedAt',
+      type: 'date',
+      label: 'Закрито (авто)',
+      admin: {
+        date: { pickerAppearance: 'dayAndTime' },
+        position: 'sidebar',
+        description:
+          'Проставляється автоматично, коли лічильник досягає цілі (done ≥ ціль). Порожньо — задача відкрита й показується на планшеті. Можна вручну очистити, щоб знову відкрити задачу.',
+      },
+    },
+    {
       name: 'carriedFromTask',
       type: 'relationship',
       relationTo: 'tasks',
-      label: 'Перенесено з задачі (недобір)',
+      label: 'Перенесено з задачі (недобір, історичне поле)',
       admin: {
         position: 'sidebar',
-        description: 'Заповнюється, коли залишок з учора переноситься на сьогодні.',
+        description:
+          'Заповнювалось старою моделлю, коли недобір копіювався в нову задачу на завтра. Нові задачі більше не копіюються — поле лишено лише для історії старих записів.',
       },
     },
     {

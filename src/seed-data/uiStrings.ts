@@ -105,6 +105,11 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   },
   { key: 'task.progress_label', value: 'Зроблено сьогодні' },
   { key: 'task.done_button', value: 'Виконано' },
+  {
+    key: 'task.closed_title',
+    value: 'Закрито',
+    note: 'Коротка карточка-підтвердження, що показується ~1.5с замість картки задачі, коли лічильник досяг цілі, перед тим як задача зникає зі списку.',
+  },
   { key: 'task.all_done_title', value: 'Усі задачі на сьогодні зроблено' },
   { key: 'task.all_done_sub', value: 'Час переходити до аркуша дня і закриття зміни' },
   { key: 'task.to_daily_sheet', value: 'До аркуша дня' },
@@ -211,12 +216,13 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   },
   {
     key: 'blocker.carry_note_template',
-    value: 'Залишок {qty} перенесеться на завтра автоматично',
+    value: 'Задача лишиться відкритою, поки не буде зроблено ще {qty}',
+    note: 'Оновлено разом зі зміною моделі задач (2026-09-15) — задача більше не копіюється на завтра, той самий запис лишається відкритим.',
   },
   { key: 'blocker.send_button', value: 'Відправити і далі' },
   {
     key: 'blocker.all_sent_confirmation',
-    value: 'Причини відправлено. Залишки перенесено на завтра.\nДалі — закриття зміни.',
+    value: 'Причини відправлено. Задачі лишаться відкритими до виконання.\nДалі — закриття зміни.',
   },
 
   // ---------- hub.* (07-hub.html) ----------
