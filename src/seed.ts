@@ -55,7 +55,19 @@ async function seed() {
 
   // ---- Tasks на сьогодні (04-steps.html `proc` + грід карток на планшеті) ----
   const todayIso = new Date().toISOString()
-  const tasksData = [
+  // Явна анотація — інакше рядки з різним набором полів (referenceNote/steps
+  // є не в усіх) звужуються TS у union із занадто різними формами, і
+  // payload.create/update плутається між перевантаженнями (вимагає draft).
+  type SeedTask = {
+    title: string
+    description: string
+    date: string
+    stageNo: number
+    targetQty: number
+    referenceNote?: string
+    steps?: { title: string; keyPoint: string; why: string }[]
+  }
+  const tasksData: SeedTask[] = [
     {
       title: 'Збірка лопаті, етап 1',
       description: 'Зібрати й склеїти секції лопаті, затягнути фланцеві з’єднання за моментом.',
@@ -97,6 +109,10 @@ async function seed() {
     },
   ]
   for (const taskData of tasksData) {
+    // Демо-задачі — усі звичайне виробництво (taskType має defaultValue у
+    // схемі, але створення/оновлення без явного значення require'ить його —
+    // required-поле лишається required для TS, дефолт це лише на рівні БД).
+    const data = { ...taskData, taskType: 'production' as const }
     const existingTask = await payload.find({
       collection: 'tasks',
       where: { title: { equals: taskData.title } },
@@ -107,11 +123,11 @@ async function seed() {
       await payload.update({
         collection: 'tasks',
         id: existingTask.docs[0].id,
-        data: taskData,
+        data,
         overrideAccess: true,
       })
     } else {
-      await payload.create({ collection: 'tasks', data: taskData, overrideAccess: true })
+      await payload.create({ collection: 'tasks', data, overrideAccess: true })
     }
   }
   console.log(`✓ tasks: ${tasksData.length}`)

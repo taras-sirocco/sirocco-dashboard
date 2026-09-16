@@ -14,6 +14,11 @@ export default async function OpeningPage() {
   if (!session) {
     redirect('/')
   }
+  // Бригадир не проходить потік монтажника — гейт як у STEP_INSTRUCTIONS
+  // на /steps, тільки за роллю. Без серверного гейта бригадир зайде за URL.
+  if (session.role === 'foreman') {
+    redirect('/quality')
+  }
 
   const [strings, template] = await Promise.all([
     getUiStrings(['opening', 'shared']),

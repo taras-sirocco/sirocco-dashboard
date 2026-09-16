@@ -18,6 +18,9 @@ export default async function ReportPage({
   if (!session) {
     redirect('/')
   }
+  if (session.role === 'foreman') {
+    redirect('/quality')
+  }
 
   const { kind: kindParam } = await searchParams
   const kind = kindParam === 'critical' ? 'critical' : 'note'

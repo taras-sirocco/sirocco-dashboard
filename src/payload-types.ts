@@ -77,6 +77,7 @@ export interface Config {
     checklistAnswers: ChecklistAnswer;
     tasks: Task;
     taskProgress: TaskProgress;
+    qualityChecks: QualityCheck;
     blockers: Blocker;
     comments: Comment;
     changesLog: ChangesLog;
@@ -100,6 +101,7 @@ export interface Config {
     checklistAnswers: ChecklistAnswersSelect<false> | ChecklistAnswersSelect<true>;
     tasks: TasksSelect<false> | TasksSelect<true>;
     taskProgress: TaskProgressSelect<false> | TaskProgressSelect<true>;
+    qualityChecks: QualityChecksSelect<false> | QualityChecksSelect<true>;
     blockers: BlockersSelect<false> | BlockersSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
     changesLog: ChangesLogSelect<false> | ChangesLogSelect<true>;
@@ -354,9 +356,13 @@ export interface Task {
   _order?: string | null;
   title: string;
   /**
-   * Показується в картці задачі на планшеті, під назвою.
+   * Показується в картці задачі на планшеті, під назвою. Для задач-переробок сюди автоматично потрапляє коментар бригадира з перевірки якості.
    */
   description?: string | null;
+  /**
+   * Переробка — задача, створена автоматично контролем якості бригадира (недобір по якості). Видно поміченою на планшеті.
+   */
+  taskType: 'production' | 'rework';
   /**
    * Орієнтир планування — на видимість задачі на планшеті більше не впливає (див. Completed at).
    */
@@ -368,7 +374,7 @@ export interface Task {
    */
   completedAt?: string | null;
   /**
-   * Заповнювалось старою моделлю, коли недобір копіювався в нову задачу на завтра. Нові задачі більше не копіюються — поле лишено лише для історії старих записів.
+   * Історично заповнювалось старою моделлю при копіюванні недобору на завтра (більше так не робиться). Тепер так само заповнюється автоматично для задач-переробок (Тип задачі = Переробка) — тут вихідна задача, з якої знайшли брак.
    */
   carriedFromTask?: (number | null) | Task;
   /**
@@ -414,6 +420,29 @@ export interface TaskProgress {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Контроль якості бригадиром: скільки із заявленого монтажником по задачі за конкретну зміну приймається. Одна перевірка на пару (зміна, задача) — повторне збереження РЕДАГУЄ той самий рядок (унікальний індекс shift+task, руками в міграції).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "qualityChecks".
+ */
+export interface QualityCheck {
+  id: number;
+  shift: number | Shift;
+  task: number | Task;
+  /**
+   * Сума прогресу по цій задачі саме за цю зміну — на момент перевірки.
+   */
+  qtyDone: number;
+  qtyAccepted: number;
+  /**
+   * Обов’язковий, якщо прийнято менше, ніж заявлено — стає описом задачі-переробки.
+   */
+  comment?: string | null;
+  checkedBy: number | Worker;
   updatedAt: string;
   createdAt: string;
 }
@@ -614,6 +643,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'taskProgress';
         value: number | TaskProgress;
+      } | null)
+    | ({
+        relationTo: 'qualityChecks';
+        value: number | QualityCheck;
       } | null)
     | ({
         relationTo: 'blockers';
@@ -824,6 +857,7 @@ export interface TasksSelect<T extends boolean = true> {
   _order?: T;
   title?: T;
   description?: T;
+  taskType?: T;
   date?: T;
   stageNo?: T;
   targetQty?: T;
@@ -852,6 +886,20 @@ export interface TaskProgressSelect<T extends boolean = true> {
   worker?: T;
   qtyDelta?: T;
   unitIds?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "qualityChecks_select".
+ */
+export interface QualityChecksSelect<T extends boolean = true> {
+  shift?: T;
+  task?: T;
+  qtyDone?: T;
+  qtyAccepted?: T;
+  comment?: T;
+  checkedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

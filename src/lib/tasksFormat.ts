@@ -9,6 +9,7 @@ export type TaskWithProgress = {
   description: string
   targetQty: number
   done: number
+  taskType: 'production' | 'rework'
 }
 
 /** Індекс першої незавершеної задачі, -1 якщо всі готові. */

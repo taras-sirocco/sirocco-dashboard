@@ -17,6 +17,7 @@ import { ChecklistRuns } from './collections/ChecklistRuns'
 import { ChecklistAnswers } from './collections/ChecklistAnswers'
 import { Tasks } from './collections/Tasks'
 import { TaskProgress } from './collections/TaskProgress'
+import { QualityChecks } from './collections/QualityChecks'
 import { Blockers } from './collections/Blockers'
 import { Comments } from './collections/Comments'
 import { ChangesLog } from './collections/ChangesLog'
@@ -45,6 +46,7 @@ export default buildConfig({
     ChecklistAnswers,
     Tasks,
     TaskProgress,
+    QualityChecks,
     Blockers,
     Comments,
     ChangesLog,

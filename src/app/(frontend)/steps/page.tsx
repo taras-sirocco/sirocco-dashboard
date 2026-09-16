@@ -26,6 +26,9 @@ export default async function StepsPage({
   if (!session) {
     redirect('/')
   }
+  if (session.role === 'foreman') {
+    redirect('/quality')
+  }
 
   const shift = await getTodayShift()
   if (!shift?.openedAt) {

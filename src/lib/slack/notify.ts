@@ -25,6 +25,13 @@ type ReportEvent =
       tasks: { title: string; done: number; targetQty: number; reason?: string }[]
     }
   | { kind: 'note'; workerName: string; text: string }
+  | {
+      kind: 'shift_quality_checked'
+      workerName: string
+      shiftDateLabel: string
+      isUpdate: boolean
+      tasks: { title: string; qtyDone: number; qtyAccepted: number; comment?: string }[]
+    }
 
 function formatDateTime(iso?: string): string {
   const date = iso ? new Date(iso) : new Date()
@@ -173,6 +180,24 @@ export async function notifyReport(event: ReportEvent): Promise<void> {
       lines = [`Хто: ${event.workerName}`, `Час: ${time}`, '', event.text]
       fallbackText = `Нотатка — ${event.workerName}`
       break
+    case 'shift_quality_checked': {
+      headerText = `Перевірка якості${event.isUpdate ? ' (оновлено)' : ''}`
+      const taskLines = event.tasks.map((t) =>
+        t.qtyAccepted >= t.qtyDone
+          ? `• ${t.title}: прийнято ${t.qtyAccepted}/${t.qtyDone}`
+          : `• ⚠️ ${t.title}: зроблено ${t.qtyDone}, прийнято ${t.qtyAccepted} — ${t.comment || 'причину не вказано'}`,
+      )
+      lines = [
+        `Бригадир: ${event.workerName}`,
+        `Зміна: ${event.shiftDateLabel}`,
+        `Час: ${time}`,
+        '',
+        '*Задачі:*',
+        ...taskLines,
+      ]
+      fallbackText = `Перевірка якості — ${event.workerName}`
+      break
+    }
   }
 
   await postToWebhook('SLACK_WEBHOOK_URL_REPORTS', reportBlocks(headerText, lines), fallbackText)

@@ -199,6 +199,7 @@ function TaskCard({ task, tt, error, saving, closing, onConfirm }: TaskCardProps
   return (
     <div className={`glass ${styles.card} ${isDone ? styles.cardDone : ''}`}>
       {isDone && <div className={styles.badge}>✓</div>}
+      {task.taskType === 'rework' && <div className={styles.reworkTag}>{tt('task.rework_tag')}</div>}
       <div className={styles.title}>{task.title}</div>
       {task.description && <div className={styles.desc}>{task.description}</div>}
 

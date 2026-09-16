@@ -17,6 +17,9 @@ export default async function DailySheetPage() {
   if (!session) {
     redirect('/')
   }
+  if (session.role === 'foreman') {
+    redirect('/quality')
+  }
 
   const shift = await getTodayShift()
   if (!shift?.openedAt) {

@@ -103,11 +103,14 @@ export function LoginScreen({ workers, strings }: LoginScreenProps) {
   }
 
   // "Відкриваємо зміну…" — багатокрапка означає перехід далі сам собою.
+  // Бригадир не проходить потік монтажника (відкриття/задачі) — веде
+  // одразу на екран контролю якості.
   useEffect(() => {
-    if (step !== 'done') return
-    const timer = setTimeout(() => router.push('/opening'), 900)
+    if (step !== 'done' || !selected) return
+    const target = selected.role === 'foreman' ? '/quality' : '/opening'
+    const timer = setTimeout(() => router.push(target), 900)
     return () => clearTimeout(timer)
-  }, [step, router])
+  }, [step, router, selected])
 
   return (
     <main className={styles.main}>
@@ -182,7 +185,7 @@ export function LoginScreen({ workers, strings }: LoginScreenProps) {
           <div className={styles.done}>
             <div className={`glass ${styles.ini}`}>{initials(selected.name)}</div>
             <h2>{tt('login.welcome', { name: selected.name.split(' ')[0] })}</h2>
-            <p>{tt('login.opening_shift')}</p>
+            <p>{tt(selected.role === 'foreman' ? 'login.opening_quality' : 'login.opening_shift')}</p>
           </div>
         )}
       </section>

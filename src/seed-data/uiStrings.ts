@@ -52,6 +52,7 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'login.pin_submit', value: 'Вхід' },
   { key: 'login.welcome', value: 'Вітаю, {name}', note: '{name} — ім’я відповідального (тільки перше ім’я).' },
   { key: 'login.opening_shift', value: 'Відкриваємо зміну…' },
+  { key: 'login.opening_quality', value: 'Переходимо до контролю якості…' },
 
   // ---------- opening.* (02-opening.html) ----------
   {
@@ -98,6 +99,7 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
 
   // ---------- task.* (сітка задач на сьогодні) ----------
   { key: 'task.grid_title', value: 'Задачі на сьогодні' },
+  { key: 'task.rework_tag', value: '↻ Переробка', note: 'Позначка на картці задачі, якщо це переробка браку.' },
   {
     key: 'task.grid_empty',
     value: 'На сьогодні задач ще немає — зверніться до бригадира.',
@@ -268,4 +270,38 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'hub.modal_from_foreman_template', value: '{name} · бригадир · щойно' },
   { key: 'hub.modal_ack_message', value: 'Прочитано' },
   { key: 'hub.modal_ack_task', value: 'Прийнято' },
+
+  // ---------- quality.* (контроль якості, екран бригадира) ----------
+  { key: 'quality.foreman_bar_template', value: 'Контроль якості · Бригадир — {name}' },
+  { key: 'quality.list_eyebrow', value: 'Контроль якості' },
+  { key: 'quality.list_title', value: 'Перевірки змін' },
+  {
+    key: 'quality.list_empty',
+    value: 'Ще немає жодної зміни з прогресом по задачах.',
+  },
+  { key: 'quality.tag_current', value: 'Поточна зміна' },
+  { key: 'quality.tag_needs_check', value: 'Потребує перевірки' },
+  {
+    key: 'quality.summary_template',
+    value: 'Перевірено {checked} з {total} задач',
+    note: '{checked} і {total} — кількість задач, яких торкались за зміну.',
+  },
+  { key: 'quality.summary_no_progress', value: 'Прогресу по задачах ще немає' },
+  { key: 'quality.summary_has_defect', value: '⚠ є брак' },
+  { key: 'quality.readonly_note', value: 'Перегляд минулої зміни — редагування недоступне.' },
+  { key: 'quality.no_progress', value: 'У цій зміні ще не було прогресу по жодній задачі.' },
+  { key: 'quality.rework_tag', value: 'Переробка' },
+  { key: 'quality.qty_done_label', value: 'Заявлено монтажником' },
+  { key: 'quality.qty_accepted_label', value: 'Прийнято по якості' },
+  {
+    key: 'quality.defect_template',
+    value: 'Брак: {n} шт — створиться задача-переробка',
+    note: '{n} — різниця між заявленим і прийнятим.',
+  },
+  { key: 'quality.comment_label', value: 'Коментар (обов’язково при браку)' },
+  { key: 'quality.comment_placeholder', value: 'Що саме не відповідає еталону' },
+  { key: 'quality.submit_send', value: 'Відправити перевірку' },
+  { key: 'quality.submit_update', value: 'Оновити перевірку' },
+  { key: 'quality.submit_ok', value: 'Збережено.' },
+  { key: 'quality.submit_failed', value: 'Не вдалося зберегти. Спробуй ще раз.' },
 ]

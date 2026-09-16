@@ -4,6 +4,8 @@ import * as migration_20260911_200153_add_shift_autoclosed from './20260911_2001
 import * as migration_20260912_052620_add_step_media from './20260912_052620_add_step_media';
 import * as migration_20260914_113807_add_task_description from './20260914_113807_add_task_description';
 import * as migration_20260915_194709_add_task_completed_at from './20260915_194709_add_task_completed_at';
+import * as migration_20260916_080100_add_task_type from './20260916_080100_add_task_type';
+import * as migration_20260916_080200_add_quality_checks from './20260916_080200_add_quality_checks';
 
 export const migrations = [
   {
@@ -35,5 +37,15 @@ export const migrations = [
     up: migration_20260915_194709_add_task_completed_at.up,
     down: migration_20260915_194709_add_task_completed_at.down,
     name: '20260915_194709_add_task_completed_at'
+  },
+  {
+    up: migration_20260916_080100_add_task_type.up,
+    down: migration_20260916_080100_add_task_type.down,
+    name: '20260916_080100_add_task_type'
+  },
+  {
+    up: migration_20260916_080200_add_quality_checks.up,
+    down: migration_20260916_080200_add_quality_checks.down,
+    name: '20260916_080200_add_quality_checks'
   },
 ];

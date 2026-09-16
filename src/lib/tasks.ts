@@ -52,5 +52,6 @@ export async function getTodayTasksWithProgress(): Promise<TaskWithProgress[]> {
     // Перебір показуємо як є (10/9) — задача вже закрита сервером
     // окремим completedAt, тут кліпати число більше нема сенсу.
     done: doneByTask.get(task.id) ?? 0,
+    taskType: task.taskType,
   }))
 }

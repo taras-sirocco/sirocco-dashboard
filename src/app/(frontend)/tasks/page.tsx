@@ -16,6 +16,9 @@ export default async function TasksPage() {
   if (!session) {
     redirect('/')
   }
+  if (session.role === 'foreman') {
+    redirect('/quality')
+  }
 
   const shift = await getTodayShift()
   if (!shift?.openedAt) {
