@@ -5,7 +5,7 @@ import config from '@/payload.config'
 export type LoginWorker = {
   id: number
   name: string
-  role: 'worker' | 'foreman'
+  role: 'worker' | 'foreman' | 'owner'
 }
 
 /** Список для плиток на екрані входу. Ніколи не включає pinHash. */

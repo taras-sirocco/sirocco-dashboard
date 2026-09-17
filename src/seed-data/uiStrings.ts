@@ -45,6 +45,7 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'login.title', value: 'Відповідальний за зміну' },
   { key: 'login.role_worker', value: 'Монтажник' },
   { key: 'login.role_foreman', value: 'Бригадир' },
+  { key: 'login.role_owner', value: 'Власник' },
   { key: 'login.not_me', value: 'Це не я' },
   { key: 'login.pin_incomplete', value: 'Введи чотири цифри' },
   { key: 'login.pin_wrong', value: 'Код не підходить. Спробуй ще раз' },
@@ -53,6 +54,7 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'login.welcome', value: 'Вітаю, {name}', note: '{name} — ім’я відповідального (тільки перше ім’я).' },
   { key: 'login.opening_shift', value: 'Відкриваємо зміну…' },
   { key: 'login.opening_quality', value: 'Переходимо до контролю якості…' },
+  { key: 'login.opening_owner', value: 'Переходимо до зведених звітів…' },
 
   // ---------- opening.* (02-opening.html) ----------
   {
@@ -315,4 +317,12 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   },
   { key: 'quality.submit_done_to_list', value: 'До списку перевірок' },
   { key: 'quality.submit_done_check_again', value: 'Ще раз перевірити' },
+
+  // ---------- owner.* (режим власника) ----------
+  {
+    key: 'owner.placeholder_title',
+    value: 'Режим власника',
+    note: 'Заглушка ЕТАПУ 0 — заміниться зведеним звітом в ЕТАПІ 1.',
+  },
+  { key: 'owner.placeholder_sub', value: 'Зведені звіти з’являться на наступному етапі.' },
 ]

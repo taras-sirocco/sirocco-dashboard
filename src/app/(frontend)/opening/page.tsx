@@ -6,6 +6,7 @@ import { OpeningScreen } from '@/components/opening/OpeningScreen'
 import { getChecklistTemplate } from '@/lib/checklistTemplates'
 import { getUiStrings, t } from '@/lib/uiStrings'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
+import { requireRole } from '@/utilities/requireRole'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,11 +15,7 @@ export default async function OpeningPage() {
   if (!session) {
     redirect('/')
   }
-  // Бригадир не проходить потік монтажника — гейт як у STEP_INSTRUCTIONS
-  // на /steps, тільки за роллю. Без серверного гейта бригадир зайде за URL.
-  if (session.role === 'foreman') {
-    redirect('/quality')
-  }
+  requireRole(session, ['worker'])
 
   const [strings, template] = await Promise.all([
     getUiStrings(['opening', 'shared']),

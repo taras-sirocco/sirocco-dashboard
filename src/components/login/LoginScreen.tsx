@@ -19,8 +19,26 @@ function initials(name: string): string {
     .toUpperCase()
 }
 
+const ROLE_LABEL_KEY: Record<LoginWorker['role'], string> = {
+  worker: 'login.role_worker',
+  foreman: 'login.role_foreman',
+  owner: 'login.role_owner',
+}
+
 function roleLabelKey(role: LoginWorker['role']): string {
-  return role === 'foreman' ? 'login.role_foreman' : 'login.role_worker'
+  return ROLE_LABEL_KEY[role]
+}
+
+const ROLE_HOME: Record<LoginWorker['role'], string> = {
+  worker: '/opening',
+  foreman: '/quality',
+  owner: '/owner',
+}
+
+const ROLE_TRANSITION_KEY: Record<LoginWorker['role'], string> = {
+  worker: 'login.opening_shift',
+  foreman: 'login.opening_quality',
+  owner: 'login.opening_owner',
 }
 
 const DIGIT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -103,12 +121,11 @@ export function LoginScreen({ workers, strings }: LoginScreenProps) {
   }
 
   // "Відкриваємо зміну…" — багатокрапка означає перехід далі сам собою.
-  // Бригадир не проходить потік монтажника (відкриття/задачі) — веде
-  // одразу на екран контролю якості.
+  // Бригадир і власник не проходять потік монтажника (відкриття/задачі) —
+  // ведуть одразу на свій екран (ROLE_HOME).
   useEffect(() => {
     if (step !== 'done' || !selected) return
-    const target = selected.role === 'foreman' ? '/quality' : '/opening'
-    const timer = setTimeout(() => router.push(target), 900)
+    const timer = setTimeout(() => router.push(ROLE_HOME[selected.role]), 900)
     return () => clearTimeout(timer)
   }, [step, router, selected])
 
@@ -185,7 +202,7 @@ export function LoginScreen({ workers, strings }: LoginScreenProps) {
           <div className={styles.done}>
             <div className={`glass ${styles.ini}`}>{initials(selected.name)}</div>
             <h2>{tt('login.welcome', { name: selected.name.split(' ')[0] })}</h2>
-            <p>{tt(selected.role === 'foreman' ? 'login.opening_quality' : 'login.opening_shift')}</p>
+            <p>{tt(ROLE_TRANSITION_KEY[selected.role])}</p>
           </div>
         )}
       </section>

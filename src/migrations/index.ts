@@ -6,6 +6,7 @@ import * as migration_20260914_113807_add_task_description from './20260914_1138
 import * as migration_20260915_194709_add_task_completed_at from './20260915_194709_add_task_completed_at';
 import * as migration_20260916_080100_add_task_type from './20260916_080100_add_task_type';
 import * as migration_20260916_080200_add_quality_checks from './20260916_080200_add_quality_checks';
+import * as migration_20260918_001406_add_worker_role_owner from './20260918_001406_add_worker_role_owner';
 
 export const migrations = [
   {
@@ -47,5 +48,10 @@ export const migrations = [
     up: migration_20260916_080200_add_quality_checks.up,
     down: migration_20260916_080200_add_quality_checks.down,
     name: '20260916_080200_add_quality_checks'
+  },
+  {
+    up: migration_20260918_001406_add_worker_role_owner.up,
+    down: migration_20260918_001406_add_worker_role_owner.down,
+    name: '20260918_001406_add_worker_role_owner'
   },
 ];

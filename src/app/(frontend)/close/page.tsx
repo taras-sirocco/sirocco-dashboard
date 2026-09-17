@@ -9,6 +9,7 @@ import { getTodayShift } from '@/lib/shifts'
 import { getTodayTasksWithProgress } from '@/lib/tasks'
 import { getUiStrings, t } from '@/lib/uiStrings'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
+import { requireRole } from '@/utilities/requireRole'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,9 +18,7 @@ export default async function DailySheetPage() {
   if (!session) {
     redirect('/')
   }
-  if (session.role === 'foreman') {
-    redirect('/quality')
-  }
+  requireRole(session, ['worker'])
 
   const shift = await getTodayShift()
   if (!shift?.openedAt) {

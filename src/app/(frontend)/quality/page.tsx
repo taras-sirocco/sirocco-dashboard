@@ -7,6 +7,7 @@ import { QualityCheckScreen } from '@/components/quality/QualityCheckScreen'
 import { getQualityCheckList, getShiftQualityDetail } from '@/lib/qualityChecks'
 import { getUiStrings, t } from '@/lib/uiStrings'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
+import { requireRole } from '@/utilities/requireRole'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,11 +20,7 @@ export default async function QualityPage({
   if (!session) {
     redirect('/')
   }
-  // Дзеркальний гейт до тих, що на екранах монтажника: сюди заходить лише
-  // бригадир, навіть якщо монтажник підставить URL вручну.
-  if (session.role !== 'foreman') {
-    redirect('/tasks')
-  }
+  requireRole(session, ['foreman'])
 
   const strings = await getUiStrings(['quality', 'shared'])
   const { shiftId: shiftIdParam } = await searchParams

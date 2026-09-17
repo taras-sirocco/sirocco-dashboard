@@ -8,7 +8,7 @@ const SESSION_TTL_MS = 16 * 60 * 60 * 1000 // 16 годин — з запасо�
 export type SessionPayload = {
   workerId: number
   name: string
-  role: 'worker' | 'foreman'
+  role: 'worker' | 'foreman' | 'owner'
   exp: number
 }
 
