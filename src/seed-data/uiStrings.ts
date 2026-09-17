@@ -299,9 +299,20 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
     note: '{n} — різниця між заявленим і прийнятим.',
   },
   { key: 'quality.comment_label', value: 'Коментар (обов’язково при браку)' },
-  { key: 'quality.comment_placeholder', value: 'Що саме не відповідає еталону' },
+  { key: 'quality.comment_placeholder', value: 'Що саме не так з деталями' },
   { key: 'quality.submit_send', value: 'Відправити перевірку' },
   { key: 'quality.submit_update', value: 'Оновити перевірку' },
-  { key: 'quality.submit_ok', value: 'Збережено.' },
   { key: 'quality.submit_failed', value: 'Не вдалося зберегти. Спробуй ще раз.' },
+  {
+    key: 'quality.submit_done_title',
+    value: 'Перевірку збережено',
+    note: 'Заголовок повноекранного підтвердження після відправки/оновлення перевірки.',
+  },
+  {
+    key: 'quality.submit_done_sub',
+    value: 'Дані передані в систему',
+    note: 'Свідомо НЕ "передано в Slack" — клієнт не знає статус Slack-сповіщення (after() виконується вже після відповіді).',
+  },
+  { key: 'quality.submit_done_to_list', value: 'До списку перевірок' },
+  { key: 'quality.submit_done_check_again', value: 'Ще раз перевірити' },
 ]

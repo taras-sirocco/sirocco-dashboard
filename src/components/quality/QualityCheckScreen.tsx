@@ -30,10 +30,13 @@ function formatDate(iso: string): string {
   )
 }
 
+type View = 'form' | 'done'
+
 export function QualityCheckScreen({ strings, foremanName, detail }: QualityCheckScreenProps) {
   const router = useRouter()
   const tt = (key: string, vars?: Record<string, string>) => t(strings, key, vars)
 
+  const [view, setView] = useState<View>('form')
   const [rows, setRows] = useState<RowState[]>(
     detail.rows.map((row) => ({
       taskId: row.taskId,
@@ -49,7 +52,6 @@ export function QualityCheckScreen({ strings, foremanName, detail }: QualityChec
   )
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
 
   const hadAnyExistingCheck = rows.some((row) => row.hadExistingCheck)
 
@@ -74,7 +76,6 @@ export function QualityCheckScreen({ strings, foremanName, detail }: QualityChec
     if (submitting || missingComment) return
     setSubmitting(true)
     setError('')
-    setSuccess(false)
     try {
       const res = await fetch('/api/app/quality/check', {
         method: 'POST',
@@ -92,14 +93,34 @@ export function QualityCheckScreen({ strings, foremanName, detail }: QualityChec
         setError(tt('quality.submit_failed'))
         return
       }
-      setSuccess(true)
       setRows((prev) => prev.map((row) => ({ ...row, hadExistingCheck: true })))
       router.refresh()
+      setView('done')
     } catch {
       setError(tt('quality.submit_failed'))
     } finally {
       setSubmitting(false)
     }
+  }
+
+  if (view === 'done') {
+    return (
+      <main className={styles.main}>
+        <div className={styles.fin}>
+          <div className={styles.finIc}>✓</div>
+          <h1 className={styles.h1}>{tt('quality.submit_done_title')}</h1>
+          <p>{tt('quality.submit_done_sub')}</p>
+        </div>
+        <div className={styles.finActs}>
+          <button className={`glass ${styles.big} ${styles.primary}`} onClick={() => router.push('/quality')}>
+            {tt('quality.submit_done_to_list')}
+          </button>
+          <button className={`glass ${styles.big} ${styles.ghost}`} onClick={() => setView('form')}>
+            {tt('quality.submit_done_check_again')}
+          </button>
+        </div>
+      </main>
+    )
   }
 
   return (
@@ -168,7 +189,6 @@ export function QualityCheckScreen({ strings, foremanName, detail }: QualityChec
       )}
 
       {error && <p className={styles.err}>{error}</p>}
-      {success && <p className={styles.ok}>{tt('quality.submit_ok')}</p>}
 
       {detail.isEditable && rows.length > 0 && (
         <button
