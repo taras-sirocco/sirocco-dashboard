@@ -11,17 +11,13 @@ export type CommentEntry = {
   text: string
 }
 
-/** Коментарі сьогоднішньої зміни, найстаріші перші — показуємо як є, не переписуємо. */
-export async function getTodayComments(): Promise<CommentEntry[]> {
-  const shift = await getTodayShift()
-  if (!shift) return []
-
+async function findCommentsForShift(shiftId: number): Promise<CommentEntry[]> {
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
   const { docs } = await payload.find({
     collection: 'comments',
-    where: { shift: { equals: shift.id } },
+    where: { shift: { equals: shiftId } },
     sort: 'createdAt',
     limit: 200,
     depth: 0,
@@ -34,4 +30,20 @@ export async function getTodayComments(): Promise<CommentEntry[]> {
     contextType: doc.contextType ?? 'general',
     text: doc.text ?? '',
   }))
+}
+
+/** Коментарі сьогоднішньої зміни, найстаріші перші — показуємо як є, не переписуємо. */
+export async function getTodayComments(): Promise<CommentEntry[]> {
+  const shift = await getTodayShift()
+  if (!shift) return []
+  return findCommentsForShift(shift.id)
+}
+
+/**
+ * Те саме, але для КОНКРЕТНОЇ (в т.ч. вже закритої/минулої) зміни — для
+ * зведеного звіту власника. getTodayComments лишається без змін для
+ * потоку монтажника.
+ */
+export async function getShiftComments(shiftId: number): Promise<CommentEntry[]> {
+  return findCommentsForShift(shiftId)
 }
