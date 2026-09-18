@@ -356,4 +356,25 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'owner.section_photos_empty', value: 'Фото немає.' },
   { key: 'owner.copy_log_button', value: 'Скопіювати весь лог' },
   { key: 'owner.copy_log_done', value: 'Скопійовано' },
+
+  // ---------- owner.task_* (керування задачами, ЕТАП 3) ----------
+  { key: 'owner.tasks_section_eyebrow', value: 'Збиральна дільниця' },
+  { key: 'owner.tasks_section_title', value: 'Активні задачі' },
+  { key: 'owner.tasks_section_empty', value: 'Активних задач немає.' },
+  { key: 'owner.task_completed_badge', value: 'Закрита' },
+  { key: 'owner.task_progress_badge', value: 'Є прогрес' },
+  { key: 'owner.task_checked_badge', value: 'Перевірена' },
+  {
+    key: 'owner.task_qty_template',
+    value: '{done} з {target}',
+    note: '{done} — накопичено за весь час, {target} — поточна ціль (targetQty).',
+  },
+  { key: 'owner.task_edit_button', value: 'Редагувати' },
+  { key: 'owner.task_target_update_failed', value: 'Не вдалося оновити ціль. Спробуй ще раз.' },
+  { key: 'owner.task_edit_modal_title', value: 'Редагувати задачу' },
+  { key: 'owner.task_title_label', value: 'Назва' },
+  { key: 'owner.task_description_label', value: 'Опис' },
+  { key: 'owner.task_save_button', value: 'Зберегти' },
+  { key: 'owner.task_cancel_button', value: 'Скасувати' },
+  { key: 'owner.task_save_failed', value: 'Не вдалося зберегти. Спробуй ще раз.' },
 ]

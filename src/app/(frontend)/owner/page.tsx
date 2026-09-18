@@ -4,7 +4,9 @@ import { Blobs } from '@/components/Blobs'
 import { TopBar } from '@/components/TopBar'
 import { OwnerShiftListScreen } from '@/components/owner/OwnerShiftListScreen'
 import { OwnerShiftReportScreen } from '@/components/owner/OwnerShiftReportScreen'
+import { OwnerTaskGridSection } from '@/components/owner/OwnerTaskGridSection'
 import { getOwnerShiftList, getOwnerShiftDetail } from '@/lib/ownerReport'
+import { getOwnerActiveTasks } from '@/lib/ownerTasks'
 import { getUiStrings, t } from '@/lib/uiStrings'
 import { getSessionWorker } from '@/utilities/getSessionWorker'
 import { requireRole } from '@/utilities/requireRole'
@@ -45,7 +47,7 @@ export default async function OwnerPage({
     )
   }
 
-  const shifts = await getOwnerShiftList()
+  const [tasks, shifts] = await Promise.all([getOwnerActiveTasks(), getOwnerShiftList()])
 
   return (
     <>
@@ -55,6 +57,16 @@ export default async function OwnerPage({
         offlineLabel={t(strings, 'shared.network_offline')}
         pendingSyncTemplate={t(strings, 'shared.pending_sync_template')}
       />
+      <div style={{ padding: '0 20px' }}>
+        <OwnerTaskGridSection strings={strings} tasks={tasks} />
+        <hr
+          style={{
+            border: 'none',
+            borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+            margin: '8px 0 18px',
+          }}
+        />
+      </div>
       <OwnerShiftListScreen strings={strings} ownerName={session.name} shifts={shifts} />
     </>
   )
