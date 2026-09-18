@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
+import { AutoRefresh } from '@/components/AutoRefresh'
 import { Blobs } from '@/components/Blobs'
 import { TopBar } from '@/components/TopBar'
 import { OwnerShiftListScreen } from '@/components/owner/OwnerShiftListScreen'
@@ -68,6 +69,7 @@ export default async function OwnerPage({
         />
       </div>
       <OwnerShiftListScreen strings={strings} ownerName={session.name} shifts={shifts} />
+      <AutoRefresh />
     </>
   )
 }

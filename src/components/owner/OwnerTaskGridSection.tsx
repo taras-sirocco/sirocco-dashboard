@@ -24,6 +24,10 @@ export function OwnerTaskGridSection({ strings, tasks }: OwnerTaskGridSectionPro
       <div className={styles.eyebrow}>{tt('owner.tasks_section_eyebrow')}</div>
       <h1 className={styles.h1}>{tt('owner.tasks_section_title')}</h1>
 
+      <div className={styles.createWrap}>
+        <CreateTaskButton tt={tt} onCreated={() => router.refresh()} />
+      </div>
+
       {tasks.length === 0 ? (
         <p className={styles.empty}>{tt('owner.tasks_section_empty')}</p>
       ) : (
@@ -34,6 +38,111 @@ export function OwnerTaskGridSection({ strings, tasks }: OwnerTaskGridSectionPro
         </div>
       )}
     </section>
+  )
+}
+
+const DEFAULT_NEW_TASK_TARGET_QTY = 28
+
+type CreateTaskButtonProps = {
+  tt: (key: string, vars?: Record<string, string>) => string
+  onCreated: () => void
+}
+
+function CreateTaskButton({ tt, onCreated }: CreateTaskButtonProps) {
+  const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [targetQty, setTargetQty] = useState(DEFAULT_NEW_TASK_TARGET_QTY)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  function openModal() {
+    setTitle('')
+    setDescription('')
+    setTargetQty(DEFAULT_NEW_TASK_TARGET_QTY)
+    setError('')
+    setOpen(true)
+  }
+
+  function targetQtyFromInput(value: string) {
+    const n = Math.trunc(Number(value))
+    setTargetQty(Number.isFinite(n) && n >= 1 ? n : 1)
+  }
+
+  async function create() {
+    if (!title.trim() || saving) return
+    setSaving(true)
+    setError('')
+    try {
+      const res = await fetch('/api/app/owner/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim() || undefined,
+          targetQty,
+        }),
+      })
+      if (!res.ok) {
+        setError(tt('owner.task_create_failed'))
+        return
+      }
+      setOpen(false)
+      // Нова задача просто з'явиться в сітці на наступному рендері —
+      // OwnerTaskGridSection не тримає власного списку, лише мапить props.
+      onCreated()
+    } catch {
+      setError(tt('owner.task_create_failed'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <>
+      <button type="button" className={`glass ${styles.createBtn}`} onClick={openModal}>
+        {`+ ${tt('owner.task_create_button')}`}
+      </button>
+
+      {open && (
+        <div className={styles.modalOverlay} onClick={() => setOpen(false)}>
+          <div className={`glass ${styles.modal}`} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalTitle}>{tt('owner.task_create_modal_title')}</div>
+            <label className={styles.fieldLabel}>{tt('owner.task_title_label')}</label>
+            <input className={styles.input} value={title} onChange={(e) => setTitle(e.target.value)} />
+            <label className={styles.fieldLabel}>{tt('owner.task_description_label')}</label>
+            <textarea
+              className={styles.textarea}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <label className={styles.fieldLabel}>{tt('owner.task_target_qty_label')}</label>
+            <input
+              className={styles.input}
+              type="number"
+              inputMode="numeric"
+              min={1}
+              value={targetQty}
+              onChange={(e) => targetQtyFromInput(e.target.value)}
+            />
+            {error && <p className={styles.err}>{error}</p>}
+            <div className={styles.modalActs}>
+              <button type="button" className={`glass ${styles.modalCancel}`} onClick={() => setOpen(false)}>
+                {tt('owner.task_cancel_button')}
+              </button>
+              <button
+                type="button"
+                className={`glass ${styles.modalSave}`}
+                disabled={saving || !title.trim()}
+                onClick={create}
+              >
+                {tt('owner.task_create_submit')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
@@ -48,6 +157,16 @@ function TaskCard({ task, tt, onChanged }: TaskCardProps) {
   const [savingQty, setSavingQty] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current) }, [])
+
+  // AutoRefresh приносить свіжий task.targetQty кожні ~25с (напр. якщо
+  // ціль підняли деінде). Не підміняємо локальне значення, поки триває
+  // власне збереження чи відкладений (debounce) тап степера — інакше
+  // фоновий рефреш міг би на мить відкотити щойно застосовану локальну
+  // зміну, поки відповідь PATCH ще в дорозі.
+  useEffect(() => {
+    if (savingQty || debounceRef.current) return
+    setTargetQty(task.targetQty)
+  }, [task.targetQty, savingQty])
 
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)

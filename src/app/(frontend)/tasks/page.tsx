@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
+import { AutoRefresh } from '@/components/AutoRefresh'
 import { Blobs } from '@/components/Blobs'
 import { BroadcastGate } from '@/components/BroadcastGate'
 import { TopBar } from '@/components/TopBar'
@@ -39,6 +40,7 @@ export default async function TasksPage() {
       />
       <TaskScreen strings={strings} workerName={session.name} tasks={tasks} />
       <BroadcastGate />
+      <AutoRefresh />
     </>
   )
 }

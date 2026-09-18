@@ -377,4 +377,9 @@ export const uiStrings: { key: string; value: string; note?: string }[] = [
   { key: 'owner.task_save_button', value: 'Зберегти' },
   { key: 'owner.task_cancel_button', value: 'Скасувати' },
   { key: 'owner.task_save_failed', value: 'Не вдалося зберегти. Спробуй ще раз.' },
+  { key: 'owner.task_create_button', value: 'Нова задача' },
+  { key: 'owner.task_create_modal_title', value: 'Нова задача' },
+  { key: 'owner.task_target_qty_label', value: 'Ціль, шт' },
+  { key: 'owner.task_create_submit', value: 'Створити' },
+  { key: 'owner.task_create_failed', value: 'Не вдалося створити. Спробуй ще раз.' },
 ]

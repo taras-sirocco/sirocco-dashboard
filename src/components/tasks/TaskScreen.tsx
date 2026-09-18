@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { Dock } from '@/components/Dock'
@@ -33,6 +33,31 @@ export function TaskScreen({ strings, workerName, tasks: initialTasks }: TaskScr
   // "Закрити зміну" — дія кінця зміни, тому вимагає другого підтвердження,
   // щоб не натиснулась випадково посеред роботи.
   const [confirmingClose, setConfirmingClose] = useState(false)
+
+  // AutoRefresh (router.refresh()) кожні ~25с приносить нові initialTasks —
+  // саме так монтажник бачить нову задачу з адмінки без ручного
+  // перезавантаження. useState(initialTasks) бере значення лише при
+  // монтуванні, тому без цього ефекту локальний tasks так і лишався б
+  // застиглим. Мерджимо обережно, а не просто setTasks(initialTasks):
+  // задачу з активним запитом (savingIds) чи в анімації "✓ Закрито"
+  // (closingIds) не чіпаємо — інакше фоновий рефреш міг би на мить
+  // відкотити щойно застосований оптимістичний приріст або обірвати
+  // анімацію на півдорозі.
+  useEffect(() => {
+    setTasks((prevTasks) => {
+      const prevById = new Map(prevTasks.map((t) => [t.id, t]))
+      const merged = initialTasks.map((fresh) => {
+        const local = prevById.get(fresh.id)
+        if (local && savingIds.has(fresh.id)) return local
+        return fresh
+      })
+      const stillClosing = prevTasks.filter(
+        (t) => closingIds.has(t.id) && !merged.some((m) => m.id === t.id),
+      )
+      return [...merged, ...stillClosing]
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- реагуємо лише на нові дані з сервера, не на власний локальний стан
+  }, [initialTasks])
 
   // Список тепер = усі НЕЗАКРИТІ задачі (сервер уже відфільтрував). Якщо
   // почали з непорожнього списку й він спорожнів — усе зроблено. Якщо
